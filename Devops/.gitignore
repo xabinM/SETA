@@ -1,0 +1,36 @@
+# Docker local override
+docker-compose.override.yml
+.env.docker.local
+
+# Terraform/Ansible sensitive
+*.tfstate
+*.tfstate.backup
+*.retry
+*.vault_pass
+*.pem
+*.key
+*.crt
+*.p12
+
+# 로컬 캐시
+.terraform/
+.ansible/
+.cache/
+
+# Kubernetes
+*.kubeconfig
+*-kubeconfig.yml
+*-kubeconfig.yaml
+
+# Helm
+charts/*.tgz
+Chart.lock
+
+# 모니터링/로깅
+grafana/data/
+prometheus/data/
+elasticsearch/data/
+
+# CI/CD secrets
+jenkins_home/secrets/
+gitlab-runner/config/

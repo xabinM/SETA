@@ -1,0 +1,44 @@
+# Java / Maven / Gradle
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+target/
+build/
+.gradle/
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# Spring Boot
+application-secret.properties
+application-secret.yml
+application-secret.yaml
+
+# 런타임 저장소
+uploads/
+storage/
+logs/
+
+# 임시 파일
+hs_err_pid*
+replay_pid*
+
+# Spring Boot 추가
+*.pid
+*.seed
+*.pid.lock
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+h2/
+
+# Test coverage
+jacoco.exec
+coverage/
+
+# Maven/Gradle wrapper
+.mvn/wrapper/maven-wrapper.jar
+gradle/wrapper/gradle-wrapper.jar

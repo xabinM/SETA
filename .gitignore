@@ -1,0 +1,119 @@
+# ========================================
+# OS / IDE 공통
+# ========================================
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.apdisk
+*.icloud
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+### IntelliJ / JetBrains ###
+*.iml
+.idea/
+out/
+*.ipr
+*.iws
+.fleet/
+
+### VSCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+### WebStorm / PhpStorm ###
+.webstorm/
+.phpstorm/
+
+### Sublime Text ###
+*.sublime-workspace
+*.sublime-project
+
+### Atom ###
+.atom/
+
+# ========================================
+# 보안 / 비밀키
+# ========================================
+*.env
+*.env.*
+!*.env.example
+application-secret.*
+*secret*.yml
+*secret*.yaml
+*secret*.json
+secrets/
+*.pem
+*.key
+*.crt
+*.p12
+
+# ========================================
+# 대규모 데이터/모델
+# ========================================
+*.csv
+*.tsv
+*.parquet
+*.h5
+*.hdf5
+*.pkl
+*.joblib
+*.npy
+*.npz
+*.ckpt
+*.onnx
+*.pb
+*.tflite
+models/
+saved_models/
+
+# ========================================
+# 공통 로그/캐시
+# ========================================
+logs/
+log/
+tmp/
+temp/
+.cache/
+
+# ========================================
+# 프로젝트별 공통
+# ========================================
+# 문서/설계
+*.drawio.bkp
+*.drawio~
+.~lock.*
+
+# 압축파일
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# 실행파일
+*.exe
+*.o
+*.so
+*.app

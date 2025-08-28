@@ -1,0 +1,65 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+.pnpm-debug.log*
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# 빌드 산출물
+dist/
+build/
+out/
+.cache/
+.next/
+.nuxt/
+storybook-static/
+
+# 테스트 도구
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+playwright-report/
+test-results/
+
+# 환경변수
+.env
+.env.*
+!*.env.example
+
+# React Native(Android)
+android/.gradle/
+android/app/build/
+*.aab
+*.apk
+*.jks
+*.keystore
+google-services.json
+
+# React Native(iOS)
+ios/build/
+ios/DerivedData/
+*.xcuserstate
+*.xcworkspace
+GoogleService-Info.plist
+*.ipa
+*.app
+*.xcarchive
+*.mobileprovision
+
+# Expo
+.expo/
+.expo-shared/
+
+# Vue.js
+.vite/
+*.local
+.eslintcache
+
+# Vue specific
+.vue/
+*.vue.d.ts

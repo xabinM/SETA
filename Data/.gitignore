@@ -1,0 +1,15 @@
+# 원시 데이터
+*.csv
+*.tsv
+*.json
+*.xlsx
+*.xls
+*.parquet
+*.feather
+*.zip
+*.tar.gz
+
+# 분석/캐시
+.ipynb_checkpoints/
+.cache/
+tmp/
