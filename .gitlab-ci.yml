@@ -1,0 +1,46 @@
+stages:
+  - build
+  - test
+
+# ---------- Backend ----------
+backend-build:
+  stage: build
+  script:
+    - echo "Backend Build Job 실행 테스트"
+  rules:
+    - changes:
+      - Backend/**/*
+
+backend-test:
+  stage: test
+  script:
+    - echo "Backend Test Job 실행 테스트"
+  rules:
+    - changes:
+      - Backend/**/*
+
+# ---------- Frontend ----------
+frontend-build:
+  stage: build
+  script:
+    - echo "Frontend Build Job 실행 테스트"
+  rules:
+    - changes:
+      - Frontend/**/*
+
+frontend-test:
+  stage: test
+  script:
+    - echo "Frontend Test Job 실행 테스트"
+  rules:
+    - changes:
+      - Frontend/**/*
+
+# ---------- AI ----------
+ai-test:
+  stage: test
+  script:
+    - echo "AI Test Job 실행 테스트"
+  rules:
+    - changes:
+      - AI/**/*
