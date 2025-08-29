@@ -17,33 +17,6 @@ backend-build:
   only:
     - Devops_config
 
-backend-test:
-  stage: test
-  image: amazoncorretto:17
-  services:
-    - name: mysql:8.0
-      alias: mydb   # 도커 네트워크에서 DB 컨테이너 이름
-  variables:
-    MYSQL_ROOT_PASSWORD: ssafy
-    MYSQL_DATABASE: mydb
-    MYSQL_USER: testuser
-    MYSQL_PASSWORD: testpass
-    SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mydb
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: ssafy
-    SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
-    SPRING_JPA_HIBERNATE_DDL_AUTO: create
-  script:
-    - cd Backend
-    - chmod +x gradlew
-    - ./gradlew test
-    - echo "Backend Test Job 실행 테스트"
-  # rules:
-  #   - changes:
-  #     - Backend/**/*
-  only:
-    - Devops_config
-
 # ---------- Frontend ----------
 frontend-build:
   stage: build
