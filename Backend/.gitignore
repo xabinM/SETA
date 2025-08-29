@@ -1,44 +1,39 @@
-# Java / Maven / Gradle
-*.class
-*.jar
-*.war
-*.ear
-*.zip
-target/
+HELP.md
+.gradle
 build/
-.gradle/
-!gradle-wrapper.jar
-!gradle-wrapper.properties
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# Spring Boot
-application-secret.properties
-application-secret.yml
-application-secret.yaml
+src/main/resources/application-secret.yml
 
-# 런타임 저장소
-uploads/
-storage/
-logs/
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
 
-# 임시 파일
-hs_err_pid*
-replay_pid*
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-# Spring Boot 추가
-*.pid
-*.seed
-*.pid.lock
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
-h2/
-
-# Test coverage
-jacoco.exec
-coverage/
-
-# Maven/Gradle wrapper
-.mvn/wrapper/maven-wrapper.jar
-gradle/wrapper/gradle-wrapper.jar
+### VS Code ###
+.vscode/
