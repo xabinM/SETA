@@ -21,6 +21,8 @@ backend-test:
   stage: test
   image: amazoncorretto:17
   script:
+    - cd Backend
+    - chmod +x gradlew
     - ./gradlew test
     - echo "Backend Test Job 실행 테스트"
   # rules:
