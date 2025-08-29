@@ -5,7 +5,7 @@ stages:
 # ---------- Backend ----------
 backend-build:
   stage: build
-  image: corretto:17
+  image: amazoncorretto:17
   script:
     - ./gradlew clean build -x test
     - echo "Backend Build Job 실행 테스트 성공공"
