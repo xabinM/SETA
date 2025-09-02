@@ -11,9 +11,11 @@ import com.AIce.Backend.auth.exception.WrongPasswordException;
 import com.AIce.Backend.auth.jwt.JwtTokenProvider;
 import com.AIce.Backend.domain.user.entity.User;
 import com.AIce.Backend.domain.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Service
 @RequiredArgsConstructor
@@ -65,5 +67,19 @@ public class AuthService {
         }
 
         redisService.addToBlacklist(refreshToken, BLACKLIST_STATUS_LOGOUT);
+    }
+
+    public Tokens reissueToken(String refreshToken) {
+
+        jwtTokenProvider.validateToken(refreshToken);
+
+        if (redisService.isBlacklisted(refreshToken)) {
+            throw new InvalidTokenException();
+        }
+        redisService.addToBlacklist(refreshToken, BLACKLIST_STATUS_REISSUE);
+
+        Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+
+        return jwtTokenProvider.generateTokens(userId);
     }
 }
