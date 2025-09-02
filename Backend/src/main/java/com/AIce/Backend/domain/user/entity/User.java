@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Table(name = "users")
@@ -39,5 +40,9 @@ public class User extends BaseTimeEntity {
         this.username = username;
         this.password = password;
         this.name = name;
+    }
+
+    public boolean isPasswordMatching(PasswordEncoder encoder, String rawPassword) {
+        return encoder.matches(rawPassword, this.password);
     }
 }

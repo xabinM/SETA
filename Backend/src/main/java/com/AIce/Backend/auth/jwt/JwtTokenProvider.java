@@ -1,8 +1,7 @@
 package com.AIce.Backend.auth.jwt;
 
-import com.AIce.Backend.auth.dto.Tokens;
+import com.AIce.Backend.auth.dto.signup.Tokens;
 import com.AIce.Backend.auth.exception.ExpiredTokenException;
-import com.AIce.Backend.auth.exception.InvalidClaimTypeException;
 import com.AIce.Backend.auth.exception.InvalidTokenException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

@@ -1,7 +1,13 @@
 package com.AIce.Backend.auth.service;
 
-import com.AIce.Backend.auth.dto.SignupRequest;
+import com.AIce.Backend.auth.dto.login.LoginDto;
+import com.AIce.Backend.auth.dto.login.LoginRequest;
+import com.AIce.Backend.auth.dto.signup.SignupRequest;
+import com.AIce.Backend.auth.dto.signup.Tokens;
 import com.AIce.Backend.auth.exception.DuplicateUsernameException;
+import com.AIce.Backend.auth.exception.NotFoundUserException;
+import com.AIce.Backend.auth.exception.WrongPasswordException;
+import com.AIce.Backend.auth.jwt.JwtTokenProvider;
 import com.AIce.Backend.domain.user.entity.User;
 import com.AIce.Backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +20,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public void signup(SignupRequest request) {
         validateDuplicateUsername(request.getUsername());
@@ -29,5 +36,19 @@ public class AuthService {
         if (userRepository.existsByUsername(username)) {
             throw new DuplicateUsernameException();
         }
+    }
+
+    public LoginDto login(LoginRequest request) {
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(NotFoundUserException::new);
+
+        if (!user.isPasswordMatching(passwordEncoder, request.getPassword())) {
+            throw new WrongPasswordException();
+        }
+
+
+        Tokens tokens = jwtTokenProvider.generateTokens(user.getUserId());
+
+        return new LoginDto(user.getUserId(), user.getName(), tokens);
     }
 }
