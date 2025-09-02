@@ -4,10 +4,13 @@ import com.AIce.Backend.auth.dto.login.LoginDto;
 import com.AIce.Backend.auth.dto.login.LoginRequest;
 import com.AIce.Backend.auth.dto.login.LoginResponse;
 import com.AIce.Backend.auth.dto.logout.LogoutResponse;
+import com.AIce.Backend.auth.dto.reissue.ReissueResponse;
 import com.AIce.Backend.auth.dto.signup.SignupRequest;
 import com.AIce.Backend.auth.dto.signup.SignupResponse;
+import com.AIce.Backend.auth.dto.signup.Tokens;
 import com.AIce.Backend.auth.service.AuthService;
 import com.AIce.Backend.global.enums.ResponseMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,5 +44,12 @@ public class AuthController {
         authService.logout(refreshToken);
 
         return ResponseEntity.ok(new LogoutResponse(ResponseMessage.SUCCESS_LOGOUT.getMessage()));
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissueToken(@RequestHeader("RefreshToken") String refreshToken) {
+        Tokens tokens = authService.reissueToken(refreshToken);
+
+        return ResponseEntity.ok(new ReissueResponse(ResponseMessage.SUCCESS_TOKEN_REISSUE.getMessage(), tokens));
     }
 }
