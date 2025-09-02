@@ -1,4 +1,4 @@
-package com.AIce.Backend.auth.dto;
+package com.AIce.Backend.auth.dto.signup;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
