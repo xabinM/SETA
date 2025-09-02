@@ -1,12 +1,12 @@
 package com.AIce.Backend.auth.dto.signup;
 
-import lombok.AllArgsConstructor;
+import com.AIce.Backend.global.dto.SuccessResponse;
+
 import lombok.Getter;
-
 @Getter
-@AllArgsConstructor
-public class SignupResponse {
+public class SignupResponse extends SuccessResponse {
 
-    private boolean success;
-    private String message;
+    public SignupResponse(String message) {
+        super(true, message);
+    }
 }

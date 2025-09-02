@@ -23,9 +23,9 @@ public class JwtTokenProvider {
             long accessTokenExpirationMs,
             long refreshTokenExpiration) {
 
-        this.key = Keys.hmacShaKeyFor(key.getBytes());    // 비밀키 주입
+        this.key = Keys.hmacShaKeyFor(key.getBytes());
         this.accessTokenExpirationMs = accessTokenExpirationMs;
-        this.refreshTokenExpirationMs = refreshTokenExpiration; // 만료시간 주입
+        this.refreshTokenExpirationMs = refreshTokenExpiration;
     }
 
     public Tokens generateTokens(Long userId) {

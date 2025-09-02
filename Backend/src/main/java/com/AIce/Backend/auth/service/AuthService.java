@@ -5,6 +5,7 @@ import com.AIce.Backend.auth.dto.login.LoginRequest;
 import com.AIce.Backend.auth.dto.signup.SignupRequest;
 import com.AIce.Backend.auth.dto.signup.Tokens;
 import com.AIce.Backend.auth.exception.DuplicateUsernameException;
+import com.AIce.Backend.auth.exception.InvalidTokenException;
 import com.AIce.Backend.auth.exception.NotFoundUserException;
 import com.AIce.Backend.auth.exception.WrongPasswordException;
 import com.AIce.Backend.auth.jwt.JwtTokenProvider;
@@ -18,9 +19,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private static final String BLACKLIST_STATUS_REISSUE = "reissued";
+    private static final String BLACKLIST_STATUS_LOGOUT = "logout";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisService redisService;
 
     public void signup(SignupRequest request) {
         validateDuplicateUsername(request.getUsername());
@@ -50,5 +55,15 @@ public class AuthService {
         Tokens tokens = jwtTokenProvider.generateTokens(user.getUserId());
 
         return new LoginDto(user.getUserId(), user.getName(), tokens);
+    }
+
+    public void logout(String refreshToken) {
+        jwtTokenProvider.validateToken(refreshToken);
+
+        if (redisService.isBlacklisted(refreshToken)) {
+            throw new InvalidTokenException();
+        }
+
+        redisService.addToBlacklist(refreshToken, BLACKLIST_STATUS_LOGOUT);
     }
 }
