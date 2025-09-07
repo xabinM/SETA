@@ -34,10 +34,11 @@ export default function Landing() {
           <div className="star-4" role="presentation" aria-hidden="true"></div>
           <div className="star-5" role="presentation" aria-hidden="true"></div>
           
-          {/* SETA 텍스트들 - 3개 레이어 */}
+          {/* SETA 텍스트들 - 4개 레이어 */}
           <h1 className="text-wrapper">SETA</h1>
           <div className="text-wrapper-2" role="presentation" aria-hidden="true">SETA</div>
           <div className="text-wrapper-3" role="presentation" aria-hidden="true">SETA</div>
+          <div className="text-wrapper-4" role="presentation" aria-hidden="true">SETA</div>
         </div>
       </section>
     </main>

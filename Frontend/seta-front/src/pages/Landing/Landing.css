@@ -184,7 +184,7 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   
-  /* 스트로크 효과 (box-shadow로 구현) */
+  /* 검정색 문제 해결 - drop-shadow로 스트로크 구현 */
   filter: 
     drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
     drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
@@ -196,18 +196,73 @@ body {
     drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   
   
+  
   mix-blend-mode: hard-light;
 }
 
-/* 리플렉션 효과 1 - 밝은 반사 (사진처럼) */
+/* 거울 리플렉션 1 - 글자 바로 밑에 붙어서 */
 .frame .text-wrapper-2 {
   position: absolute;
   width: min(858px, 80vw);
   height: min(622px, 60vh);
   left: 50%;
   top: 50%;
-  transform: translate(-50%, calc(-50% + 20px));
-  z-index: -1;
+  transform: translate(-50%, calc(-50% + 350px)) scaleY(-1);
+  z-index: 2;
+
+  font-family: 'Knewave';
+  font-style: normal;
+  font-weight: 400;
+  font-size: min(400px, 25vw);
+  line-height: min(622px, 60vh);
+  display: flex;
+  align-items: flex-start;
+  text-align: center;
+
+  /* 두 번째 레이어도 경계선 부분 밝게, 아래로 갈수록 어둡게 */
+  background: linear-gradient(180deg,
+  rgba(102, 153, 218, 0.8) 0%,      /* 경계선 부분 - 밝게 */
+  rgba(87, 131, 187, 0.6) 20%,
+  rgba(67, 100, 143, 0.4) 40%,
+  rgba(54, 81, 115, 0.2) 60%,
+  rgba(54, 81, 115, 0.1) 80%,
+  rgba(54, 81, 115, 0.05) 100%  /* 아래쪽 - 어둡게 */
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+
+  mix-blend-mode: normal;
+  filter: blur(15px);  /* 더 흐림 */
+  opacity: 0.4;
+
+  /* 더 부드러운 페이드아웃 */
+  -webkit-mask: linear-gradient(to bottom,
+  rgba(0,0,0,0.8) 0%,
+  rgba(0,0,0,0.6) 25%,
+  rgba(0,0,0,0.3) 50%,
+  rgba(0,0,0,0.1) 75%,
+  rgba(0,0,0,0) 100%
+  );
+  mask: linear-gradient(to bottom,
+  rgba(0,0,0,0.8) 0%,
+  rgba(0,0,0,0.6) 25%,
+  rgba(0,0,0,0.3) 50%,
+  rgba(0,0,0,0.1) 75%,
+  rgba(0,0,0,0) 100%
+  );
+}
+
+/* 거울 리플렉션 3 - 블러 효과 레이어 */
+.frame .text-wrapper-4 {
+  position: absolute;
+  width: min(858px, 80vw);
+  height: min(622px, 60vh);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-50% + 350px)) scaleY(-1);
+  z-index: 3;
   
   font-family: 'Knewave';
   font-style: normal;
@@ -215,28 +270,45 @@ body {
   font-size: min(400px, 25vw);
   line-height: min(622px, 60vh);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   text-align: center;
   
-  background: linear-gradient(180deg, rgba(102, 153, 218, 0.5) 25.88%, rgba(87, 131, 187, 0.5) 46.97%, rgba(67, 100, 143, 0.5) 76.76%, rgba(54, 81, 115, 0.5) 95.5%);
+  background: linear-gradient(180deg, rgba(102, 153, 218, 0.3) 0%, rgba(87, 131, 187, 0.2) 20%, rgba(67, 100, 143, 0.1) 40%, rgba(54, 81, 115, 0.05) 60%, rgba(54, 81, 115, 0.02) 80%, rgba(54, 81, 115, 0) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-fill-color: transparent;
   
-  mix-blend-mode: hard-light;
-  filter: blur(135px);
+  mix-blend-mode: normal;
+  filter: blur(3px);
+  opacity: 0.6;
+  
+  /* 부드러운 페이드아웃 */
+  -webkit-mask: linear-gradient(to bottom,
+  rgba(0,0,0,0.9) 0%,
+  rgba(0,0,0,0.7) 30%,
+  rgba(0,0,0,0.4) 60%,
+  rgba(0,0,0,0.1) 80%,
+  rgba(0,0,0,0) 100%
+  );
+  mask: linear-gradient(to bottom,
+  rgba(0,0,0,0.9) 0%,
+  rgba(0,0,0,0.7) 30%,
+  rgba(0,0,0,0.4) 60%,
+  rgba(0,0,0,0.1) 80%,
+  rgba(0,0,0,0) 100%
+  );
 }
 
-/* 리플렉션 효과 2 - 세밀한 반사 (사진처럼) */
+/* 거울 리플렉션 2 - 더 흐릿한 반사 */
 .frame .text-wrapper-3 {
   position: absolute;
   width: min(858px, 80vw);
   height: min(622px, 60vh);
   left: 50%;
   top: 50%;
-  transform: translate(-50%, calc(-50% + 47px)) matrix(1, 0, 0, -1, 0, 0);
-  z-index: -2;
+  transform: translate(-50%, calc(-50% + 311px)) scaleY(-1);
+  z-index: 1;
   
   font-family: 'Knewave';
   font-style: normal;
@@ -244,17 +316,22 @@ body {
   font-size: min(400px, 25vw);
   line-height: min(622px, 60vh);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   text-align: center;
   
-  background: linear-gradient(360deg, rgba(102, 153, 218, 0.4) 10.85%, rgba(54, 81, 115, 0) 62.78%);
+  background: linear-gradient(180deg, rgba(102, 153, 218, 0.6) 0%, rgba(87, 131, 187, 0.4) 20%, rgba(67, 100, 143, 0.25) 40%, rgba(54, 81, 115, 0.15) 60%, rgba(54, 81, 115, 0.08) 80%, rgba(54, 81, 115, 0.02) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-fill-color: transparent;
   
-  mix-blend-mode: hard-light;
-  filter: blur(15px);
+  mix-blend-mode: normal;
+  filter: blur(0px);
+  opacity: 0.8;
+  
+  /* 선 아래는 거의 안보이게 하는 마스크 */
+  -webkit-mask: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0) 80%);
+  mask: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0) 80%);
 }
 
 
