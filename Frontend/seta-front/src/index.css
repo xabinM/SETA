@@ -1,3 +1,8 @@
+@import './styles/tailwind.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
     --container-max: 1200px;
     --gutter: 24px;

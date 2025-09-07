@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  button, input, select, textarea { @apply appearance-none bg-transparent border-0 outline-none; }
+  html, body, #root { height: 100%; margin: 0; padding: 0; background: #010205 !important; }
+}
+
+@layer components {
+  .all-\[unset\] { all: unset; }
+}
+
+/* 필요한 기본 애니메이션만 유지 */
+:root {
+  --animate-spin: spin 1s linear infinite;
+}
+
+.animate-spin { animation: var(--animate-spin); }
+
+@keyframes spin { 
+  to { transform: rotate(1turn); } 
+}

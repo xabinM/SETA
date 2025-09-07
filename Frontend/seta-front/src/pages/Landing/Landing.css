@@ -1,0 +1,308 @@
+/* 사진과 동일한 3D 입체 효과 구현 */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 강제로 어두운 배경 적용 */
+html, body, #root {
+  background: #010205 !important;
+}
+
+body {
+  background: #010205 !important;
+  color: #fff !important;
+}
+
+.frame {
+  background-color: #010205;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.frame .overlap-group-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.frame .overlap-group {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 배경 블러 요소들 - 원래 색상으로 */
+.frame .ellipse {
+  position: absolute;
+  width: 60vw;
+  height: 60vh;
+  top: 20vh;
+  left: 70vw;
+  background-color: #0d051a;
+  border-radius: 50%;
+  filter: blur(min(15vw, 200px));
+  transform: translate(-50%, -50%);
+  opacity: 0.8;
+}
+
+.frame .div {
+  position: absolute;
+  width: 60vw;
+  height: 80vh;
+  top: 10vh;
+  left: 70vw;
+  background-color: #050d26;
+  border-radius: 50% / 70%;
+  filter: blur(min(20vw, 250px));
+  transform: translate(-50%, -50%);
+}
+
+.frame .ellipse-2 {
+  position: absolute;
+  width: 100vw;
+  height: 60vh;
+  top: 30vh;
+  left: 40vw;
+  background-color: #030814;
+  border-radius: 50% / 30%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  filter: blur(min(20vw, 250px));
+}
+
+.frame .ellipse-3 {
+  position: absolute;
+  width: 60vw;
+  height: 60vh;
+  top: 25vh;
+  left: 20vw;
+  background-color: #14051f;
+  border-radius: 50%;
+  filter: blur(min(20vw, 250px));
+  transform: translate(-50%, -50%);
+}
+
+.frame .ellipse-4 {
+  position: absolute;
+  width: 60vw;
+  height: 60vh;
+  top: 70vh;
+  left: 30vw;
+  background-color: #080f2e;
+  border-radius: 50%;
+  filter: blur(min(20vw, 250px));
+  transform: translate(-50%, -50%);
+}
+
+/* 별들 - 원래 색상으로 */
+.frame .star {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  top: 20vh;
+  left: 20vw;
+  background-color: #e5f2ff;
+  border-radius: 4px;
+}
+
+.frame .star-2 {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  top: 30vh;
+  left: 75vw;
+  background-color: #cce5ff;
+  border-radius: 3px;
+}
+
+.frame .star-3 {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 15vh;
+  left: 55vw;
+  background-color: #ffe5cc;
+  border-radius: 5px;
+}
+
+.frame .star-4 {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  top: 75vh;
+  left: 80vw;
+  background-color: #b2ccff;
+  border-radius: 2.5px;
+}
+
+.frame .star-5 {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  top: 80vh;
+  left: 60vw;
+  background-color: #e5d9ff;
+  border-radius: 3.5px;
+}
+
+/* SETA 메인 텍스트 - 새로운 접근법 */
+.frame .text-wrapper {
+  position: absolute;
+  width: min(858px, 80vw);
+  height: min(622px, 60vh);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  
+  font-family: 'Knewave';
+  font-style: normal;
+  font-weight: 400;
+  font-size: min(400px, 25vw);
+  line-height: min(622px, 60vh);
+  display: flex;
+  align-items: center;
+  text-align: center;
+
+  /* 밝은 파란색 그라디언트 */
+  background: linear-gradient(180deg, #6699DA 25.88%, #5783BB 46.97%, #43648F 76.76%, #365173 95.5%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  
+  /* 스트로크 효과 (box-shadow로 구현) */
+  filter: 
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+    drop-shadow(0 15px 30px rgba(0, 0, 0, 0.6))
+    drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4))
+    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))
+    drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  
+  
+  mix-blend-mode: hard-light;
+}
+
+/* 리플렉션 효과 1 - 밝은 반사 (사진처럼) */
+.frame .text-wrapper-2 {
+  position: absolute;
+  width: min(858px, 80vw);
+  height: min(622px, 60vh);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-50% + 20px));
+  z-index: -1;
+  
+  font-family: 'Knewave';
+  font-style: normal;
+  font-weight: 400;
+  font-size: min(400px, 25vw);
+  line-height: min(622px, 60vh);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  
+  background: linear-gradient(180deg, rgba(102, 153, 218, 0.5) 25.88%, rgba(87, 131, 187, 0.5) 46.97%, rgba(67, 100, 143, 0.5) 76.76%, rgba(54, 81, 115, 0.5) 95.5%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  
+  mix-blend-mode: hard-light;
+  filter: blur(135px);
+}
+
+/* 리플렉션 효과 2 - 세밀한 반사 (사진처럼) */
+.frame .text-wrapper-3 {
+  position: absolute;
+  width: min(858px, 80vw);
+  height: min(622px, 60vh);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-50% + 47px)) matrix(1, 0, 0, -1, 0, 0);
+  z-index: -2;
+  
+  font-family: 'Knewave';
+  font-style: normal;
+  font-weight: 400;
+  font-size: min(400px, 25vw);
+  line-height: min(622px, 60vh);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  
+  background: linear-gradient(360deg, rgba(102, 153, 218, 0.4) 10.85%, rgba(54, 81, 115, 0) 62.78%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  
+  mix-blend-mode: hard-light;
+  filter: blur(15px);
+}
+
+
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  .frame .text-wrapper {
+    font-size: clamp(4rem, 18vw, 22rem);
+    text-shadow:
+      2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .frame .text-wrapper-2 {
+    font-size: clamp(4rem, 18vw, 22rem);
+    top: calc(50% + clamp(3rem, 10vw, 15rem));
+  }
+
+  .frame .text-wrapper-3 {
+    font-size: clamp(4rem, 18vw, 22rem);
+    top: calc(50% + clamp(1.5rem, 6vw, 10rem));
+  }
+}
+
+/* 세로 모드 */
+@media (orientation: portrait) {
+  .frame .text-wrapper,
+  .frame .text-wrapper-2,
+  .frame .text-wrapper-3 {
+    font-size: clamp(3rem, 16vw, 20rem);
+  }
+}
+
+/* 성능 최적화 */
+.frame .text-wrapper,
+.frame .text-wrapper-2,
+.frame .text-wrapper-3 {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* 접근성 */
+@media (prefers-reduced-motion: reduce) {
+  .frame .text-wrapper {
+    transform: translate(-50%, -50%);
+  }
+
+  .frame .text-wrapper-2,
+  .frame .text-wrapper-3 {
+    filter: none;
+  }
+}

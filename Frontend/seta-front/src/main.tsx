@@ -1,22 +1,5 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import AppLayout from '@/layouts/AppLayout'
-import Home from '@/pages/Home'
-import About from '@/pages/About'
-import NotFound from '@/pages/NotFound'
-import './index.css'
+import { createRoot } from 'react-dom/client';
+import AppRouter from '@/app/router';
+import './index.css';
 
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <BrowserRouter>
-            <Routes>
-                <Route element={<AppLayout />}>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="*" element={<NotFound />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
-    </StrictMode>
-)
+createRoot(document.getElementById('root')!).render(<AppRouter />);
