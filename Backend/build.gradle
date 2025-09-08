@@ -35,7 +35,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	implementation 'com.mysql:mysql-connector-j'
+	// implementation 'com.mysql:mysql-connector-j'
+	implementation 'org.postgresql:postgresql:42.7.4'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12'
 
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -44,7 +46,6 @@ dependencies {
 
 	// Valid
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-
 }
 
 tasks.named('test') {
