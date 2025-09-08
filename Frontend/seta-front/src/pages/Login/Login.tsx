@@ -1,20 +1,7 @@
-import React, { useState } from "react";
-import LoginBg from "@/assets/loginBackground.png"
+import LoginBg from "@/assets/loginBackground.png";
 import "./Login.css";
 
 export default function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log("Login attempt:", { email, password });
-    };
-
-    const handleSignupClick = () => {
-        console.log("Navigate to signup");
-    };
-
     return (
         <div
             className="login-page relative min-h-screen overflow-hidden"
@@ -34,16 +21,13 @@ export default function Login() {
                         <p className="login-subtitle">SETA 플랫폼에 오신 것을 환영합니다</p>
                     </header>
 
-                    <form className="login-form" onSubmit={handleSubmit}>
+                    <form className="login-form">
                         <div className="field">
-                            <label htmlFor="email" className="label">이메일 주소</label>
+                            <label htmlFor="username" className="label">아이디</label>
                             <input
-                                id="email"
-                                type="email"
-                                required
-                                placeholder="you@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                id="username"
+                                type="text"
+                                placeholder="아이디를 입력하세요"
                                 className="input"
                             />
                         </div>
@@ -53,10 +37,7 @@ export default function Login() {
                             <input
                                 id="password"
                                 type="password"
-                                required
                                 placeholder="••••••••"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
                                 className="input"
                             />
                         </div>
@@ -65,7 +46,7 @@ export default function Login() {
 
                         <div className="signup">
                             <span className="signup-text">계정이 없으신가요?</span>
-                            <button type="button" className="signup-link" onClick={handleSignupClick}>
+                            <button type="button" className="signup-link">
                                 회원가입
                             </button>
                         </div>
