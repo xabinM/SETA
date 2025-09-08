@@ -8,13 +8,13 @@ spring:
     include: secret
 
   datasource:
-    url: jdbc:mysql://localhost:3306/mydb
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://localhost:55432/mydb
+    driver-class-name: org.postgresql.Driver
 
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -22,5 +22,10 @@ spring:
 
   data:
     redis:
-      host: 172.19.64.149
+      host: localhost
       port: 6379
+
+
+springdoc:
+  swagger-ui:
+    path: /docs
