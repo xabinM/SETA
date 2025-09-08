@@ -1,7 +1,4 @@
 @import './styles/tailwind.css';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 :root {
     --container-max: 1200px;
@@ -14,9 +11,17 @@
 *::before,
 *::after { box-sizing: border-box; }
 html, body, #root { height: 100%; }
-body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; line-height: 1.5; color: #222; background: #fff; }
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    line-height: 1.5;
+    color: #222; }
 
-a { color: #2f6feb; text-decoration: none; }
+a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
 a:hover { text-decoration: underline; }
 
 h1 { margin: 0 0 0.5em; line-height: 1.2; }
