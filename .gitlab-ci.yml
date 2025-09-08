@@ -1,0 +1,54 @@
+stages:
+  - build
+  - test
+
+# ---------- Backend ----------
+backend-build:
+  stage: build
+  image: corretto:17
+  script:
+    - ./gradlew clean build -x test
+    - echo "Backend Build Job 실행 테스트 성공공"
+  # rules:  // 변경이 있을 때만 실행하는 명령어 
+  #   - changes:
+  #     - Backend/**/*
+  only:
+    - Devops_config
+
+backend-test:
+  stage: test
+  image: amazoncorretto:17
+  script:
+    - ./gradlew test
+    - echo "Backend Test Job 실행 테스트"
+  # rules:
+  #   - changes:
+  #     - Backend/**/*
+  only:
+    - Devops_config
+
+# ---------- Frontend ----------
+frontend-build:
+  stage: build
+  script:
+    - echo "Frontend Build Job 실행 테스트"
+  rules:
+    - changes:
+      - Frontend/**/*
+
+frontend-test:
+  stage: test
+  script:
+    - echo "Frontend Test Job 실행 테스트"
+  rules:
+    - changes:
+      - Frontend/**/*
+
+# ---------- AI ----------
+ai-test:
+  stage: test
+  script:
+    - echo "AI Test Job 실행 테스트"
+  rules:
+    - changes:
+      - AI/**/*
