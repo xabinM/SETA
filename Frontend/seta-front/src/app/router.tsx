@@ -3,12 +3,15 @@ import Landing from '@/pages/Landing';
 import NotFound from '@/pages/NotFound/NotFound';
 import Home from '@/pages/Home/Home';
 import Login from '@/pages/Login/Login';
+import SignUp from "@/pages/SignUp/SignUp";
 
 const router = createBrowserRouter([
     { path: '/', element: <Landing /> },
     { path: '*', element: <NotFound /> },
     {path: '/home', element: <Home />},
-    {path: '/login', element: <Login />}
+    {path: '/login', element: <Login />},
+    {path: '/signup', element: <SignUp />}
+
 ]);
 
 export default function AppRouter() {

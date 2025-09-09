@@ -1,7 +1,10 @@
 import { Header } from '@/ui/components/Header'
 import HomeBg from '@/assets/homebackground.png'
+import {useNavigate} from "react-router-dom";
 
 export default function Home() {
+    const navigate = useNavigate()
+
     return (
         <div
             className="relative min-h-screen overflow-hidden" // ← bg-black 제거
@@ -80,6 +83,8 @@ export default function Home() {
                                 t.style.boxShadow = '0px 2px 8px rgba(56, 224, 123, 0.3)'
                                 t.style.backgroundColor = '#38E07B'
                             }}
+
+                            onClick={() => navigate("/login")}
                         >
                             시작하기
                         </button>

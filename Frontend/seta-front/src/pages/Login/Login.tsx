@@ -1,7 +1,10 @@
 import LoginBg from "@/assets/loginBackground.png";
 import "./Login.css";
+import {useNavigate} from "react-router-dom";
 
 export default function Login() {
+
+    const navigate = useNavigate();
     return (
         <div
             className="login-page relative min-h-screen overflow-hidden"
@@ -46,7 +49,7 @@ export default function Login() {
 
                         <div className="signup">
                             <span className="signup-text">계정이 없으신가요?</span>
-                            <button type="button" className="signup-link">
+                            <button type="button" className="signup-link" onClick={() => navigate("/signup")}>
                                 회원가입
                             </button>
                         </div>
