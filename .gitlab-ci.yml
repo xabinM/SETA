@@ -1,44 +1,89 @@
 stages:
   - build
   - test
+  - build-docker
+  - deploy
 
-# ---------- Backend ----------
+variables:
+  DOCKER_REGISTRY: $CI_REGISTRY                  # GitLab Container Registry
+  BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA
+  # dind 사용시 TLS 자동 생성 비활성화 (권장)
+  DOCKER_TLS_CERTDIR: ""
+
+# ----------------
+# Backend: build
+# ----------------
 backend-build:
   stage: build
   image: amazoncorretto:17
   script:
     - cd Backend
     - chmod +x gradlew
-    - ./gradlew clean build -x test
-    - echo "Backend Build Job 실행 테스트 성공"
-  # rules:  // 변경이 있을 때만 실행하는 명령어 
-  #   - changes:
-  #     - Backend/**/*
+    - ./gradlew clean bootJar  # 또는 assemble / build (bootJar가 Spring Boot jar 생성)
+  artifacts:
+    paths:
+      - Backend/build/libs/*.jar
+    expire_in: 1 hour
   only:
     - Devops_config
 
-# ---------- Frontend ----------
-frontend-build:
-  stage: build
-  script:
-    - echo "Frontend Build Job 실행 테스트"
-  rules:
-    - changes:
-      - Frontend/**/*
-
-frontend-test:
+# ----------------
+# Backend: test
+# ----------------
+backend-test:
   stage: test
+  image: amazoncorretto:17
   script:
-    - echo "Frontend Test Job 실행 테스트"
-  rules:
-    - changes:
-      - Frontend/**/*
+    - cd Backend
+    - chmod +x gradlew
+    - ./gradlew test
+  only:
+    - Devops_config
 
-# ---------- AI ----------
-ai-test:
-  stage: test
+# ----------------
+# Backend: build-docker (Docker 이미지 생성 + 푸시)
+# ----------------
+backend-build-docker:
+  stage: build-docker
+  image: docker:20.10.16
+  services:
+    - name: docker:20.10.16-dind
+      alias: docker
+  variables:
+    # dind 사용시 필요한 변수 (TLS off)
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    # GitLab 레지스트리 로그인
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $DOCKER_REGISTRY
   script:
-    - echo "AI Test Job 실행 테스트"
-  rules:
-    - changes:
-      - AI/**/*
+    - ls -la                 # 확인용
+    - docker build -t $BACKEND_IMAGE ./Backend
+    - docker push $BACKEND_IMAGE
+  dependencies:
+    - backend-build
+  only:
+    - Devops_config
+  # GitLab Runner가 privileged 모드(도커 인 도커 허용)일 것을 요구할 수 있습니다.
+
+# ----------------
+# Deploy: ssh로 서버에 deploy.sh 복사 후 실행
+# ----------------
+deploy-to-server-a:
+  stage: deploy
+  image: alpine:latest  # 최소화 된 리눅스 환경(이미지)
+  before_script:
+    - apk add --no-cache openssh-client bash rsync  # SSH 클라이언트, bash, rsync 설치 : SSH로 서버 접속하고 파일 복사할 때 필요
+    - mkdir -p ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts                  # 서버의 호스트 키를 미리 등록 -> SSH 접속시 yes/no 묻는 것 방지
+    - eval "$(ssh-agent -s)"
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -  # SSH 비밀키를 ssh-agent에 등록
+                                                        # $SSH_PRIVATE_KEY = GitLab CI/CD 변수로 등록된 서버 접속용 프라이빗 키
+                                                        # 이렇게 해야 Runner가 비밀번호 없이 서버에 SSH 접속 가능
+  script:
+    # deploy.sh 를 서버로 복사하고 원격에서 실행 (이미지 태그 전달)
+    - scp Devops/deploy.sh $DEPLOY_SERVER_A:/home/$DEPLOY_USER/deploy.sh  # scp : CI/CD 환경에서 서버로 deploy.sh 파일을 복사
+    - ssh $DEPLOY_SERVER_A "chmod +x /home/$DEPLOY_USER/deploy.sh && /home/$DEPLOY_USER/deploy.sh $BACKEND_IMAGE"   # ssh : 복사한 deploy.sh를 서버에서 실행
+  only:
+    - Devops_config

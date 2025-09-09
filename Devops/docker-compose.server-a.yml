@@ -1,0 +1,57 @@
+# backend 서비스의 공통 설정을 위한 앵커(anchor) 정의
+x-backend-template: &backend-template
+  image: ${BACKEND_IMAGE}
+  environment:
+    - SPRING_PROFILES_ACTIVE=prod
+    - DB_HOST=db
+    - DB_PORT=3306
+    - DB_USER=${DB_USER}
+    - DB_PASSWORD=${DB_PASSWORD}
+    - DB_NAME=${DB_NAME}
+    - REDIS_HOST=redis
+    - REDIS_PORT=6379
+  depends_on:
+    db:
+      condition: service_healthy  # service_healthy : docker compose가 제공하는 예약 키워드
+    redis:
+      condition: service_healthy
+
+services:
+  db:
+    image: mysql:8
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend-blue:
+    <<: *backend-template  # 앵커 적용
+    container_name: backend-blue
+    ports:
+      - "8081:8080"     # 8081 port로 요청이 들어오지만 실제 동작 port는 8080
+
+  backend-green:
+    <<: *backend-template  # 앵커 적용
+    container_name: backend-green
+    ports:
+      - "8082:8080"
