@@ -1,5 +1,7 @@
 spring:
   kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
     properties:
       security.protocol: SASL_SSL
       sasl.mechanism: AWS_MSK_IAM
