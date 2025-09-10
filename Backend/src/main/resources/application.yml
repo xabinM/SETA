@@ -11,7 +11,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -22,28 +22,16 @@ spring:
       host: localhost
       port: 6379
 
-  kafka:
-    bootstrap-servers: localhost:9092
-    properties:
-      enable.idempotence: true
-    producer:
-      acks: all
-      retries: 10
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-    consumer:
-      group-id: ${KAFKA_GROUP_ID:app-default}
-      auto-offset-reset: latest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-
-  app:
-    topics:
-      raw: chat.raw.request.v
-      filterResult: chat.filter.result.v1
-      promptBuilt: chat.prompt.built.v1
-      llmAnswer: chat.llm.answer.v1
-      error: chat.error.v1
+app:
+  topics:
+    raw: chat.raw.request.v1
+    filterResult: chat.filter.result.v1
+    promptBuilt: chat.prompt.built.v1
+    llmAnswer: chat.llm.answer.v1
+    error: chat.error.v1
+  topic-spec:
+    raw:
+      partitions: 6
 
 
 springdoc:

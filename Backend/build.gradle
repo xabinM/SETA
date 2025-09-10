@@ -39,7 +39,10 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	// kafka
-	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.springframework.kafka:spring-kafka:3.3.6'
+	implementation 'org.apache.kafka:kafka-clients'
+	// msk iam 인증
+	implementation 'software.amazon.msk:aws-msk-iam-auth:2.2.0'
 
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

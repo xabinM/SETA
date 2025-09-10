@@ -41,12 +41,10 @@ public class ChatMessage {
     @Column(name = "role", length = 16)
     private ChatMessageRole role;
 
-    @Lob
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Lob
-    @Column(name = "filtered_content")
+    @Column(name = "filtered_content", columnDefinition = "TEXT")
     private String filteredContent;
 
     @Column(name = "external_id", length = 64)
