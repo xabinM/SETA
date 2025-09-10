@@ -36,9 +36,6 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// CI/CD 환경의 Test 단계에서 실제 DB 없이 테스트를 진행하기 위한 H2 의존성
-	testImplementation 'com.h2database:h2'
-
 	implementation 'com.mysql:mysql-connector-j'
 
 	// jwt
