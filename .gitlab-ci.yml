@@ -42,7 +42,7 @@ backend-build-docker:
     DOCKER_HOST: tcp://docker:2375 # Docker daemon 주소 지정
   before_script:
     - docker info                   # Docker daemon 연결 확인
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $DOCKER_REGISTRY
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $DOCKER_REGISTRY
   script:
     - docker build -t $BACKEND_IMAGE ./Backend
     - docker push $BACKEND_IMAGE
