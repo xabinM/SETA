@@ -34,11 +34,13 @@ backend-build-docker:
   stage: build-docker
   image: docker:20.10.16
   services:
-    - docker:dind                     # Docker-in-Docker 사용
+    - name: docker:20.10.16-dind   # Docker-in-Docker 사용
+      command: ["--host=tcp://0.0.0.0:2375"]  # TLS 없이 접근 가능
   variables:
-    DOCKER_TLS_CERTDIR: ""            # DIND TLS 비활성화
+    DOCKER_TLS_CERTDIR: ""          # DIND TLS 비활성화
+    DOCKER_HOST: tcp://docker:2375 # Docker daemon 주소 지정
   before_script:
-    - docker info                      # Docker daemon 연결 확인
+    - docker info                   # Docker daemon 연결 확인
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $DOCKER_REGISTRY
   script:
     - docker build -t $BACKEND_IMAGE ./Backend
