@@ -10,6 +10,9 @@ x-backend-template: &backend-template
     - DB_NAME=${DB_NAME}
     - REDIS_HOST=redis
     - REDIS_PORT=6379
+    - JWT_SECRET=${JWT_SECRET}
+    - JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
+    - JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
   depends_on:
     db:
       condition: service_healthy  # service_healthy : docker compose가 제공하는 예약 키워드
