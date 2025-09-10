@@ -7,9 +7,9 @@ stages:
 variables:
   DOCKER_REGISTRY: $CI_REGISTRY                  # GitLab Container Registry
   BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA
+  # dind 사용시 TLS 자동 생성 비활성화 (권장)
+  DOCKER_TLS_CERTDIR: ""
 
-# ----------------
-# Backend: build
 # ----------------
 backend-build:
   stage: build
@@ -26,28 +26,12 @@ backend-build:
     - Devops_config
 
 # ----------------
-# Backend: test
-# ----------------
-#backend-test:
-#  stage: test
-#  image: amazoncorretto:17
-#  script:
-#    - cd Backend
-#    - chmod +x gradlew
-#    - ./gradlew test
-#  only:
-#    - Devops_config
-
-# ----------------
 # Backend: build-docker (Docker 이미지 생성 + 푸시)
 # ----------------
 backend-build-docker:
   stage: build-docker
   image: docker:20.10.16
-  variables:
-    # dind를 사용하지 않고 호스트의 Docker 데몬을 직접 사용하도록 DOCKER_HOST를 명시적으로 설정합니다.
-    # 이렇게 하면 "lookup docker" 오류를 근본적으로 해결할 수 있습니다.
-    DOCKER_HOST: unix:///var/run/docker.sock
+  services: []
   before_script:
     # GitLab 레지스트리 로그인
     - docker info
@@ -60,7 +44,6 @@ backend-build-docker:
     - backend-build
   only:
     - Devops_config
-  # GitLab Runner가 privileged 모드(도커 인 도커 허용)일 것을 요구할 수 있습니다.
 
 # ----------------
 # Deploy: ssh로 서버에 deploy.sh 복사 후 실행
