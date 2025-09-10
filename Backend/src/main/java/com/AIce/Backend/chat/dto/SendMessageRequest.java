@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SendMessageReq {
+public class SendMessageRequest {
     private Long userId;
     private String text;
     private String sessionId;

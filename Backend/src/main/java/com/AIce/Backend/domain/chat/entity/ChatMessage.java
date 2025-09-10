@@ -2,6 +2,7 @@ package com.AIce.Backend.domain.chat.entity;
 
 import com.AIce.Backend.domain.user.entity.User;
 import com.AIce.Backend.global.enums.ChatMessageRole;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

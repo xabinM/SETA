@@ -1,5 +1,6 @@
 package com.AIce.Backend.global.sse;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -11,11 +12,13 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class SseController {
     private final SseHub hub;
 
+    @Operation(summary="실시간 응답 스트리밍")
     @GetMapping(value = "/chat/{roomId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@PathVariable String roomId) {
         return hub.subscribe(roomId);
     }
 
+    @Operation(summary="실시간 차트")
     @GetMapping(value="/metrics/live", produces=MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter metrics() {
         return hub.subscribe("metrics");

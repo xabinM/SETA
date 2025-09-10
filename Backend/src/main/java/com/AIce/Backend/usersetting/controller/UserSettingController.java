@@ -13,8 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+
 @Slf4j
-@Tag(name = "User Setting", description = "유저 GPT 세팅 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/user-settings")
