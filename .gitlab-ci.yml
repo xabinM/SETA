@@ -4,7 +4,6 @@ stages:
   - deploy
 
 variables:
-  DOCKER_REGISTRY: $CI_REGISTRY                  # GitLab Container Registry
   BACKEND_IMAGE: $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA
   DOCKER_TLS_CERTDIR: ""                         # DIND 사용 시 TLS 비활성화
   SSH_KNOWN_HOSTS: $SSH_KNOWN_HOSTS
@@ -42,7 +41,7 @@ backend-build-docker:
     DOCKER_HOST: tcp://docker:2375 # Docker daemon 주소 지정
   before_script:
     - docker info                   # Docker daemon 연결 확인
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $DOCKER_REGISTRY
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
     - docker build -t $BACKEND_IMAGE ./Backend
     - docker push $BACKEND_IMAGE
