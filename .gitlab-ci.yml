@@ -46,12 +46,8 @@ backend-build:
 backend-build-docker:
   stage: build-docker
   image: docker:20.10.16
-  services:
-    - name: docker:20.10.16-dind
-      alias: docker
-  variables:
-    # dind 사용시 필요한 변수 (TLS off)
-    DOCKER_TLS_CERTDIR: ""
+  # dind 서비스는 privileged 권한이 필요하므로, 권한이 없는 Runner 환경에서는
+  # 호스트의 Docker 소켓을 사용하는 방식으로 변경합니다. (services, DOCKER_TLS_CERTDIR 제거)
   before_script:
     # GitLab 레지스트리 로그인
     - docker info
