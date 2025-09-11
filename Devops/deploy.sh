@@ -31,6 +31,11 @@ echo "현재 실행 중: $CURRENT, 새 배포 대상: $TARGET"
 # -d는 이미 컨테이너가 떠있으면 재실행 X
 docker-compose -f docker-compose.server-a.yml up -d db redis --wait
 
+echo "=============================="
+echo $SPRING_DATASOURCE_REDIS_HOST
+echo $SPRING_DATASOURCE_REDIS_PORT
+echo "=============================="
+
 # 3. 새 컨테이너 실행
 docker-compose -f docker-compose.server-a.yml up -d --no-deps backend-$TARGET
 
