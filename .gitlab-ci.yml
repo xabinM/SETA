@@ -57,20 +57,20 @@ deploy-to-server-a:
   stage: deploy
   image: alpine:latest
   before_script:
-    - apk add --no-cache openssh-client bash rsync  # SSH 접속 및 파일 복사용
+    - apk add --no-cache openssh-client bash rsync
     - mkdir -p ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - eval "$(ssh-agent -s)"
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   script:
-    # 배포 스크립트와 docker-compose 파일 복사
-    - scp -o LogLevel=ERROR Devops/deploy.sh $DEPLOY_SERVER_A:/home/$DEPLOY_USER/deploy.sh
-    - scp -o LogLevel=ERROR Devops/docker-compose.server-a.yml $DEPLOY_SERVER_A:/home/$DEPLOY_USER/docker-compose.server-a.yml
+    # SCP 대신 rsync 사용 (더 안정적)
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.server-a.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
 
-    # 원격 서버에 .env 파일 한 번에 생성 (불필요한 echo 제거)
+    # .env 파일 생성
     - |
-      ssh $DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
+      ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
       DB_USER=${DB_USER}
       DB_PASSWORD=${DB_PASSWORD}
       DB_NAME=${DB_NAME}
@@ -79,7 +79,7 @@ deploy-to-server-a:
       JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
       EOF"
 
-    # 배포 스크립트 실행
-    - ssh o LogLevel=ERROR $DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh $BACKEND_IMAGE"
+    # 배포 스크립트 실행 (구문 오류 수정)
+    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh $BACKEND_IMAGE"
   only:
     - Devops_config
