@@ -31,6 +31,21 @@ echo "현재 실행 중: $CURRENT, 새 배포 대상: $TARGET"
 # -d는 이미 컨테이너가 떠있으면 재실행 X
 docker-compose -f docker-compose.server-a.yml up -d db redis --wait
 
+# 실제 데이터베이스 연결 테스트
+echo "MySQL 연결 테스트 중..."
+for i in {1..30}; do
+    if docker exec mysql mysql -u root -p${DB_PASSWORD} -e "USE ${DB_NAME}; SELECT 1;" >/dev/null 2>&1; then
+        echo "MySQL 연결 성공"
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo "MySQL 연결 실패"
+        exit 1
+    fi
+    echo "MySQL 연결 대기 중... ($i/30)"
+    sleep 2
+done
+
 
 # 3. 새 컨테이너 실행
 docker-compose -f docker-compose.server-a.yml up -d --no-deps backend-$TARGET
