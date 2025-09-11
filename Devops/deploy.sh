@@ -41,7 +41,8 @@ PORT=$([ "$TARGET" == "blue" ] && echo 8081 || echo 8082)
 echo "=== 헬스 체크 시작 (대상: http://localhost:$PORT/actuator/health) ==="
 for i in {1..12}; do
     echo "헬스 체크 시도 #$i..."
-    HTTP_STATUS=$(curl -o /dev/null -w "%{http_code}" -s http://localhost:$PORT/actuator/health)
+    # --connect-timeout: 연결 시도 시간 제한, || true: curl 실패(exit code 56 등) 시 스크립트 중단 방지
+    HTTP_STATUS=$(curl -o /dev/null -w "%{http_code}" -s --connect-timeout 3 http://localhost:$PORT/actuator/health) || true
 
     if [ "$HTTP_STATUS" -eq 200 ]; then
         echo "✅ 헬스 체크 성공 (상태 코드: $HTTP_STATUS)"
@@ -64,7 +65,8 @@ done
 
 # 8. 롤백
 echo "❌ 롤백: 새 컨테이너($TARGET) 60초 내 시작 실패"
-docker-compose -f docker-compose.server-a.yml logs backend-$TARGET
+# 실패 원인 파악을 위해 마지막 100줄의 로그를 출력합니다.
+docker-compose -f docker-compose.server-a.yml logs --tail="100" backend-$TARGET
 docker-compose -f docker-compose.server-a.yml stop backend-$TARGET
 docker-compose -f docker-compose.server-a.yml rm -f backend-$TARGET
 exit 1
