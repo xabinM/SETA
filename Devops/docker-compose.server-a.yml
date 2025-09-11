@@ -31,6 +31,8 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
+    command:
+      - --default-authentication-plugin=mysql_native_password
     healthcheck:
       # 이제 ${DB_USER}가 실제로 생성되므로 이 헬스체크가 정상 동작합니다.
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
