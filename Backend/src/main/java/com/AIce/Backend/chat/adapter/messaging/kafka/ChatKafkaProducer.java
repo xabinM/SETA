@@ -4,9 +4,11 @@ import com.AIce.Backend.chat.contracts.HeadersV1;
 import com.AIce.Backend.chat.contracts.RawRequestV1;
 import com.AIce.Backend.global.config.kafka.KafkaTopicsProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ChatKafkaProducer {
@@ -16,7 +18,16 @@ public class ChatKafkaProducer {
 
     // raw 토픽 발행
     public void publishRaw(String roomId, RawRequestV1 payload) {
-        kafkaTemplate.send(topics.getRaw(), roomId, payload);
+        kafkaTemplate.send(topics.getRaw(), roomId, payload)
+                .whenComplete((result, ex) -> { // 전송 성공 로그 출력
+                    if (ex != null) {
+                        log.error("kafka send failed", ex);
+                    } else {
+                        var md = result.getRecordMetadata();
+                        log.info("kafka sent topic={} partition={} offset={} roomId={}",
+                                md.topic(), md.partition(), md.offset(), roomId);
+                    }
+                });
     }
 
     public static HeadersV1 header(String traceId, String producer, String schema) {

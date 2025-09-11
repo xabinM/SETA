@@ -1,13 +1,15 @@
 package com.AIce.Backend.chat.controller;
 
 import com.AIce.Backend.chat.dto.SendMessageRequest;
+import com.AIce.Backend.chat.dto.SendMessageResponse;
 import com.AIce.Backend.chat.service.ChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -17,18 +19,18 @@ public class ChatMessageController {
 
     private final ChatMessageService chatMessageService;
 
-    @Operation(summary="메세지 입력")
+    @Operation(summary = "메시지 입력")
     @PostMapping("/{roomId}/messages")
-    public ResponseEntity<?> postMessage(@PathVariable String roomId,
-                                         @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
-                                         @RequestHeader(value = "User-Agent", required = false) String userAgent,
-                                         @RequestBody SendMessageRequest req) {
-        // 멱등성 처리는 Redis/DB로 확장 (여긴 생략)
-        UUID messageId = chatMessageService.handleUserMessage(
-                roomId, req.getUserId(), req.getText(), req.getSessionId(), req.getTraceId(), userAgent
+    public ResponseEntity<SendMessageResponse> postMessage(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String roomId,
+            @RequestBody SendMessageRequest req
+    ) {
+        String traceId = chatMessageService.handleUserMessage(
+                roomId,
+                userId,
+                req.getText()
         );
-        return ResponseEntity.accepted().body(Map.of(
-                "traceId", req.getTraceId(),
-                "messageId", messageId.toString()));
+        return ResponseEntity.ok(new SendMessageResponse(traceId));
     }
 }
