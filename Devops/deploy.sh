@@ -4,6 +4,8 @@ set -e  # 오류 발생 시 스크립트 종료
 # --- 입력 값 ---
 BACKEND_IMAGE=$1  # docker-compose.server-a.yml에서 사용할 이미지 변수
 
+export BACKEND_IMAGE
+
 # --- 최소 출력 ---
 echo "=== Deploy 시작: $BACKEND_IMAGE ==="
 
