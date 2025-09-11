@@ -3,8 +3,12 @@ set -e  # 오류 발생 시 스크립트 종료
 
 # --- 입력 값 ---
 BACKEND_IMAGE=$1  # docker-compose.server-a.yml에서 사용할 이미지 변수
-
 export BACKEND_IMAGE
+
+echo "=== 환경변수 디버깅 ==="
+echo "DB_USER from .env: '$(grep DB_USER .env || echo 'NOT FOUND')'"
+echo "DB_PASSWORD from .env: '$(grep DB_PASSWORD .env || echo 'NOT FOUND')'"
+echo "DB_NAME from .env: '$(grep DB_NAME .env || echo 'NOT FOUND')'"
 
 # --- 최소 출력 ---
 echo "=== Deploy 시작: $BACKEND_IMAGE ==="
