@@ -80,6 +80,6 @@ deploy-to-server-a:
       EOF"
 
     # 배포 스크립트 실행 (구문 오류 수정)
-    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh '{$BACKEND_IMAGE}'"
+    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh '${BACKEND_IMAGE}'"
   only:
     - Devops_config
