@@ -39,7 +39,7 @@ PORT=$([ "$TARGET" == "blue" ] && echo 8081 || echo 8082)
 
 # 5. 헬스 체크 (최대 60초)
 for i in {1..12}; do
-    if nx -z localhost $PORT; then
+    if nc -z localhost $PORT; then
         # 6. Nginx 라우팅 전환
         echo "Nginx 라우팅을 $TARGET 으로 전환"
         echo "set \$service_url http://127.0.0.1:$PORT;" | sudo tee /etc/nginx/conf.d/service-url.inc >/dev/null
