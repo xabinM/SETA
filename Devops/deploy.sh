@@ -32,8 +32,8 @@ echo "현재 실행 중: $CURRENT, 새 배포 대상: $TARGET"
 docker-compose -f docker-compose.server-a.yml up -d db redis --wait
 
 echo "=============================="
-echo $SPRING_DATASOURCE_REDIS_HOST
-echo $SPRING_DATASOURCE_REDIS_PORT
+echo $REDIS_HOST
+echo $REDIS_PORT
 echo "=============================="
 
 # 3. 새 컨테이너 실행
