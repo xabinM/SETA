@@ -23,6 +23,11 @@ fi
 
 echo "현재 실행 중: $CURRENT, 새 배포 대상: $TARGET"
 
+# DB 컨테이너 실행 - 무중단 배포 위해 --no-deps 를 걸어 두었기에 DB는 따로 실행 시켜야함
+# -d는 이미 컨테이너가 떠있으면 재실행 X
+docker-compose -f docker-compose.server-a.yml up -d db redis
+
+
 # 3. 새 컨테이너 실행
 docker-compose -f docker-compose.server-a.yml up -d --no-deps backend-$TARGET
 
