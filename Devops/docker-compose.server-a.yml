@@ -13,6 +13,9 @@ x-backend-template: &backend-template
     - JWT_SECRET=${JWT_SECRET}
     - JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
     - JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
+    - SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mydb
+    - SPRING_DATASOURCE_USERNAME: root
+    - SPRING_DATASOURCE_PASSWORD: ssafy403
   depends_on:
     db:
       condition: service_healthy  # service_healthy : docker compose가 제공하는 예약 키워드
