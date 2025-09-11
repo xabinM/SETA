@@ -65,8 +65,8 @@ deploy-to-server-a:
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   script:
     # 배포 스크립트와 docker-compose 파일 복사
-    - scp Devops/deploy.sh $DEPLOY_SERVER_A:/home/$DEPLOY_USER/deploy.sh
-    - scp Devops/docker-compose.server-a.yml $DEPLOY_SERVER_A:/home/$DEPLOY_USER/docker-compose.server-a.yml
+    - scp -o LogLevel=ERROR Devops/deploy.sh $DEPLOY_SERVER_A:/home/$DEPLOY_USER/deploy.sh
+    - scp -o LogLevel=ERROR Devops/docker-compose.server-a.yml $DEPLOY_SERVER_A:/home/$DEPLOY_USER/docker-compose.server-a.yml
 
     # 원격 서버에 .env 파일 한 번에 생성 (불필요한 echo 제거)
     - |
@@ -80,6 +80,6 @@ deploy-to-server-a:
       EOF"
 
     # 배포 스크립트 실행
-    - ssh $DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh $BACKEND_IMAGE"
+    - ssh o LogLevel=ERROR $DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh $BACKEND_IMAGE"
   only:
     - Devops_config
