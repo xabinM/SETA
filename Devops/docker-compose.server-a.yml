@@ -10,7 +10,8 @@ x-backend-template: &backend-template
     - JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
     # GitLab CI에서 생성된 .env 파일의 값을 사용하여 DB에 연결합니다.
     # 이제 애플리케이션은 root가 아닌 전용 사용자로 접속합니다.
-    - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${DB_NAME}
+    # allowPublicKeyRetrieval=true 파라미터를 추가하여 최신 MySQL 인증 방식을 지원합니다.
+    - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
     - SPRING_DATASOURCE_USERNAME=${DB_USER}
     - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
   depends_on:
@@ -31,8 +32,6 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
-    command:
-      - --default-authentication-plugin=mysql_native_password
     healthcheck:
       # 이제 ${DB_USER}가 실제로 생성되므로 이 헬스체크가 정상 동작합니다.
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]

@@ -3,9 +3,9 @@ spring:
     name: argo-backend
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/mydb}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:ssafy403}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 
