@@ -37,7 +37,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/users/signup",
                                 "/users/login",
-                                "/users/reissue"
+                                "/users/reissue",
+                                "/actuator/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
