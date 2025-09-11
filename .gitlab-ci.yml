@@ -68,13 +68,16 @@ deploy-to-server-a:
     - scp Devops/deploy.sh $DEPLOY_SERVER_A:/home/$DEPLOY_USER/deploy.sh
     - scp Devops/docker-compose.server-a.yml $DEPLOY_SERVER_A:/home/$DEPLOY_USER/docker-compose.server-a.yml
 
-    # 원격 서버에 .env 생성
-    - ssh $DEPLOY_SERVER_A "echo 'DB_USER=${DB_USER}' > /home/${DEPLOY_USER}/.env"
-    - ssh $DEPLOY_SERVER_A "echo 'DB_PASSWORD=${DB_PASSWORD}' >> /home/${DEPLOY_USER}/.env"
-    - ssh $DEPLOY_SERVER_A "echo 'DB_NAME=${DB_NAME}' >> /home/${DEPLOY_USER}/.env"
-    - ssh $DEPLOY_SERVER_A "echo 'JWT_SECRET=${JWT_SECRET}' >> /home/${DEPLOY_USER}/.env"
-    - ssh $DEPLOY_SERVER_A "echo 'JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}' >> /home/${DEPLOY_USER}/.env"
-    - ssh $DEPLOY_SERVER_A "echo 'JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}' >> /home/${DEPLOY_USER}/.env"
+    # 원격 서버에 .env 파일 한 번에 생성 (불필요한 echo 제거)
+    - |
+      ssh $DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
+      DB_USER=${DB_USER}
+      DB_PASSWORD=${DB_PASSWORD}
+      DB_NAME=${DB_NAME}
+      JWT_SECRET=${JWT_SECRET}
+      JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
+      JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
+      EOF"
 
     # 배포 스크립트 실행
     - ssh $DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh $BACKEND_IMAGE"
