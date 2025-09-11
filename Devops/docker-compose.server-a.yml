@@ -3,8 +3,8 @@ x-backend-template: &backend-template
   image: ${BACKEND_IMAGE}
   environment:
     - SPRING_PROFILES_ACTIVE=prod
-    - SPRING_DATASOURCE_REDIS_HOST=redis # Docker Compose 네트워크 내의 서비스 이름(redis)을 직접 명시
-    - SPRING_DATASOURCE_REDIS_PORT=6379   # Redis의 기본 포트를 직접 명시
+    - SPRING_DATA_REDIS_HOST=redis # Spring Boot가 인식하는 올바른 환경 변수 이름으로 수정
+    - SPRING_DATA_REDIS_PORT=6379
     - JWT_SECRET=${JWT_SECRET}
     - JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
     - JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
