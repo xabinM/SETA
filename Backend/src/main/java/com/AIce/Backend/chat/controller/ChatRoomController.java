@@ -1,5 +1,6 @@
 package com.AIce.Backend.chat.controller;
 
+import com.AIce.Backend.chat.dto.ChatMessageResponse;
 import com.AIce.Backend.chat.dto.ChatRoomResponse;
 import com.AIce.Backend.chat.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,5 +34,11 @@ public class ChatRoomController {
     @Operation(summary="채팅방 삭제")
     public void delete(@AuthenticationPrincipal Long userId, @PathVariable UUID roomId) {
         chatRoomService.deleteRoom(userId, roomId);
+    }
+
+    @GetMapping("/{roomId}/messages")
+    @Operation(summary="채팅방 내 메시지 히스토리 조회")
+    public List<ChatMessageResponse> listMyRooms(@AuthenticationPrincipal Long userId, @PathVariable UUID roomId) {
+        return chatRoomService.listMyMessages(userId, roomId);
     }
 }

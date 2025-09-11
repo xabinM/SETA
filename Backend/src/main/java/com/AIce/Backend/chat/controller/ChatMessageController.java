@@ -1,9 +1,8 @@
 package com.AIce.Backend.chat.controller;
 
 import com.AIce.Backend.chat.dto.SendMessageRequest;
-import com.AIce.Backend.chat.service.ChatService;
+import com.AIce.Backend.chat.service.ChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +13,9 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/chat/rooms")
-public class ChatController {
+public class ChatMessageController {
 
-    private final ChatService chatService;
+    private final ChatMessageService chatMessageService;
 
     @Operation(summary="메세지 입력")
     @PostMapping("/{roomId}/messages")
@@ -25,7 +24,7 @@ public class ChatController {
                                          @RequestHeader(value = "User-Agent", required = false) String userAgent,
                                          @RequestBody SendMessageRequest req) {
         // 멱등성 처리는 Redis/DB로 확장 (여긴 생략)
-        UUID messageId = chatService.handleUserMessage(
+        UUID messageId = chatMessageService.handleUserMessage(
                 roomId, req.getUserId(), req.getText(), req.getSessionId(), req.getTraceId(), userAgent
         );
         return ResponseEntity.accepted().body(Map.of(

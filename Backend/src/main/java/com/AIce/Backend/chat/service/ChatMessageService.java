@@ -10,13 +10,12 @@ import com.AIce.Backend.global.enums.ChatMessageRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ChatService {
+public class ChatMessageService {
 
     private final ChatMessageRepository chatMessagerepo;
     private final ChatRoomRepository chatRoomrepo;

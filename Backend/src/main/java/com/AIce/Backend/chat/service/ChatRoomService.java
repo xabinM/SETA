@@ -1,8 +1,11 @@
 package com.AIce.Backend.chat.service;
 
+import com.AIce.Backend.chat.dto.ChatMessageResponse;
 import com.AIce.Backend.chat.dto.ChatRoomResponse;
 import com.AIce.Backend.chat.exception.NotFoundChatRoomException;
+import com.AIce.Backend.domain.chat.entity.ChatMessage;
 import com.AIce.Backend.domain.chat.entity.ChatRoom;
+import com.AIce.Backend.domain.chat.repository.ChatMessageRepository;
 import com.AIce.Backend.domain.chat.repository.ChatRoomRepository;
 import com.AIce.Backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomrepo;
+    private final ChatMessageRepository chatMessagerepo;
     private final UserRepository userrepo;
 
     @Transactional
@@ -56,5 +61,14 @@ public class ChatRoomService {
         ChatRoom room = chatRoomrepo.findByChatRoomIdAndUser(roomId, userrepo.findByUserId(userId))
                 .orElseThrow(() -> new NotFoundChatRoomException("ChatRoom not found"));
         chatRoomrepo.delete(room);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatMessageResponse> listMyMessages(Long userId, UUID roomId) {
+        List<ChatMessage> messages = chatMessagerepo.findByChatRoom_ChatRoomIdAndUser_UserIdOrderByCreatedAtDesc(roomId, userId)
+                .orElse(Collections.emptyList());
+        return messages.stream()
+                .map(ChatMessageResponse::from)
+                .toList();
     }
 }
