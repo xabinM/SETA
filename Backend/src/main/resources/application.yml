@@ -11,7 +11,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate # 'create'는 매 배포 시 테이블을 재생성하여 데이터 유실을 유발할 수 있으므로, 운영 환경에서는 'validate' 또는 'none' 사용을 권장합니다.
     show-sql: true
     properties:
       hibernate:
@@ -21,3 +21,10 @@ spring:
     redis:
       host: ${SPRING_DATASOURCE_REDIS_HOST:redis}
       port: ${SPRING_DATASOURCE_REDIS_PORT:6379}
+
+# Actuator 헬스 체크 엔드포인트 활성화
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

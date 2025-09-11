@@ -38,8 +38,13 @@ docker-compose -f docker-compose.server-a.yml up -d --no-deps backend-$TARGET
 PORT=$([ "$TARGET" == "blue" ] && echo 8081 || echo 8082)
 
 # 5. 헬스 체크 (최대 60초)
+echo "=== 헬스 체크 시작 (대상: http://localhost:$PORT/actuator/health) ==="
 for i in {1..12}; do
-    if nc -z localhost $PORT; then
+    echo "헬스 체크 시도 #$i..."
+    HTTP_STATUS=$(curl -o /dev/null -w "%{http_code}" -s http://localhost:$PORT/actuator/health)
+
+    if [ "$HTTP_STATUS" -eq 200 ]; then
+        echo "✅ 헬스 체크 성공 (상태 코드: $HTTP_STATUS)"
         # 6. Nginx 라우팅 전환
         echo "Nginx 라우팅을 $TARGET 으로 전환"
         echo "set \$service_url http://127.0.0.1:$PORT;" | sudo tee /etc/nginx/conf.d/service-url.inc >/dev/null
@@ -51,6 +56,8 @@ for i in {1..12}; do
 
         echo "✅ $CURRENT → $TARGET 무중단 배포 완료"
         exit 0
+    else
+        echo "헬스 체크 실패 (상태 코드: $HTTP_STATUS). 5초 후 재시도..."
     fi
     sleep 5
 done
