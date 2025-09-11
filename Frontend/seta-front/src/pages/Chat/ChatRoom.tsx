@@ -12,6 +12,13 @@ export default function ChatRoom() {
     const [sp] = useSearchParams();
     const seed = sp.get("q") || "";
 
+    // 이 화면에서만 문서 스크롤 잠그기
+    useEffect(() => {
+        document.body.classList.add("no-scroll");
+        return () => document.body.classList.remove("no-scroll");
+    }, []);
+
+    // 디자인 확인용: 사용자 메시지만 표시 (어시스턴트 자동응답 없음)
     const [messages, setMessages] = useState<Msg[]>(
         seed ? [{ id: "u1", role: "user", content: seed }] : []
     );
@@ -19,7 +26,8 @@ export default function ChatRoom() {
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+        const el = scrollRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
     }, [messages]);
 
     const send = () => {
@@ -30,13 +38,16 @@ export default function ChatRoom() {
     };
 
     return (
-        <div className="chat-root" style={{
-            backgroundImage: `url(${ChatBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundAttachment: "fixed",
-        }}>
+        <div
+            className="chat-root"
+            style={{
+                backgroundImage: `url(${ChatBg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundAttachment: "fixed",
+            }}
+        >
             <Header />
 
             <div className="chat-stage">

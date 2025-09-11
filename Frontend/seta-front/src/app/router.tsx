@@ -7,7 +7,6 @@ const Login    = lazy(() => import("@/pages/Login/Login"));
 const SignUp   = lazy(() => import("@/pages/SignUp/SignUp"));
 const NotFound = lazy(() => import("@/pages/NotFound/NotFound"));
 const Chat     = lazy(() => import("@/pages/Chat/Chat"));
-const ChatRoom = lazy(() => import("@/pages/Chat/ChatRoom"));
 
 
 const LoadingFallback = () => (
@@ -30,8 +29,8 @@ const router = createBrowserRouter([
     { path: "/home",  element: withSuspense(<Home />) },
     { path: "/login", element: withSuspense(<Login />) },
     { path: "/signup",element: withSuspense(<SignUp />) },
-    { path: "/chat", element: withSuspense(<Chat />) },
-    { path: "/chat/:threadId", element: withSuspense(<ChatRoom />) },
+    { path: "/chat",            element: withSuspense(<Chat />) },
+    { path: "/chat/:threadId",  element: withSuspense(<Chat />) },
     { path: "*",      element: withSuspense(<NotFound />) },
 ]);
 
