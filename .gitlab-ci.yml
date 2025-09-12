@@ -68,11 +68,9 @@ deploy-to-server-a:
     - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
     - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.server-a.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
 
-    # .env 파일 생성
+    # .env 파일 생성 (Redis 관련 변수 제거)
     - |
       ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
-      REDIS_HOST=redis
-      REDIS_PORT=6379
       DB_USER=${DB_USER}
       DB_PASSWORD=${DB_PASSWORD}
       DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}

@@ -1,23 +1,24 @@
+
 # backend 서비스의 공통 설정을 위한 앵커(anchor) 정의
 x-backend-template: &backend-template
   image: ${BACKEND_IMAGE}
   environment:
-    SPRING_REDIS_HOST: ${REDIS_HOST}
-    SPRING_REDIS_PORT: ${REDIS_PORT}
-    REDIS_HOST: ${REDIS_HOST}
-    REDIS_PORT: ${REDIS_PORT}
+    # Redis 설정 - 컨테이너명으로 직접 지정
+    SPRING_REDIS_HOST: redis
+    SPRING_REDIS_PORT: 6379
+    # JWT 설정
     JWT_SECRET: ${JWT_SECRET}
     JWT_ACCESSTOKENEXPIRATIONMS: ${JWT_ACCESSTOKENEXPIRATIONMS}
     JWT_REFRESHTOKENEXPIRATIONMS: ${JWT_REFRESHTOKENEXPIRATIONMS}
+    # MySQL 설정 - 컨테이너명 'mysql'로 통일
     SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
     SPRING_DATASOURCE_USERNAME: ${DB_USER}
     SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
   networks:
     - tmp
-
   depends_on:
     db:
-      condition: service_healthy  # service_healthy : docker compose가 제공하는 예약 키워드
+      condition: service_healthy
     redis:
       condition: service_healthy
 
@@ -66,6 +67,7 @@ services:
     container_name: backend-green
     ports:
       - "8082:8080"
+
 networks:
   tmp:
     driver: bridge
