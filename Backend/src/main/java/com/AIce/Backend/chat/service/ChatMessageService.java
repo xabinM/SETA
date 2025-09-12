@@ -25,6 +25,7 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomrepo;
     private final UserRepository userrepo;
     private final ChatKafkaProducer producer;
+    private final ChatRoomTitleService chatRoomTitleService;
 
     @Observed(name = "chat.handleUserMessage")
     @Transactional
@@ -51,7 +52,8 @@ public class ChatMessageService {
         chatMessagerepo.save(entity);
 
         if (turnIdx == 1) {
-            // TO DO: 메세지 요약해서 채팅방 제목 update
+            // 요약 비동기 + 타임아웃 + 폴백 처리
+            chatRoomTitleService.tryUpdateTitleAsync(roomUuid, text);
         }
 
         // raw 발행

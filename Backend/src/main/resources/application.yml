@@ -1,4 +1,19 @@
+server:
+  tomcat:
+    uri-encoding: UTF-8
+
+
 spring:
+  mvc:
+    locale: ko_KR
+    log-request-details: true
+
+  http:
+    encoding:
+      enabled: true
+      force: true
+      charset: UTF-8
+
   application:
     name: argo-backend
 
