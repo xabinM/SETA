@@ -1,7 +1,9 @@
 package com.AIce.Backend.chat.contracts;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class LlmResponseV1 {
     private HeadersV1 headers;

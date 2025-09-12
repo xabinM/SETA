@@ -13,6 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -26,8 +28,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/auth/signup", "/auth/login", "/auth/reissue"
     );
 
+    private static final List<String> WHITELIST_PATTERNS = List.of(
+            "/sse/**", "/swagger-ui/**", "/v3/api-docs/**"
+    );
+
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationEntryPoint entryPoint;
+    private final PathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -38,6 +45,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (WHITELIST.contains(uri)) {
             filterChain.doFilter(request, response);
             return;
+        }
+
+        // 패턴 매칭 (SSE, Swagger 등)
+        for (String pattern : WHITELIST_PATTERNS) {
+            if (pathMatcher.match(pattern, uri)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
         try {

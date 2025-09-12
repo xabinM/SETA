@@ -1,12 +1,18 @@
 server:
+  compression:
+    enabled: false
   tomcat:
     uri-encoding: UTF-8
+    max-connections: 8192
+    connection-timeout: 10s
 
 
 spring:
   mvc:
     locale: ko_KR
     log-request-details: true
+    async:
+      request-timeout: 0
 
   http:
     encoding:

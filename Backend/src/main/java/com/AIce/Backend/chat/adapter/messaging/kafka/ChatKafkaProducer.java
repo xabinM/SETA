@@ -2,7 +2,6 @@ package com.AIce.Backend.chat.adapter.messaging.kafka;
 
 import com.AIce.Backend.chat.contracts.HeadersV1;
 import com.AIce.Backend.chat.contracts.RawRequestV1;
-import com.AIce.Backend.global.config.kafka.KafkaTopicsProperties;
 import io.micrometer.observation.annotation.Observed;
 import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component;
 public class ChatKafkaProducer {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final KafkaTopicsProperties topics;
     private final Tracer tracer;
 
     // raw 토픽 발행
@@ -27,7 +25,7 @@ public class ChatKafkaProducer {
             payload.getHeaders().setTrace_id(traceId);
         }
 
-        kafkaTemplate.send(topics.getRaw(), roomId, payload)
+        kafkaTemplate.send("chat.raw.request.v1", roomId, payload)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("kafka send failed traceId={}", traceId, ex);

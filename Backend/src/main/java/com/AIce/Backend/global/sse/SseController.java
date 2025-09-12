@@ -2,7 +2,9 @@ package com.AIce.Backend.global.sse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -14,8 +16,15 @@ public class SseController {
 
     @Operation(summary="실시간 응답 스트리밍")
     @GetMapping(value = "/chat/{roomId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@PathVariable String roomId) {
-        return hub.subscribe(roomId);
+    public ResponseEntity<SseEmitter> subscribe(@PathVariable String roomId) {
+        SseEmitter emitter = hub.subscribe(roomId);
+
+        HttpHeaders h = new HttpHeaders();
+        h.set(HttpHeaders.CACHE_CONTROL, "no-cache");
+        h.set("X-Accel-Buffering", "no");     // Nginx 버퍼링 비활성
+        h.set(HttpHeaders.CONNECTION, "keep-alive");
+
+        return ResponseEntity.ok().headers(h).body(emitter);
     }
 
     @Operation(summary="실시간 차트")

@@ -17,7 +17,7 @@ public class ErrorLogConsumer {
 
     // error SSE 중계
     @Observed(name = "chat.error.consume")
-    @KafkaListener(topics = "${app.topics.error:chat.error.v1}", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "chat.error.v1", containerFactory = "kafkaListenerContainerFactory")
     public void onError(@Payload ErrorLogV1 msg) {
         String currentTrace = tracer.currentSpan().context().traceId();
         String room = (msg.getRoom_id() != null) ? msg.getRoom_id() : "GLOBAL";

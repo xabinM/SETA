@@ -14,6 +14,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
@@ -54,5 +55,22 @@ public class KafkaConsumerProducerConfig {
         f.getContainerProperties().setObservationEnabled(true);
         f.getContainerProperties().setObservationRegistry(observationRegistry);
         return f;
+    }
+
+    // String Listener Factory
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> stringKafkaListenerFactory(
+            ConsumerFactory<String, String> cf) {
+        var f = new ConcurrentKafkaListenerContainerFactory<String, String>();
+        f.setConsumerFactory(cf);
+        return f;
+    }
+
+    @Bean
+    public ConsumerFactory<String, String> cf(KafkaProperties props) {
+        var cfg = new HashMap<>(props.buildConsumerProperties());
+        cfg.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        cfg.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(cfg);
     }
 }
