@@ -2,23 +2,15 @@
 x-backend-template: &backend-template
   image: ${BACKEND_IMAGE}
   environment:
-    # ── Redis: 스프링이 인식하는 '정확한' 키 2개 (핵심 수정)
-    - SPRING_DATA_REDIS_HOST=${REDIS_HOST:-redis}
-    - SPRING_DATA_REDIS_PORT=${REDIS_PORT:-6379}
+    REDIS_HOST: ${REDIS_HOST}
+    REDIS_PORT: ${REDIS_PORT}
+    JWT_SECRET: ${JWT_SECRET}
+    JWT_ACCESSTOKENEXPIRATIONMS: ${JWT_ACCESSTOKENEXPIRATIONMS}
+    JWT_REFRESHTOKENEXPIRATIONMS: ${JWT_REFRESHTOKENEXPIRATIONMS}
+    SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
+    SPRING_DATASOURCE_USERNAME: ${DB_USER}
+    SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
 
-    # (옵션) yml에서 ${REDIS_HOST}/${REDIS_PORT} 직접 참조 시 대비용
-    - REDIS_HOST=${REDIS_HOST}
-    - REDIS_PORT=${REDIS_PORT}
-
-    # ── JWT
-    - JWT_SECRET=${JWT_SECRET}
-    - JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
-    - JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
-
-    # ── MySQL: 인증/문자셋/타임존 옵션 권장
-    - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=utf8
-    - SPRING_DATASOURCE_USERNAME=${DB_USER}
-    - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
   depends_on:
     db:
       condition: service_healthy  # service_healthy : docker compose가 제공하는 예약 키워드
