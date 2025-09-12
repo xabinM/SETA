@@ -2,15 +2,21 @@
 x-backend-template: &backend-template
   image: ${BACKEND_IMAGE}
   environment:
-    - REDIS_HOST=${REDIS_HOST} # Spring Boot가 인식하는 올바른 환경 변수 이름으로 수정
+    # ── Redis: 스프링이 인식하는 '정확한' 키 2개 (핵심 수정)
+    - SPRING_DATA_REDIS_HOST=${REDIS_HOST:-redis}
+    - SPRING_DATA_REDIS_PORT=${REDIS_PORT:-6379}
+
+    # (옵션) yml에서 ${REDIS_HOST}/${REDIS_PORT} 직접 참조 시 대비용
+    - REDIS_HOST=${REDIS_HOST}
     - REDIS_PORT=${REDIS_PORT}
+
+    # ── JWT
     - JWT_SECRET=${JWT_SECRET}
     - JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
     - JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
-    # GitLab CI에서 생성된 .env 파일의 값을 사용하여 DB에 연결합니다.
-    # 이제 애플리케이션은 root가 아닌 전용 사용자로 접속합니다.
-    # allowPublicKeyRetrieval=true 파라미터를 추가하여 최신 MySQL 인증 방식을 지원합니다.
-    - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
+
+    # ── MySQL: 인증/문자셋/타임존 옵션 권장
+    - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=utf8
     - SPRING_DATASOURCE_USERNAME=${DB_USER}
     - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
   depends_on:
@@ -53,7 +59,7 @@ services:
     <<: *backend-template  # 앵커 적용
     container_name: backend-blue
     ports:
-      - "8081:8080"     # 8081 port로 요청이 들어오지만 실제 동작 port는 8080
+      - "8081:8080"     # 8081로 들어온 요청을 컨테이너 8080에 매핑
 
   backend-green:
     <<: *backend-template  # 앵커 적용
