@@ -12,6 +12,8 @@ x-backend-template: &backend-template
     SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
     SPRING_DATASOURCE_USERNAME: ${DB_USER}
     SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+  networks:
+    - tmp
 
   depends_on:
     db:
@@ -31,6 +33,8 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
+    networks:
+      - tmp
     healthcheck:
       # 이제 ${DB_USER}가 실제로 생성되므로 이 헬스체크가 정상 동작합니다.
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
@@ -48,6 +52,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - tmp
 
   backend-blue:
     <<: *backend-template  # 앵커 적용

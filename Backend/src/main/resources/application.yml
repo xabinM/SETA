@@ -19,7 +19,7 @@ spring:
 
   redis:
     host: ${SPRING_REDIS_HOST:redis}
-    port: ${SPRING_REDIS_PORT:6379}
+    port: ${SPRING_doREDIS_PORT:6379}
     timeout: 5000 # 연결 타임아웃 (ms)
     lettuce:
       shutdown-timeout: 100ms
