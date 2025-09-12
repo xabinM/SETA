@@ -45,7 +45,6 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/auth/reissue"
                         ).permitAll()
-                        .requestMatchers("/sse/**").permitAll()  // SSE 경로 허용
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .anyRequest().authenticated()
                 )

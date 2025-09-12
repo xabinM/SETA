@@ -28,10 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/auth/signup", "/auth/login", "/auth/reissue"
     );
 
-    private static final List<String> WHITELIST_PATTERNS = List.of(
-            "/sse/**", "/swagger-ui/**", "/v3/api-docs/**"
-    );
-
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationEntryPoint entryPoint;
     private final PathMatcher pathMatcher = new AntPathMatcher();
@@ -45,14 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (WHITELIST.contains(uri)) {
             filterChain.doFilter(request, response);
             return;
-        }
-
-        // 패턴 매칭 (SSE, Swagger 등)
-        for (String pattern : WHITELIST_PATTERNS) {
-            if (pathMatcher.match(pattern, uri)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
         }
 
         try {

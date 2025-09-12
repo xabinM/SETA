@@ -71,4 +71,9 @@ public class ChatRoomService {
                 .map(ChatMessageResponse::from)
                 .toList();
     }
+
+    // 사용자가 해당 채팅방에 접근할 수 있는지 확인
+    public boolean hasAccessToRoom(Long userId, String roomId) {
+        return chatRoomrepo.existsByChatRoomIdAndUser_UserId(UUID.fromString(roomId), userId);
+    }
 }
