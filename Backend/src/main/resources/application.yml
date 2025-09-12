@@ -18,8 +18,8 @@ spring:
         format_sql: true
 
   redis:
-    host: ${REDIS_HOST:redis}
-    port: ${REDIS_PORT:6379}
+    host: ${SPRING_DATA_REDIS_HOST:${REDIS_HOST:redis}}
+    port: ${SPRING_DATA_REDIS_PORT:${REDIS_PORT:6379}}
     timeout: 5000 # 연결 타임아웃 (ms)
     lettuce:
       shutdown-timeout: 100ms
