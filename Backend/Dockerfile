@@ -17,4 +17,4 @@ ENV JAVA_OPTS=""
 # non-root 유저로 전환
 USER appuser
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
+ENTRYPOINT ["sh", "-c", "echo '--- Printing container environment variables ---' && printenv && echo '--- Starting application ---' && java $JAVA_OPTS -jar /app/app.jar"]
