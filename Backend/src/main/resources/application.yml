@@ -31,9 +31,13 @@ app:
     error: chat.error.v1
   topic-spec:
     raw:
-      partitions: 6
+      partitions: 3
 
 
 springdoc:
   swagger-ui:
     path: /docs
+
+logging:
+  pattern:
+    level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"

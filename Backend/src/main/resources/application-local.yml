@@ -7,7 +7,12 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        compression.type: zstd
+        linger.ms: 20
+        batch.size: 131072
         enable.idempotence: true
+        acks: all
+        max.in.flight.requests.per.connection: 5
     consumer:
       group-id: backend-${spring.profiles.active}
       auto-offset-reset: latest
@@ -15,3 +20,18 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
+        fetch.min.bytes: 65536         # 64KB
+        fetch.max.wait.ms: 50
+    listener:
+      observation-enabled: true
+    template:
+      observation-enabled: true
+
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://127.0.0.1:4318/v1/traces

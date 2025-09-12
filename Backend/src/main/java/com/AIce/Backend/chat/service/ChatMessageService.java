@@ -7,6 +7,8 @@ import com.AIce.Backend.chat.contracts.*;
 import com.AIce.Backend.domain.chat.repository.ChatRoomRepository;
 import com.AIce.Backend.domain.user.repository.UserRepository;
 import com.AIce.Backend.global.enums.ChatMessageRole;
+import io.micrometer.observation.annotation.Observed;
+import io.micrometer.tracing.Tracer;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,29 +20,32 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ChatMessageService {
 
+    private final Tracer tracer;
     private final ChatMessageRepository chatMessagerepo;
     private final ChatRoomRepository chatRoomrepo;
     private final UserRepository userrepo;
     private final ChatKafkaProducer producer;
 
+    @Observed(name = "chat.handleUserMessage")
     @Transactional
-    public String handleUserMessage(String roomId, Long userId, String text) {
+    public void handleUserMessage(String roomId, Long userId, String text) {
+        String traceId = tracer.currentSpan().context().traceId();
+
         var roomUuid = UUID.fromString(roomId);
         var room = chatRoomrepo.findById(roomUuid)
                 .orElseThrow(() -> new IllegalArgumentException("chat room not found: " + roomUuid));
 
+        // turn 계산
         int turnIdx = chatMessagerepo.findMaxTurnIndex(room.getChatRoomId()) + 1;
-        String traceId = UUID.randomUUID().toString();
+
         // DB 저장
         ChatMessage entity = ChatMessage.builder()
                 .chatRoom(room)
                 .user(userrepo.findByUserId(userId))
                 .role(ChatMessageRole.valueOf("user"))
                 .content(text)
-                // traceId 생성
                 .externalId(traceId)
                 .createdAt(LocalDateTime.now())
-                // turn 계산
                 .turnIndex(turnIdx)
                 .build();
         chatMessagerepo.save(entity);
@@ -51,6 +56,7 @@ public class ChatMessageService {
 
         // raw 발행
         var payload = new RawRequestV1();
+        payload.setTrace_id(traceId);
         payload.setRoom_id(roomId);
         payload.setMessage_id(entity.getMessageId().toString());
         payload.setUser_id(userId != null ? String.valueOf(userId) : null);
@@ -62,7 +68,5 @@ public class ChatMessageService {
         ));
 
         producer.publishRaw(roomId, payload);
-
-        return traceId;
     }
 }

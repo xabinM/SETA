@@ -1,5 +1,6 @@
 package com.AIce.Backend.global.config.kafka;
 
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -31,7 +32,9 @@ public class KafkaConsumerProducerConfig {
 
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> pf) {
-        return new KafkaTemplate<>(pf);
+        var t = new KafkaTemplate<>(pf);
+        t.setObservationEnabled(true);
+        return t;
     }
 
     @Bean
@@ -45,9 +48,11 @@ public class KafkaConsumerProducerConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
-            ConsumerFactory<String, Object> cf) {
+            ConsumerFactory<String, Object> cf, ObservationRegistry observationRegistry) {
         var f = new ConcurrentKafkaListenerContainerFactory<String, Object>();
         f.setConsumerFactory(cf);
+        f.getContainerProperties().setObservationEnabled(true);
+        f.getContainerProperties().setObservationRegistry(observationRegistry);
         return f;
     }
 }

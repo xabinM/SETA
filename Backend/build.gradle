@@ -39,6 +39,12 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// micrometer tracing
+	implementation "org.springframework.boot:spring-boot-starter-actuator"
+	implementation "io.micrometer:micrometer-tracing-bridge-otel"
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "org.springframework.boot:spring-boot-starter-aop"
+
 	// kafka
 	implementation 'org.springframework.kafka:spring-kafka:3.3.6'
 	implementation 'org.apache.kafka:kafka-clients'

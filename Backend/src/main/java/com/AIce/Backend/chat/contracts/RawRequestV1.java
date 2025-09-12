@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class RawRequestV1 {
     private HeadersV1 headers;
+    private String trace_id;
     private String room_id;
     private String message_id;
     private String user_id;
