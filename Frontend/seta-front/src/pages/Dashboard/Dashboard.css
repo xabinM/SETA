@@ -1,21 +1,113 @@
-:root {
-    --primary-50:  #f0fdf4;
-    --primary-100: #dcfce7;
-    --primary-200: #bbf7d0;
-    --primary-300: #86efac;
-    --primary-400: #4ade80;
-    --primary-500: #22c55e;
-    --primary-600: #16a34a;
-    --primary-700: #15803d;
-    --primary-800: #166534;
-    --primary-900: #14532d;
-    --primary-950: #052e16;
+/* ===== Base / Vars ===== */
+:root{
+    /* 헤더가 fixed라 본문 여백 확보용 */
+    --header-total: 103px;
 }
 
-/* 원본 HTML의 constellation 배경 */
-.constellation-bg {
-    background-image:
-            radial-gradient(circle at 15% 50%, rgba(134, 239, 172, 0.10) 0%, rgba(134, 239, 172, 0) 25%),
-            radial-gradient(circle at 85% 30%, rgba(134, 239, 172, 0.08) 0%, rgba(134, 239, 172, 0) 20%),
-            radial-gradient(circle at 50% 80%, rgba(134, 239, 172, 0.05) 0%, rgba(134, 239, 172, 0) 15%);
+* { margin:0; padding:0; box-sizing:border-box; }
+
+.dash-root{
+    min-height:100vh;
+    background:#050806;
+    color:#fff;
+    position:relative;
+    overflow-x:hidden;
+    font-family: 'Spline Sans', 'Noto Sans KR', 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* 배경 성운 */
+.dash-root::before{
+    content:'';
+    position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+            radial-gradient(circle at 50% 80%, rgba(134,239,172,0.05) 0%, rgba(134,239,172,0) 15%),
+            radial-gradient(circle at 85% 30%, rgba(134,239,172,0.08) 0%, rgba(134,239,172,0) 20%),
+            radial-gradient(circle at 15% 50%, rgba(134,239,172,0.10) 0%, rgba(134,239,172,0) 25%);
+}
+
+/* 헤더 아래 여백 */
+.dash-main{
+    padding-top: calc(var(--header-total) + 16px);
+    padding-bottom: 40px;
+}
+
+/* 페이지 폭 */
+.dash-container{
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 0 80px;
+}
+
+/* 타이틀 */
+.dash-title{
+    font-size:36px; font-weight:700; letter-spacing:-0.9px; line-height:40px;
+    margin: 16px 0 32px 0;
+}
+.dash-subtitle{
+    font-size:24px; font-weight:700; letter-spacing:-0.6px; line-height:32px;
+    margin: 32px 0 24px 0;
+}
+
+/* KPI */
+.dash-overview-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:32px; margin-bottom:48px;
+}
+.dash-metric-card{
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:16px;
+    padding:25px;
+    backdrop-filter: blur(10px);
+}
+.dash-metric-label{
+    font-size:14px; font-weight:500; color:#d1d5db; line-height:20px; margin-bottom:8px;
+}
+.dash-metric-value{
+    font-size:30px; font-weight:700; line-height:36px;
+}
+
+/* Performance Grid */
+.dash-performance-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:32px;
+}
+.dash-perf-card{
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:16px;
+    padding:25px;
+    backdrop-filter: blur(10px);
+}
+.dash-perf-head{ margin-bottom:24px; }
+.dash-perf-label{ font-size:14px; font-weight:500; color:#d1d5db; line-height:20px; margin-bottom:8px; }
+.dash-perf-value{ font-size:36px; font-weight:700; line-height:40px; margin-bottom:8px; }
+.dash-perf-meta{ display:flex; justify-content:space-between; align-items:center; }
+.dash-perf-period{ font-size:14px; color:#9ca3af; }
+.dash-perf-change{ font-size:14px; font-weight:500; }
+.dash-pos{ color:#ffffff; }    /* +값 */
+.dash-neg{ color:#f87171; }    /* -값 */
+
+/* 차트 영역 */
+.dash-chart-area{
+    height:111px;
+    background: rgba(255,255,255,0.02);
+    border-radius:8px;
+    margin-bottom:16px;
+    position:relative;
+    overflow:hidden;
+    padding:8px;
+}
+.dash-chart-canvas{ width:100% !important; height:100% !important; }
+
+/* 요일 */
+.dash-week{ display:flex; justify-content:space-between; margin-top:8px; }
+.dash-day{ font-size:12px; font-weight:700; color:#9ca3af; line-height:16px; }
+
+/* 반응형 */
+@media (max-width: 1400px){
+    .dash-overview-grid{ grid-template-columns:repeat(2,1fr); }
+    .dash-performance-grid{ grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width: 768px){
+    .dash-container{ padding: 0 20px; }
+    .dash-overview-grid, .dash-performance-grid{ grid-template-columns:1fr; }
 }
