@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AICE Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Spline Sans', sans-serif;
+            background: #050806;
+            color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Gradient Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 50% 80%, rgba(134, 239, 172, 0.05) 0%, rgba(134, 239, 172, 0) 15%),
+                radial-gradient(circle at 85% 30%, rgba(134, 239, 172, 0.08) 0%, rgba(134, 239, 172, 0) 20%),
+                radial-gradient(circle at 15% 50%, rgba(134, 239, 172, 0.1) 0%, rgba(134, 239, 172, 0) 25%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 80px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin: 16px 0 24px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: #ffffff;
+            border-radius: 4px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.27px;
+            line-height: 22.5px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-link {
+            font-size: 14px;
+            font-weight: 500;
+            color: #d1d5db;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #ffffff;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notification-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -0.9px;
+            line-height: 40px;
+            margin-bottom: 32px;
+        }
+
+        .section-subtitle {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.6px;
+            line-height: 32px;
+            margin: 32px 0 24px 0;
+        }
+
+        /* Overview Cards */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .metric-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #d1d5db;
+            line-height: 20px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 36px;
+        }
+
+        /* Performance Cards */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .performance-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .performance-header {
+            margin-bottom: 24px;
+        }
+
+        .performance-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #d1d5db;
+            line-height: 20px;
+            margin-bottom: 8px;
+        }
+
+        .performance-value {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 40px;
+            margin-bottom: 8px;
+        }
+
+        .performance-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .performance-period {
+            font-size: 14px;
+            font-weight: 400;
+            color: #9ca3af;
+            line-height: 20px;
+        }
+
+        .performance-change {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+        }
+
+        .change-positive {
+            color: #ffffff;
+        }
+
+        .change-negative {
+            color: #f87171;
+        }
+
+        /* Chart Area */
+        .chart-area {
+            height: 111px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            padding: 8px;
+        }
+
+        .chart-canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Week Days */
+        .week-days {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .day-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #9ca3af;
+            line-height: 16px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .overview-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .performance-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+            
+            .overview-grid,
+            .performance-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-menu {
+                display: none;
+            }
+            
+            .header-content {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon"></div>
+                    <div class="logo-text">AICE</div>
+                </div>
+                
+                <nav class="nav-menu">
+                    <a href="#" class="nav-link">Overview</a>
+                    <a href="#" class="nav-link">Models</a>
+                    <a href="#" class="nav-link">Datasets</a>
+                    <a href="#" class="nav-link">Jobs</a>
+                    <a href="#" class="nav-link">Settings</a>
+                </nav>
+                
+                <div class="user-section">
+                    <button class="notification-btn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L14 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                        </svg>
+                    </button>
+                    <div class="user-avatar"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <h1 class="section-title">Overview</h1>
+            
+            <div class="overview-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Saved Tokens</div>
+                    <div class="metric-value">12,345</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-label">Saved Cost</div>
+                    <div class="metric-value">$6,789</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-label">Saved CO₂</div>
+                    <div class="metric-value">1,234 kg</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-label">Saved Power</div>
+                    <div class="metric-value">5,678 kWh</div>
+                </div>
+            </div>
+
+            <!-- Performance Section -->
+            <h2 class="section-subtitle">Performance</h2>
+            
+            <div class="performance-grid">
+                <div class="performance-card">
+                    <div class="performance-header">
+                        <div class="performance-label">Pass/Drop Ratio</div>
+                        <div class="performance-value">95%</div>
+                        <div class="performance-meta">
+                            <span class="performance-period">Last 7 days</span>
+                            <span class="performance-change change-positive">+5%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-area">
+                        <canvas id="chart1" class="chart-canvas"></canvas>
+                    </div>
+                    
+                    <div class="week-days">
+                        <span class="day-label">Mon</span>
+                        <span class="day-label">Tue</span>
+                        <span class="day-label">Wed</span>
+                        <span class="day-label">Thu</span>
+                        <span class="day-label">Fri</span>
+                        <span class="day-label">Sat</span>
+                        <span class="day-label">Sun</span>
+                    </div>
+                </div>
+                
+                <div class="performance-card">
+                    <div class="performance-header">
+                        <div class="performance-label">Request Processing Speed</div>
+                        <div class="performance-value">120 ms</div>
+                        <div class="performance-meta">
+                            <span class="performance-period">Last 7 days</span>
+                            <span class="performance-change change-negative">-10%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-area">
+                        <canvas id="chart2" class="chart-canvas"></canvas>
+                    </div>
+                    
+                    <div class="week-days">
+                        <span class="day-label">Mon</span>
+                        <span class="day-label">Tue</span>
+                        <span class="day-label">Wed</span>
+                        <span class="day-label">Thu</span>
+                        <span class="day-label">Fri</span>
+                        <span class="day-label">Sat</span>
+                        <span class="day-label">Sun</span>
+                    </div>
+                </div>
+                
+                <div class="performance-card">
+                    <div class="performance-header">
+                        <div class="performance-label">Kafka Lag</div>
+                        <div class="performance-value">50 ms</div>
+                        <div class="performance-meta">
+                            <span class="performance-period">Last 7 days</span>
+                            <span class="performance-change change-positive">+20%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-area">
+                        <canvas id="chart3" class="chart-canvas"></canvas>
+                    </div>
+                    
+                    <div class="week-days">
+                        <span class="day-label">Mon</span>
+                        <span class="day-label">Tue</span>
+                        <span class="day-label">Wed</span>
+                        <span class="day-label">Thu</span>
+                        <span class="day-label">Fri</span>
+                        <span class="day-label">Sat</span>
+                        <span class="day-label">Sun</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Chart 1: Pass/Drop Ratio (상승 추세)
+        const ctx1 = document.getElementById('chart1').getContext('2d');
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    data: [75, 70, 65, 60, 55, 50, 45],
+                    borderColor: '#86efac',
+                    backgroundColor: 'rgba(134, 239, 172, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2.5,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false } 
+                },
+                scales: { 
+                    x: { display: false },
+                    y: { display: false }
+                }
+            }
+        });
+
+        // Chart 2: Request Processing Speed (변동이 큰 패턴)
+        const ctx2 = document.getElementById('chart2').getContext('2d');
+        new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    data: [30, 40, 60, 65, 45, 50, 40],
+                    borderColor: '#86efac',
+                    backgroundColor: 'rgba(134, 239, 172, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2.5,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false } 
+                },
+                scales: { 
+                    x: { display: false },
+                    y: { display: false }
+                }
+            }
+        });
+
+        // Chart 3: Kafka Lag (급격한 변동)
+        const ctx3 = document.getElementById('chart3').getContext('2d');
+        new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    data: [60, 50, 40, 30, 20, 10, 20],
+                    borderColor: '#86efac',
+                    backgroundColor: 'rgba(134, 239, 172, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2.5,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false } 
+                },
+                scales: { 
+                    x: { display: false },
+                    y: { display: false }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
