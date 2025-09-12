@@ -19,8 +19,8 @@ spring:
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST} # 올바른 환경 변수 이름으로 수정
-      port: ${SPRING_DATA_REDIS_PORT:6379}
+      host: ${REDIS_HOST:redis} # 올바른 환경 변수 이름으로 수정
+      port: ${REDIS_PORT:6379}
 
 # Actuator 헬스 체크 엔드포인트 활성화
 management:
