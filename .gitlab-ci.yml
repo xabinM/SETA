@@ -71,6 +71,8 @@ deploy-to-server-a:
     # .env 파일 생성
     - |
       ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
+      REDIS_HOST=redis
+      REDIS_PORT=6379
       DB_USER=${DB_USER}
       DB_PASSWORD=${DB_PASSWORD}
       DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
