@@ -31,7 +31,7 @@ backend-build:
 # ----------------
 backend-build-docker:
   stage: build-docker
-  image: docker:25.0.8
+  image: docker:25
   services:
     - name: docker:dind   # Docker-in-Docker 사용
       alias: docker
