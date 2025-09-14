@@ -19,8 +19,8 @@ x-backend-template: &backend-template
   depends_on:
     db:
       condition: service_healthy
-#    redis:
-#      condition: service_healthy
+    redis:
+      condition: service_healthy
 
 services:
   db:
@@ -42,19 +42,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-#
-#  redis:
-#    image: redis:7
-#    container_name: redis
-#    ports:
-#      - "6379:6379"
-#    healthcheck:
-#      test: ["CMD", "redis-cli", "ping"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-#    networks:
-#      - tmp
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tmp
 
   backend-blue:
     <<: *backend-template  # 앵커 적용

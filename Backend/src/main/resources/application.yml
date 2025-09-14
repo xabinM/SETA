@@ -18,7 +18,7 @@ spring:
         format_sql: true
 
   redis:
-    host: j13a403.p.ssafy.io
+    host: redis
     port: 6379
 #    timeout: 5000 # 연결 타임아웃 (ms)
 #    lettuce:
