@@ -2,8 +2,8 @@ x-backend-template: &backend-template
   image: ${BACKEND_IMAGE}
   environment:
     # Redis 설정 - 컨테이너명으로 직접 지정
-    SPRING_REDIS_HOST: ${SPRING_REDIS_HOST:-redis}
-    SPRING_REDIS_PORT: ${SPRING_REDIS_PORT:-6379}
+    SPRING_REDIS_HOST: redis
+    SPRING_REDIS_PORT: 6379
     # JWT 설정
     JWT_SECRET: Vt9@Z!kQ5#rL0eX2mP8^Yc7sHf3jGd1Wz41Bn6uRa8Lp0oVs#QmXkN2tFgDhJ
     JWT_ACCESSTOKENEXPIRATIONMS: 1800000
