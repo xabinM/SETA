@@ -36,7 +36,7 @@ echo "현재 실행 중: $CURRENT, 새 배포 대상: $TARGET"
 
 # DB/Redis 컨테이너 실행 (무중단 배포 위해 --no-deps 걸어둠)
 # --env-file 추가
-docker-compose --env-file "$ENV_FILE" -f docker-compose.server-a.yml up db --wait
+docker-compose --env-file "$ENV_FILE" -f docker-compose.server-a.yml up db redis --wait
 
 # 3. 새 컨테이너 실행
 docker-compose --env-file "$ENV_FILE" -f docker-compose.server-a.yml up -d --no-deps backend-$TARGET
