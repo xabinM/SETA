@@ -72,6 +72,8 @@ done
 # 8. 롤백
 echo "❌ 롤백: 새 컨테이너($TARGET) 60초 내 시작 실패"
 docker-compose --env-file "$ENV_FILE" -f docker-compose.server-a.yml logs --tail="100" backend-$TARGET
+
+docker-compose --env-file "$ENV_FILE" -f docker-compose.server-a.yml logs --tail="100" backend-$TARGET
 docker-compose --env-file "$ENV_FILE" -f docker-compose.server-a.yml stop backend-$TARGET
 docker-compose --env-file "$ENV_FILE" -f docker-compose.server-a.yml rm -f backend-$TARGET
 exit 1
