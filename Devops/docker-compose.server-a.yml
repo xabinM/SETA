@@ -1,72 +1,59 @@
-x-backend-template: &backend-template
-  image: ${BACKEND_IMAGE}
-  environment:
-    # Redis 설정 - 컨테이너명으로 직접 지정
-    SPRING_REDIS_HOST: redis
-    SPRING_REDIS_PORT: 6379
-    # JWT 설정
-    JWT_SECRET: Vt9@Z!kQ5#rL0eX2mP8^Yc7sHf3jGd1Wz41Bn6uRa8Lp0oVs#QmXkN2tFgDhJ
-    JWT_ACCESSTOKENEXPIRATIONMS: 1800000
-    JWT_REFRESHTOKENEXPIRATIONMS: 1209600000
-    # MySQL 설정 - 컨테이너명 'mysql'로 통일
-    SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mydb?allowPublicKeyRetrieval=true&useSSL=false
-    SPRING_DATASOURCE_USERNAME: temp
-    SPRING_DATASOURCE_PASSWORD: ssafy403
-  networks:
-    - tmp
-  depends_on:
-    db:
-      condition: service_healthy
-    redis:
-      condition: service_healthy
-
+version: "3.9"
 
 services:
+  # -----------------
+  # PostgreSQL
+  # -----------------
   db:
-    image: mysql:8
-    container_name: mysql
+    image: postgres:15
+    container_name: db
+    restart: unless-stopped
     environment:
-      # 루트 비밀번호와 애플리케이션용 사용자를 분리하여 보안을 강화합니다.
-      MYSQL_ROOT_PASSWORD: ssafy403
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: temp
-      MYSQL_PASSWORD: ssafy403
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
     ports:
-      - "3306:3306"
-    networks:
-      - tmp
-    healthcheck:
-      # 이제 ${DB_USER}가 실제로 생성되므로 이 헬스체크가 정상 동작합니다.
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "5432:5432"
 
+  # -----------------
+  # Redis
+  # -----------------
   redis:
     image: redis:7
     container_name: redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
     ports:
       - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - tmp
 
-  backend-blue:
-    <<: *backend-template  # 앵커 적용
-    container_name: backend-blue
+  # -----------------
+  # Backend (Spring Boot)
+  # -----------------
+  backend:
+    image: ${BACKEND_IMAGE}
+    container_name: backend
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESSTOKENEXPIRATIONMS: ${JWT_ACCESSTOKENEXPIRATIONMS}
+      JWT_REFRESHTOKENEXPIRATIONMS: ${JWT_REFRESHTOKENEXPIRATIONMS}
     ports:
-      - "8081:8080"     # 8081로 들어온 요청을 컨테이너 8080에 매핑
+      - "8080:8080"
 
-  backend-green:
-    <<: *backend-template  # 앵커 적용
-    container_name: backend-green
-    ports:
-      - "8082:8080"
-
-networks:
-  tmp:
-    driver: bridge
+# -----------------
+# 볼륨 정의
+# -----------------
+volumes:
+  db_data:
+  redis_data:

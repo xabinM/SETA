@@ -38,6 +38,8 @@ dependencies {
 
 	implementation 'com.mysql:mysql-connector-j'
 
+	implementation 'org.postgresql:postgresql:42.6.0'
+
 	// 배포시 헬스 체크 엔드 포인트 의존성 주입
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
