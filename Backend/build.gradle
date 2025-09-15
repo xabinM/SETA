@@ -29,7 +29,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	implementation 'org.postgresql:postgresql:42.7.4'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	compileOnly 'org.projectlombok:lombok'
@@ -53,6 +52,8 @@ dependencies {
 	implementation 'org.apache.kafka:kafka-clients'
 	// msk iam 인증
 	implementation 'software.amazon.msk:aws-msk-iam-auth:2.2.0'
+
+	implementation 'org.postgresql:postgresql:42.6.0'
 
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
