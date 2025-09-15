@@ -1,6 +1,7 @@
 package com.AIce.Backend.chat.adapter.messaging.kafka;
 
 import com.AIce.Backend.chat.contracts.LlmResponseV1;
+import com.AIce.Backend.chat.service.ChatMessageService;
 import com.AIce.Backend.global.sse.SseHub;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.micrometer.observation.annotation.Observed;
@@ -28,6 +29,7 @@ public class LlmAnswerConsumer {
     private final SseHub hub;
     private final Tracer tracer;
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+    private final ChatMessageService chatMessageService;
 
     // llm answer SSE 중계
     @Observed(name = "chat.llm_answer.consume", contextualName = "kafka.consume.llm_answer")
@@ -52,6 +54,9 @@ public class LlmAnswerConsumer {
                     );
 
             log.info("consume llm_answer traceId={} topic={} room={}", traceId, topic, msg.getRoom_id());
+
+            // DB 저장
+            chatMessageService.persistAssistantFromLlm(msg);
 
             // SSE 브로드캐스트
             hub.push(msg.getRoom_id(), "llm_answer", msg);

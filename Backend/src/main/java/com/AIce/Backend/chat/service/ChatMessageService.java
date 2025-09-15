@@ -1,11 +1,14 @@
 package com.AIce.Backend.chat.service;
 
 import com.AIce.Backend.domain.chat.entity.ChatMessage;
+import com.AIce.Backend.domain.chat.entity.ChatRoom;
 import com.AIce.Backend.domain.chat.repository.ChatMessageRepository;
 import com.AIce.Backend.chat.adapter.messaging.kafka.ChatKafkaProducer;
 import com.AIce.Backend.chat.contracts.*;
 import com.AIce.Backend.domain.chat.repository.ChatRoomRepository;
 import com.AIce.Backend.domain.user.repository.UserRepository;
+import com.AIce.Backend.domain.usersetting.entity.UserSetting;
+import com.AIce.Backend.domain.usersetting.repository.UserSettingRepository;
 import com.AIce.Backend.global.enums.ChatMessageRole;
 import io.micrometer.observation.annotation.Observed;
 import io.micrometer.tracing.Tracer;
@@ -14,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,8 +28,10 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessagerepo;
     private final ChatRoomRepository chatRoomrepo;
     private final UserRepository userrepo;
+    private final UserSettingRepository userSettingrepo;
     private final ChatKafkaProducer producer;
     private final ChatRoomTitleService chatRoomTitleService;
+    private final DropResponder dropResponder;
 
     @Observed(name = "chat.handleUserMessage")
     @Transactional
@@ -70,5 +76,48 @@ public class ChatMessageService {
         ));
 
         producer.publishRaw(roomId, payload);
+    }
+
+    @Transactional
+    public void persistAssistantFromLlm(LlmResponseV1 out) {
+        UUID roomId = UUID.fromString(out.getRoom_id());
+        ChatRoom room = chatRoomrepo.findByChatRoomId(roomId);
+        String content = out.getResponse() != null ? out.getResponse().getText() : "";
+
+        // turn 계산
+        int turnIndex = chatMessagerepo.findMaxTurnIndex(room.getChatRoomId());
+
+        ChatMessage saved = chatMessagerepo.save(ChatMessage.builder()
+            .chatRoom(room)
+            .user(room.getUser())
+            .role(ChatMessageRole.valueOf("assistant"))
+            .content(content)
+            .filteredContent(null)
+            .externalId(out.getTrace_id())
+            .turnIndex(turnIndex)
+            .build());
+    }
+
+    @Transactional
+    public String persistAssistantFromLlm(FilterResultV1 out) {
+        UUID roomId = UUID.fromString(out.getRoom_id());
+        ChatRoom room = chatRoomrepo.findByChatRoomId(roomId);
+        Optional<UserSetting> us = userSettingrepo.findByUser_UserId(room.getUser().getUserId());
+        String text = dropResponder.buildText(out, us);
+        String content = text != null ? text : "";
+
+        // turn 계산
+        int turnIndex = chatMessagerepo.findMaxTurnIndex(room.getChatRoomId());
+
+        ChatMessage saved = chatMessagerepo.save(ChatMessage.builder()
+                .chatRoom(room)
+                .user(room.getUser())
+                .role(ChatMessageRole.valueOf("assistant"))
+                .content(content)
+                .filteredContent(null)
+                .externalId(out.getTrace_id())
+                .turnIndex(turnIndex)
+                .build());
+        return content;
     }
 }
