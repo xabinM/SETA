@@ -25,6 +25,8 @@ backend-build:
     expire_in: 1 hour
   only:
     - Devops_config
+    - Devops_main
+    - master
 
 # ----------------
 # 2. Build Docker Image & Push to Registry
@@ -49,6 +51,8 @@ backend-build-docker:
     - backend-build
   only:
     - Devops_config
+    - Devops_main
+    - master
 
 # ----------------
 # 3. Deploy to Server via SSH
@@ -90,3 +94,5 @@ deploy-to-server-a:
     - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh '${BACKEND_IMAGE}' '${DEPLOY_USER}'"
   only:
     - Devops_config
+    - Devops_main
+    - master
