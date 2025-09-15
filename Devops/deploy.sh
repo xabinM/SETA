@@ -38,5 +38,5 @@ for i in {1..12}; do
 done
 
 echo "❌ Backend 컨테이너 시작 실패"
-docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_FILE" logs backend --tail 50
+docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_FILE" logs --tail 50 backend
 exit 1
