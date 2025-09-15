@@ -39,8 +39,6 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	implementation 'com.mysql:mysql-connector-j'
-
 	// web client
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
@@ -55,11 +53,6 @@ dependencies {
 	implementation 'org.apache.kafka:kafka-clients'
 	// msk iam 인증
 	implementation 'software.amazon.msk:aws-msk-iam-auth:2.2.0'
-
-	implementation 'org.postgresql:postgresql:42.6.0'
-
-	// 배포시 헬스 체크 엔드 포인트 의존성 주입
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
