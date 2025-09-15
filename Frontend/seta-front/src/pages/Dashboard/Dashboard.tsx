@@ -1,51 +1,88 @@
-import { useEffect, useRef, memo } from "react";
+import { useEffect, useRef, useState, memo } from "react";
 import Header from "@/ui/components/Header/Header";
-import Chart from "chart.js/auto";
+
+// 런타임용은 auto에서, 타입은 'chart.js'에서 가져오는 패턴이 안전함
+import { Chart as ChartJS } from "chart.js/auto";
+import type { Chart, ChartData, ChartOptions, ChartDataset } from "chart.js";
+
+import TreeModal from "@/ui/components/Modal/TreeModal";
+import { tokens, trees, kpis, timeline } from "@/ui/components/Modal/data";
 import "./Dashboard.css";
 
 function Dashboard() {
+    // 캔버스 ref
     const c1 = useRef<HTMLCanvasElement | null>(null);
     const c2 = useRef<HTMLCanvasElement | null>(null);
     const c3 = useRef<HTMLCanvasElement | null>(null);
 
-    useEffect(() => {
-        const make = (ctx: CanvasRenderingContext2D, data: number[]) =>
-            new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-                    datasets: [{
-                        data,
-                        borderColor: "#86efac",
-                        backgroundColor: "rgba(134, 239, 172, 0.1)",
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2.5,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { display: false }, y: { display: false } }
-                }
-            });
+    // 차트 인스턴스 ref (Strict Mode 대응)
+    const chart1Ref = useRef<Chart | null>(null);
+    const chart2Ref = useRef<Chart | null>(null);
+    const chart3Ref = useRef<Chart | null>(null);
 
-        const i1 = c1.current && make(c1.current.getContext("2d")!, [75,70,65,60,55,50,45]);
-        const i2 = c2.current && make(c2.current.getContext("2d")!, [30,40,60,65,45,50,40]);
-        const i3 = c3.current && make(c3.current.getContext("2d")!, [60,50,40,30,20,10,20]);
+    const [open, setOpen] = useState(false); // 모달 상태
+
+    useEffect(() => {
+        // 공통 데이터/옵션 타입을 명시
+        const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const baseOptions: ChartOptions<"line"> = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { display: false }, y: { display: false } },
+        };
+
+        const make = (ctx: CanvasRenderingContext2D, points: number[]) => {
+            const dataset: ChartDataset<"line", number[]> = {
+                data: points,
+                borderColor: "#86efac",
+                backgroundColor: "rgba(134, 239, 172, 0.1)",
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2.5,
+                pointRadius: 0,
+            };
+
+            const data: ChartData<"line", number[], string> = {
+                labels,
+                datasets: [dataset],
+            };
+
+            return new ChartJS(ctx, {
+                type: "line",
+                data,
+                options: baseOptions,
+            });
+        };
+
+        const initChart = (
+            canvas: HTMLCanvasElement | null,
+            ref: React.MutableRefObject<Chart | null>,
+            points: number[]
+        ) => {
+            if (!canvas) return;
+            ref.current?.destroy(); // Strict Mode 재마운트 대비
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+            ref.current = make(ctx, points);
+        };
+
+        initChart(c1.current, chart1Ref, [75, 70, 65, 60, 55, 50, 45]);
+        initChart(c2.current, chart2Ref, [30, 40, 60, 65, 45, 50, 40]);
+        initChart(c3.current, chart3Ref, [60, 50, 40, 30, 20, 10, 20]);
 
         return () => {
-            i1 && i1.destroy();
-            i2 && i2.destroy();
-            i3 && i3.destroy();
+            chart1Ref.current?.destroy();
+            chart2Ref.current?.destroy();
+            chart3Ref.current?.destroy();
+            chart1Ref.current = null;
+            chart2Ref.current = null;
+            chart3Ref.current = null;
         };
     }, []);
 
     return (
         <div className="dash-root">
-            {/* 네가 쓰던 Header 그대로 사용 */}
             <Header />
 
             <main className="dash-main">
@@ -91,11 +128,13 @@ function Dashboard() {
                                 <canvas ref={c1} className="dash-chart-canvas" />
                             </div>
 
-                            <div className="dash-week">
-                                {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d => (
-                                    <span key={d} className="dash-day">{d}</span>
-                                ))}
-                            </div>
+                            {/* 모달 열기 버튼 (원하는 위치로 옮겨도 됨) */}
+                            <button
+                                onClick={() => setOpen(true)}
+                                className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg"
+                            >
+                                나무 심기 여정 보기
+                            </button>
                         </div>
 
                         {/* Card 2 */}
@@ -111,12 +150,6 @@ function Dashboard() {
 
                             <div className="dash-chart-area">
                                 <canvas ref={c2} className="dash-chart-canvas" />
-                            </div>
-
-                            <div className="dash-week">
-                                {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d => (
-                                    <span key={d} className="dash-day">{d}</span>
-                                ))}
                             </div>
                         </div>
 
@@ -134,16 +167,20 @@ function Dashboard() {
                             <div className="dash-chart-area">
                                 <canvas ref={c3} className="dash-chart-canvas" />
                             </div>
-
-                            <div className="dash-week">
-                                {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d => (
-                                    <span key={d} className="dash-day">{d}</span>
-                                ))}
-                            </div>
                         </div>
                     </div>
                 </div>
             </main>
+
+            {/* 모달 (라우팅 없이 대시보드에서 직접 제어) */}
+            <TreeModal
+                open={open}
+                onClose={() => setOpen(false)}
+                tokens={tokens}
+                trees={trees}
+                kpis={kpis}
+                timeline={timeline}
+            />
         </div>
     );
 }
