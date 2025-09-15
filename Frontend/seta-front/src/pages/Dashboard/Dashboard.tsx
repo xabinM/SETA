@@ -1,16 +1,25 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import Header from "@/ui/components/Header/Header";
 import { Icon } from "@iconify/react";
 import ChatBg from "@/assets/ChatBackground.png";
+import TreeModal from "@/ui/components/Modal/TreeModal";
+import { tokens, trees, kpis, timeline } from "@/ui/components/Modal/data";
 import "./Dashboard.css";
 
 function Dashboard() {
+    const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
+
     return (
-        <div className="dash-root">
-            <div
-                className="dash-bg-photo"
-                style={{ backgroundImage: `url(${ChatBg})` }}
-            />
+        <div 
+            className="dash-root"
+            style={{
+                backgroundImage: `url(${ChatBg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundAttachment: "fixed",
+            }}
+        >
             <Header />
 
             <main className="dash-main">
@@ -104,7 +113,12 @@ function Dashboard() {
                                         <Icon icon="fluent-emoji:deciduous-tree" width={28} height={28} />
                                         <h2>나무 심기 현황</h2>
                                     </div>
-                                    <button className="lg-btn" type="button" aria-label="나무 심기 현황 상세보기">
+                                    <button 
+                                        className="lg-btn" 
+                                        type="button" 
+                                        aria-label="나무 심기 현황 상세보기"
+                                        onClick={() => setIsTreeModalOpen(true)}
+                                    >
                                         상세보기
                                         <svg
                                             width="14"
@@ -226,6 +240,16 @@ function Dashboard() {
                     </div>
                 </div>
             </main>
+
+            {/* TreeModal */}
+            <TreeModal
+                open={isTreeModalOpen}
+                onClose={() => setIsTreeModalOpen(false)}
+                tokens={tokens}
+                trees={trees}
+                kpis={kpis}
+                timeline={timeline}
+            />
         </div>
     );
 }
