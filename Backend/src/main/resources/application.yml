@@ -1,4 +1,7 @@
 spring:
+  profiles:
+    active: msk
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}        # PostgreSQL JDBC URL
     username: ${SPRING_DATASOURCE_USERNAME}

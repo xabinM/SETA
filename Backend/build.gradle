@@ -53,7 +53,7 @@ dependencies {
 	// msk iam 인증
 	implementation 'software.amazon.msk:aws-msk-iam-auth:2.2.0'
 
-	implementation 'org.postgresql:postgresql:42.6.0'
+	implementation 'org.postgresql:postgresql'
 
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
