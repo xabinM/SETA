@@ -1,44 +1,99 @@
 stages:
   - build
-  - test
+  - build-docker
+  - deploy
 
-# ---------- Backend ----------
+variables:
+  BACKEND_IMAGE: $DOCKER_REGISTRY/$DOCKER_USERNAME/backend:$CI_COMMIT_SHORT_SHA
+  DOCKER_TLS_CERTDIR: ""                         # DIND 사용 시 TLS 비활성화
+  SSH_KNOWN_HOSTS: $SSH_KNOWN_HOSTS
+  SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
+
+# ----------------
+# 1. Backend Build (Java + Gradle)
+# ----------------
 backend-build:
   stage: build
   image: amazoncorretto:17
   script:
     - cd Backend
     - chmod +x gradlew
-    - ./gradlew clean build -x test
-    - echo "Backend Build Job 실행 테스트 성공"
-  # rules:  // 변경이 있을 때만 실행하는 명령어 
-  #   - changes:
-  #     - Backend/**/*
+    - ./gradlew clean bootJar
+  artifacts:
+    paths:
+      - Backend/build/libs/*.jar
+    expire_in: 1 hour
   only:
     - Devops_config
+    - Devops_main
+    - master
 
-# ---------- Frontend ----------
-frontend-build:
-  stage: build
+# ----------------
+# 2. Build Docker Image & Push to Registry
+# ----------------
+backend-build-docker:
+  stage: build-docker
+  image: docker:25
+  services:
+    - name: docker:dind   # Docker-in-Docker 사용
+      alias: docker
+      command: ["--host=tcp://0.0.0.0:2375"]  # TLS 없이 접근 가능
+  variables:
+    DOCKER_TLS_CERTDIR: ""          # DIND TLS 비활성화
+    DOCKER_HOST: tcp://docker:2375 # Docker daemon 주소 지정
+  before_script:
+    - docker info                   # Docker daemon 연결 확인
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
-    - echo "Frontend Build Job 실행 테스트"
-  rules:
-    - changes:
-      - Frontend/**/*
+    - docker build -t $BACKEND_IMAGE ./Backend
+    - docker push $BACKEND_IMAGE
+  dependencies:
+    - backend-build
+  only:
+    - Devops_config
+    - Devops_main
+    - master
 
-frontend-test:
-  stage: test
+# ----------------
+# 3. Deploy to Server via SSH
+# ----------------
+deploy-to-server-a:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    # SSH 클라이언트 설치
+    - apk add --no-cache openssh-client bash rsync
+    # Known hosts 등록 (호스트 key 체크 방지)
+    - mkdir -p ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    # SSH 키 등록
+    - eval "$(ssh-agent -s)"
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   script:
-    - echo "Frontend Test Job 실행 테스트"
-  rules:
-    - changes:
-      - Frontend/**/*
+    # SCP 대신 rsync 사용 (더 안정적)
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.server-a.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
 
-# ---------- AI ----------
-ai-test:
-  stage: test
-  script:
-    - echo "AI Test Job 실행 테스트"
-  rules:
-    - changes:
-      - AI/**/*
+    # .env 파일 생성 (Redis 관련 변수 제거)
+    - |
+      ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
+      SPRING_REDIS_HOST=${REDIS_HOST}
+      SPRING_REDIS_PORT=${REDIS_PORT}
+      DB_USER=${DB_USER}
+      DB_PASSWORD=${DB_PASSWORD}
+      DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      DB_NAME=${DB_NAME}
+      JWT_SECRET=${JWT_SECRET}
+      JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
+      JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS=${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+      BACKEND_IMAGE=${BACKEND_IMAGE}
+      EOF"
+
+    # 배포 스크립트 실행 (구문 오류 수정)
+    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh '${BACKEND_IMAGE}' '${DEPLOY_USER}'"
+  only:
+    - Devops_config
+    - Devops_main
+    - master

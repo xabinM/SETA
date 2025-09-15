@@ -1,0 +1,57 @@
+services:
+  # -----------------
+  # PostgreSQL
+  # -----------------
+  db:
+    image: postgres:15
+    container_name: db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # -----------------
+  # Redis
+  # -----------------
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+  # -----------------
+  # Backend (Spring Boot)
+  # -----------------
+  backend:
+    image: ${BACKEND_IMAGE}
+    container_name: backend
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESSTOKENEXPIRATIONMS: ${JWT_ACCESSTOKENEXPIRATIONMS}
+      JWT_REFRESHTOKENEXPIRATIONMS: ${JWT_REFRESHTOKENEXPIRATIONMS}
+    ports:
+      - "8080:8080"
+
+# -----------------
+# 볼륨 정의
+# -----------------
+volumes:
+  db_data:
+  redis_data:

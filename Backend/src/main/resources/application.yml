@@ -1,20 +1,15 @@
 spring:
-  application:
-    name: argo-backend
-
-
-
   profiles:
-    include: secret
+    active: msk
 
   datasource:
-    url: jdbc:postgresql://localhost:55432/mydb
+    url: ${SPRING_DATASOURCE_URL}        # PostgreSQL JDBC URL
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
-
-
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create                 # 운영 환경에서는 validate 또는 none
     show-sql: true
     properties:
       hibernate:
@@ -22,10 +17,30 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${SPRING_DATA_REDIS_HOST}          # Redis 호스트
+      port: ${SPRING_DATA_REDIS_PORT}          # Redis 포트
+
+jwt:
+  secret: ${JWT_SECRET}                  # JWT 시크릿
+  accessTokenExpirationMs: ${JWT_ACCESSTOKENEXPIRATIONMS}
+  refreshTokenExpirationMs: ${JWT_REFRESHTOKENEXPIRATIONMS}
+
+app:
+  topics:
+    raw: chat.raw.request.v1
+    filterResult: chat.filter.result.v1
+    promptBuilt: chat.prompt.built.v1
+    llmAnswer: chat.llm.answer.v1
+    error: chat.error.v1
+  topic-spec:
+    raw:
+      partitions: 3
 
 
 springdoc:
   swagger-ui:
     path: /docs
+
+logging:
+  pattern:
+    level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"
