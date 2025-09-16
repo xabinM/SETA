@@ -21,6 +21,7 @@ public class KafkaAdminConfig {
     public NewTopic chatRawRequest() {
         return TopicBuilder.name("chat.raw.request.v1")
                 .partitions(2)
+                .replicas(1)
                 .config("retention.ms", RETENTION_1D)
                 .config("cleanup.policy", "delete")
                 .build();
@@ -30,6 +31,7 @@ public class KafkaAdminConfig {
     public NewTopic chatFilterResult() {
         return TopicBuilder.name("chat.filter.result.v1")
                 .partitions(2)
+                .replicas(1)
                 .config("retention.ms", RETENTION_1D)
                 .config("cleanup.policy", "delete")
                 .build();
@@ -39,6 +41,7 @@ public class KafkaAdminConfig {
     public NewTopic chatPromptBuilt() {
         return TopicBuilder.name("chat.prompt.built.v1")
                 .partitions(2)
+                .replicas(1)
                 .config("retention.ms", RETENTION_1D)
                 .config("cleanup.policy", "delete")
                 .build();
@@ -48,6 +51,7 @@ public class KafkaAdminConfig {
     public NewTopic chatLlmAnswer() {
         return TopicBuilder.name("chat.llm.answer.v1")
                 .partitions(2)
+                .replicas(1)
                 .config("retention.ms", RETENTION_1D)
                 .config("cleanup.policy", "delete")
                 .build();
@@ -57,6 +61,7 @@ public class KafkaAdminConfig {
     public NewTopic chatError() {
         return TopicBuilder.name("chat.error.v1")
                 .partitions(2)
+                .replicas(1)
                 .config("retention.ms", RETENTION_1D)
                 .config("cleanup.policy", "delete")
                 .build();
