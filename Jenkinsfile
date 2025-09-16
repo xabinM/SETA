@@ -1,32 +1,64 @@
 pipeline {
     agent any
-
+    
     environment {
         DEPLOY_DIR = "/home/ubuntu/seta-ml-api"
+        ELASTICSEARCH_URL = credentials('elasticsearch-url')
+        API_HOST = credentials('api-host')
+        API_PORT = credentials('api-port')
     }
-
+    
     stages {
         stage('Deploy to EC2') {
             steps {
-                echo "Deploying latest code to EC2"
-                script {
+                echo "Deploying to EC2 via SSH"
+                sshagent(['ec2-ssh-key']) {
                     sh '''
-                        # GitLab에서 체크아웃된 파일들을 실제 배포 디렉터리로 복사
-                        cp -r ${WORKSPACE}/Data/* ${DEPLOY_DIR}/
+                        scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/Data/* ubuntu@172.26.8.129:${DEPLOY_DIR}/
                         
-                        # 배포 디렉터리에서 Docker 재빌드
-                        cd ${DEPLOY_DIR}
-                        docker-compose down
-                        docker-compose up -d --build
+                        ssh -o StrictHostKeyChecking=no ubuntu@172.26.8.129 "
+                            cd ${DEPLOY_DIR} &&
+                            echo 'Stopping containers...' &&
+                            docker-compose down &&
+                            docker-compose rm -f &&
+                            echo 'Starting new containers...' &&
+                            docker-compose up -d --build &&
+                            echo 'Deployment completed'
+                        "
                     '''
                 }
             }
         }
         
-        stage('Deployment Complete') {
+        stage('Verify Deployment') {
             steps {
-                echo "Deployment finished successfully"
+                sshagent(['ec2-ssh-key']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ubuntu@172.26.8.129 "
+                            cd ${DEPLOY_DIR} &&
+                            docker-compose ps &&
+                            sleep 10 &&
+                            curl -f http://localhost:8000/health || echo 'Health check failed'
+                        "
+                    '''
+                }
             }
+        }
+    }
+    
+    post {
+        success {
+            sshagent(['ec2-ssh-key']) {
+                sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@172.26.8.129 "
+                        docker image prune -f || true &&
+                        docker builder prune -af || true
+                    "
+                '''
+            }
+        }
+        failure {
+            echo "Deployment failed. Check logs for details."
         }
     }
 }
