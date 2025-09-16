@@ -19,8 +19,9 @@ backend-build:
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
-      - Backend/.gradle/caches/
-      - Backend/.gradle/wrapper/
+      - .gradle/caches/
+      - .gradle/wrapper/
+      - Backend/.gradle
   script:
     - cd Backend
     - chmod +x gradlew
