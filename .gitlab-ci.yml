@@ -21,6 +21,7 @@ backend-build:
     paths:
       - .gradle/caches/
       - .gradle/wrapper/
+      - .gradle/wrapper/dists/
       - Backend/.gradle
   script:
     - cd Backend
