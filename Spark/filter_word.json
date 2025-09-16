@@ -1,0 +1,290 @@
+{
+    "version": "strict-v1",
+    "normalize": {
+        "lowercase": true,
+        "collapse_spaces": true,
+        "trim": true
+    },
+    "filters": [
+        {
+            "category": "goodbye",
+            "priority": 1,
+            "strict": {
+                "exact": [
+                    "안녕히계세요",
+                    "안녕히 가세요",
+                    "안녕히가세요",
+                    "잘자",
+                    "잘 자",
+                    "잘가",
+                    "잘 가",
+                    "잘가요",
+                    "잘 가요",
+                    "굿나잇",
+                    "굿밤",
+                    "굳나잇",
+                    "바이",
+                    "바이바이",
+                    "bye",
+                    "bye bye",
+                    "goodbye",
+                    "good bye",
+                    "see you",
+                    "see ya",
+                    "see u",
+                    "good night",
+                    "goodnight",
+                    "gtg",
+                    "g2g",
+                    "i'm out",
+                    "im out"
+                ],
+                "allowed_trailers": [
+                    ".",
+                    "!",
+                    "~",
+                    "…",
+                    "...",
+                    "👋"
+                ]
+            }
+        },
+        {
+            "category": "apology",
+            "priority": 2,
+            "strict": {
+                "exact": [
+                    "미안",
+                    "미안해",
+                    "미안해요",
+                    "미안합니다",
+                    "미안했어요",
+                    "미안요",
+                    "정말 미안해요",
+                    "정말 미안합니다",
+                    "죄송",
+                    "죄송해요",
+                    "죄송합니다",
+                    "죄송했어요",
+                    "죄송요",
+                    "정말 죄송합니다",
+                    "송구합니다",
+                    "사과드립니다",
+                    "사과합니다",
+                    "면목 없습니다",
+                    "sorry",
+                    "i'm sorry",
+                    "im sorry",
+                    "so sorry",
+                    "very sorry",
+                    "my bad",
+                    "i apologize",
+                    "apologies",
+                    "my apologies"
+                ],
+                "allowed_trailers": [
+                    ".",
+                    "!",
+                    "~",
+                    "…",
+                    "..."
+                ]
+            }
+        },
+        {
+            "category": "gratitude",
+            "priority": 3,
+            "strict": {
+                "exact": [
+                    "고마워",
+                    "고마워요",
+                    "정말 고마워요",
+                    "고맙습니다",
+                    "정말 고맙습니다",
+                    "감사합니다",
+                    "감사해요",
+                    "감사요",
+                    "감사드립니다",
+                    "정말 감사합니다",
+                    "진심으로 감사합니다",
+                    "대단히 감사합니다",
+                    "너무 감사합니다",
+                    "덕분에 감사합니다",
+                    "덕분에 정말 감사합니다",
+                    "덕분에 고맙습니다",
+                    "덕분에 고마워요",
+                    "thanks",
+                    "many thanks",
+                    "thanks a lot",
+                    "thanks so much",
+                    "thank you",
+                    "thank you so much",
+                    "thank you very much",
+                    "thx",
+                    "much appreciated",
+                    "i appreciate it",
+                    "really appreciate it"
+                ],
+                "allowed_trailers": [
+                    ".",
+                    "!",
+                    "~",
+                    "…",
+                    "..."
+                ]
+            }
+        },
+        {
+            "category": "greeting",
+            "priority": 4,
+            "strict": {
+                "exact": [
+                    "안녕",
+                    "안녕하세요",
+                    "안녕하십니까",
+                    "안뇽",
+                    "안뇽하세요",
+                    "하이",
+                    "하이요",
+                    "하이하이",
+                    "헬로",
+                    "헬로우",
+                    "헬로요",
+                    "hello",
+                    "hi",
+                    "hiya",
+                    "굿모닝",
+                    "굳모닝",
+                    "좋은 아침",
+                    "좋은 아침입니다",
+                    "good morning",
+                    "good afternoon",
+                    "good evening",
+                    "좋은 저녁입니다",
+                    "오랜만이야",
+                    "오랜만이에요",
+                    "오랜만입니다",
+                    "처음 뵙겠습니다",
+                    "반갑습니다",
+                    "반가워요",
+                    "반가워"
+                ],
+                "allowed_trailers": [
+                    ".",
+                    "!",
+                    "~",
+                    "…",
+                    "...",
+                    "👋"
+                ]
+            }
+        },
+        {
+            "category": "call_only",
+            "priority": 5,
+            "strict": {
+                "base": [
+                    "gpt",
+                    "chatgpt",
+                    "chat gpt",
+                    "챗gpt",
+                    "챗 gpt",
+                    "챗지피티",
+                    "지피티"
+                ],
+                "allow_suffix": [
+                    "야"
+                ],
+                "allowed_trailers": [
+                    ".",
+                    "!",
+                    "~",
+                    "…",
+                    "...",
+                    "?"
+                ]
+            }
+        },
+        {
+            "category": "reaction_only",
+            "priority": 6,
+            "strict": {
+                "exact": [
+                    "헐",
+                    "헉",
+                    "허걱",
+                    "엥",
+                    "읭",
+                    "오잉",
+                    "우와",
+                    "와우",
+                    "와아",
+                    "ㅎㅎ",
+                    "ㅎㅎㅎ",
+                    "ㅎㅎㅎㅎ",
+                    "ㅎㅎㅎㅎㅎ",
+                    "하하",
+                    "하하하",
+                    "푸하하",
+                    "ㄷㄷ",
+                    "ㄷㄷㄷ",
+                    "wow",
+                    "whoa",
+                    "woah",
+                    "omg",
+                    "lol",
+                    "lmao",
+                    "rofl",
+                    "haha",
+                    "hehe",
+                    "wtf"
+                ],
+                "allowed_trailers": [
+                    ".",
+                    "!",
+                    "~",
+                    "…",
+                    "..."
+                ]
+            }
+        },
+        {
+            "category": "no_meaning",
+            "priority": 7,
+            "strict": {
+                "exact": [
+                    "ㅁㄴㅇㄹ",
+                    "ㅁㄴㅇㄹㅁㄴㅇㄹ",
+                    "ㅂㅈㄷㄱ",
+                    "ㄷㄱㅂㅈ",
+                    "ㄴㅁㅇㄹ",
+                    ".",
+                    "..",
+                    "...",
+                    "....",
+                    ".....",
+                    "…",
+                    "……",
+                    "asdf",
+                    "asdfasdf",
+                    "qwerty",
+                    "qwertyuiop"
+                ],
+                "allowed_trailers": []
+            }
+        }
+    ],
+    "notes_excluded_for_precision": {
+        "call_only": [
+            "assistant/ai/bot 등 일반 명사",
+            "님/님아/씨 등의 존칭(요청 문맥과 자주 결합되어 모호)",
+            "hey/yo/오케이 등 이름 없이 부르는 표현(모델 호출로 단정 어려움)",
+            "물음표(?)로 끝나는 형태"
+        ],
+        "goodbye": [
+            "수고하세요, 끝, 이만, 여기까지, 먼저 들어갈게 등 상황 의존적 표현",
+            "later, take care, gn 등 맥락에 따라 중립/모호한 축약어",
+            "well-wish 전용 문구(have a nice day 등)"
+        ]
+    }
+}

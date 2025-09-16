@@ -14,7 +14,9 @@ pipeline {
                 echo "Deploying to EC2 via SSH"
                 sshagent(['ec2-ssh-key']) {
                     sh '''
-                        scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/Data/* ubuntu@172.26.8.129:${DEPLOY_DIR}/
+                        scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/Data/ \
+                                   ${WORKSPACE}/Spark/ \
+                                   ubuntu@172.26.8.129:${DEPLOY_DIR}/
                         
                         ssh -o StrictHostKeyChecking=no ubuntu@172.26.8.129 "
                             cd ${DEPLOY_DIR} &&
