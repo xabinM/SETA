@@ -1,0 +1,8 @@
+kafka-python==2.0.2
+pyspark==3.5.0
+tiktoken==0.5.1
+numpy==1.24.3
+pandas==2.0.3
+requests==2.31.0
+py4j==0.10.9.7
+findspark==2.0.1
