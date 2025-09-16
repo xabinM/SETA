@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import "./TreeModal.css";
-import type { TreeModalProps } from "./types";
+import type { TreeModalProps } from "./types.ts";
 
-export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}: TreeModalProps) {
+export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline }: TreeModalProps) {
     const shellRef = useRef<HTMLDivElement>(null);
 
     // ESC 닫기 + 스크롤락
@@ -32,22 +32,16 @@ export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}
     const remaining = Math.max(0, tokens.goal - tokens.current);
     const fmt = (n: number) => n.toLocaleString();
 
-    // 토큰 값에 따라 나무 상태 계산
     const getTreeStatus = (treeIndex: number) => {
         const requiredTokens = (treeIndex + 1) * tokens.step;
         return tokens.current >= requiredTokens;
     };
 
-    // 토큰 값에 따라 타임라인 상태 계산
-    const getTimelineStatus = (timelineItem: any, index: number) => {
+    const getTimelineStatus = (_timelineItem: any, index: number) => {
         const requiredTokens = (index + 1) * tokens.step;
-        if (tokens.current >= requiredTokens) {
-            return "done";
-        } else if (tokens.current >= requiredTokens - tokens.step) {
-            return "progress";
-        } else {
-            return "upcoming";
-        }
+        if (tokens.current >= requiredTokens) return "done";
+        if (tokens.current >= requiredTokens - tokens.step) return "progress";
+        return "upcoming";
     };
 
     return createPortal(
@@ -63,6 +57,23 @@ export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}
                 aria-labelledby="lgm-hero-title"
             >
                 <main className="lgm-container">
+                    {/* ⬇️ 닫기 버튼: 스크롤 컨테이너 내부에 절대배치 → 스크롤 시 함께 위로 사라짐 */}
+                    <button
+                        type="button"
+                        className="lgm-close"
+                        aria-label="닫기"
+                        onClick={onClose}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                            <path
+                                d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                            />
+                        </svg>
+                    </button>
+
                     {/* Hero */}
                     <section className="lgm-card" aria-labelledby="lgm-hero-title">
                         <div className="lgm-header">
@@ -70,7 +81,7 @@ export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}
                             <h1 id="lgm-hero-title" className="lgm-title">MY SETA TREE</h1>
                         </div>
                         <p className="lgm-subtitle">
-                            AI 사용을 최적화하여 실제 환경에 기여하는 가상의 나무들입니다.<br/>
+                            AI 사용을 최적화하여 실제 환경에 기여하는 가상의 나무들입니다.<br />
                             매 {tokens.step.toLocaleString()}토큰 절약마다 새로운 나무가 자라나요!
                         </p>
                     </section>
@@ -152,8 +163,8 @@ export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}
                                                             status === "progress" ? "lgm-st--progress" : ""
                                                     }`}
                                                 >
-                            {status === "done" ? "완료" : status === "progress" ? "진행중" : "예정"}
-                          </span>
+                          {status === "done" ? "완료" : status === "progress" ? "진행중" : "예정"}
+                        </span>
                                             </div>
                                             <div className="lgm-date">{t.date}</div>
                                             <div className="lgm-desc">{t.desc}</div>
@@ -168,7 +179,7 @@ export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}
                     <section className="lgm-card lgm-cta" aria-labelledby="lgm-closing-title">
                         <h2 id="lgm-closing-title" className="lgm-section-title">🌍 지구를 위한 작은 실천</h2>
                         <p className="m-0 text-center" style={{ color: "var(--text-dim)" }}>
-                            당신의 AI 사용 최적화는 실제 환경에 도움이 됩니다.<br/>
+                            당신의 AI 사용 최적화는 실제 환경에 도움이 됩니다.<br />
                             효율적인 대화로 에너지를 절약하고, 지구를 보호하는 일에 동참해 주셔서 감사합니다!
                         </p>
                         <div className="lgm-btns mt-2">

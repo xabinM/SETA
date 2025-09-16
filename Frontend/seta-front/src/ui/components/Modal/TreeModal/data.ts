@@ -1,4 +1,4 @@
-import type { Tokens, Tree, KPI, TimelineItem } from "./types";
+import type { Tokens, Tree, KPI, TimelineItem } from "./types.ts";
 
 const fmt = (n: number) => n.toLocaleString();
 

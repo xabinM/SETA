@@ -2,12 +2,15 @@ import { memo, useState } from "react";
 import Header from "@/ui/components/Header/Header";
 import { Icon } from "@iconify/react";
 import ChatBg from "@/assets/ChatBackground.png";
-import TreeModal from "@/ui/components/Modal/TreeModal";
-import { tokens, trees, kpis, timeline } from "@/ui/components/Modal/data";
+import TreeModal from "@/ui/components/Modal/TreeModal/TreeModal";
+import { tokens, trees, kpis, timeline } from "@/ui/components/Modal/TreeModal/data.ts";
+import CarModal from "@/ui/components/Modal/CarModal/CarModal";
+import { mockCarModalData } from "@/ui/components/Modal/CarModal/data";
 import "./Dashboard.css";
 
 function Dashboard() {
     const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
+    const [isCarModalOpen, setIsCarModalOpen] = useState(false);
 
     return (
         <div 
@@ -110,7 +113,7 @@ function Dashboard() {
                             <article className="lg-card lg-detail-card">
                                 <div className="lg-detail-head">
                                     <div className="lg-detail-title">
-                                        <Icon icon="fluent-emoji:deciduous-tree" width={28} height={28} />
+                                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Christmas%20Tree.png" alt="Christmas Tree" width="28" height="28" />
                                         <h2>나무 심기 현황</h2>
                                     </div>
                                     <button 
@@ -136,7 +139,7 @@ function Dashboard() {
                                 </div>
 
                                 <div className="lg-center" aria-live="polite">
-                                    <Icon icon="fluent-emoji:deciduous-tree" width={72} height={72} className="lg-emoji" />
+                                    <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Christmas%20Tree.png" alt="Christmas Tree" width="72" height="72" />
                                     <div className="lg-strong">절약한 토큰으로 3그루의 나무를 심었어요!</div>
                                     <div className="lg-dim">다음 나무까지 247토큰 남았습니다.</div>
                                     <div className="lg-dot-row" aria-hidden="true">
@@ -152,10 +155,10 @@ function Dashboard() {
                             <article className="lg-card lg-detail-card">
                                 <div className="lg-detail-head">
                                     <div className="lg-detail-title">
-                                        <Icon icon="fluent-emoji:racing-car" width={28} height={28} />
+                                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Racing%20Car.png" alt="Racing Car" width="28" height="28" />
                                         <h2>교통수단 절약 효과</h2>
                                     </div>
-                                    <button className="lg-btn" type="button" aria-label="교통수단 절약 효과 상세보기">
+                                    <button className="lg-btn" type="button" aria-label="교통수단 절약 효과 상세보기" onClick={() => setIsCarModalOpen(true)}>
                                         상세보기
                                         <svg
                                             width="14"
@@ -173,7 +176,7 @@ function Dashboard() {
                                 </div>
 
                                 <div className="lg-center">
-                                    <Icon icon="fluent-emoji:racing-car" width={72} height={72} className="lg-emoji" />
+                                    <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Racing%20Car.png" alt="Racing Car" width="72" height="72" />
                                     <div style={{ lineHeight: 1.65 }}>
                                         <div className="lg-strong">전기를 아껴서</div>
                                         <div className="lg-em">서울 → 대전</div>
@@ -249,6 +252,12 @@ function Dashboard() {
                 trees={trees}
                 kpis={kpis}
                 timeline={timeline}
+            />
+
+            <CarModal
+                open={isCarModalOpen}
+                onClose={() => setIsCarModalOpen(false)}
+                {...mockCarModalData}
             />
         </div>
     );
