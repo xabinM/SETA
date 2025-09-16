@@ -1,0 +1,102 @@
+services:
+  # -----------------
+  # PostgreSQL
+  # -----------------
+  db:
+    image: postgres:15
+    container_name: db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # -----------------
+  # Redis
+  # -----------------
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+  # -----------------
+  # Kafka
+  # -----------------
+
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: kafka
+    environment:
+      # --- KRaft ---
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.26.14.94:9092
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@172.26.14.94:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+
+      # --- 단일 브로커 필수 내장 토픽 설정 ---
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
+
+      # --- 편의 옵션 ---
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+
+    ports:
+      - "9092:9092"   # Kafka 클라이언트 연결
+      - "9093:9093"   # KRaft controller 내부 통신
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+    restart: unless-stopped
+
+  # -----------------
+  # Backend (Spring Boot)
+  # -----------------
+  backend:
+    image: ${BACKEND_IMAGE}
+    container_name: backend
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+      - kafka
+      - jaeger
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESSTOKENEXPIRATIONMS: ${JWT_ACCESSTOKENEXPIRATIONMS}
+      JWT_REFRESHTOKENEXPIRATIONMS: ${JWT_REFRESHTOKENEXPIRATIONMS}
+    ports:
+      - "8080:8080"
+
+# -----------------
+# 볼륨 정의
+# -----------------
+volumes:
+  db_data:
+  redis_data:
