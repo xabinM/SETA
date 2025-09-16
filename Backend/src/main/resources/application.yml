@@ -1,30 +1,6 @@
-server:
-  compression:
-    enabled: false
-  tomcat:
-    uri-encoding: UTF-8
-    max-connections: 8192
-    connection-timeout: 10s
-
-
 spring:
-  mvc:
-    locale: ko_KR
-    log-request-details: true
-    async:
-      request-timeout: 0
-
-  http:
-    encoding:
-      enabled: true
-      force: true
-      charset: UTF-8
-
   application:
     name: argo-backend
-
-  profiles:
-    include: secret
 
   datasource:
     url: jdbc:postgresql://localhost:55432/mydb
@@ -42,18 +18,6 @@ spring:
     redis:
       host: localhost
       port: 6379
-
-app:
-  topics:
-    raw: chat.raw.request.v1
-    filterResult: chat.filter.result.v1
-    promptBuilt: chat.prompt.built.v1
-    llmAnswer: chat.llm.answer.v1
-    error: chat.error.v1
-  topic-spec:
-    raw:
-      partitions: 3
-
 
 springdoc:
   swagger-ui:
