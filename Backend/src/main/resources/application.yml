@@ -7,6 +7,7 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: create                 # 운영 환경에서는 validate 또는 none
@@ -24,18 +25,6 @@ jwt:
   secret: ${JWT_SECRET}                  # JWT 시크릿
   accessTokenExpirationMs: ${JWT_ACCESSTOKENEXPIRATIONMS}
   refreshTokenExpirationMs: ${JWT_REFRESHTOKENEXPIRATIONMS}
-
-app:
-  topics:
-    raw: chat.raw.request.v1
-    filterResult: chat.filter.result.v1
-    promptBuilt: chat.prompt.built.v1
-    llmAnswer: chat.llm.answer.v1
-    error: chat.error.v1
-  topic-spec:
-    raw:
-      partitions: 3
-
 
 springdoc:
   swagger-ui:

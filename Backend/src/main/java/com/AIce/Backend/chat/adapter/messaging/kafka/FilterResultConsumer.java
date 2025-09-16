@@ -1,10 +1,16 @@
 package com.AIce.Backend.chat.adapter.messaging.kafka;
 
 import com.AIce.Backend.chat.contracts.FilterResultV1;
+import com.AIce.Backend.chat.contracts.LlmResponseV1;
+import com.AIce.Backend.chat.service.ChatMessageService;
+import com.AIce.Backend.chat.service.DropResponder;
+import com.AIce.Backend.domain.chat.repository.ChatMessageRepository;
+import com.AIce.Backend.domain.chat.repository.ChatRoomRepository;
+import com.AIce.Backend.domain.usersetting.entity.UserSetting;
+import com.AIce.Backend.domain.usersetting.repository.UserSettingRepository;
 import com.AIce.Backend.global.sse.SseHub;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.micrometer.observation.annotation.Observed;
-import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -22,8 +28,11 @@ import java.util.*;
 @RequiredArgsConstructor
 public class FilterResultConsumer {
     private final SseHub hub;
-    private final Tracer tracer;
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+    private final ChatRoomRepository chatRoomRepository;
+    private final UserSettingRepository userSettingRepository;
+    private final DropResponder dropResponder;
+    private final ChatMessageService chatMessageService;
 
     // filter result SSE 중계
     @Observed(name = "chat.filter_result.consume",
@@ -33,24 +42,41 @@ public class FilterResultConsumer {
                          @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                          @Headers Map<String, Object> headers) throws JsonProcessingException {
         try {
-            FilterResultV1 msg = objectMapper.readValue(payload, FilterResultV1.class);
+            final FilterResultV1 msg = objectMapper.readValue(payload, FilterResultV1.class);
+            final String roomId = msg.getRoom_id();
 
-            // traceId
-            String traceId =
-                    coalesce(
-                            msg.getTrace_id(),
-                            headerAsString(headers, "trace_id"),
-                            Optional.ofNullable(tracer)
-                                    .map(Tracer::currentSpan)
-                                    .map(span -> span.context().traceId())
-                                    .orElse(null),
-                            ""
-                    );
+            // DB 저장
+            String text = chatMessageService.persistAssistantFromLlm(msg);
 
-            log.info("consume filter_result traceId={} topic={} room={}", traceId, topic, msg.getRoom_id());
+            // DROP이면
+            if (msg.getDecision() != null && "DROP".equalsIgnoreCase(msg.getDecision().getAction())) {
+                final long now = System.currentTimeMillis();
+                final long startTs = msg.getTimestamp() != null ? msg.getTimestamp() : now;
+                final long latency = Math.max(0, now - startTs);
 
-            // SSE 브로드캐스트
-            hub.push(msg.getRoom_id(), "filter_result", msg);
+                LlmResponseV1 out = LlmResponseV1.builder()
+                        .headers(null)
+                        .trace_id(msg.getTrace_id())
+                        .room_id(roomId)
+                        .timestamp(now)
+                        .llm(LlmResponseV1.Llm.builder()
+                                .model("synthetic/drop-policy")
+                                .temperature(0.0)
+                                .build())
+                        .latency_ms(latency)
+                        .response(LlmResponseV1.Response.builder().text(text).build())
+                        .token_usage(LlmResponseV1.TokenUsage.builder().input(0).output(0).total(0).build())
+                        .cost_estimate(LlmResponseV1.CostEstimate.builder().currency("USD").value(0.0).build())
+                        .schema_version("1.0.0")
+                        .build();
+
+                // SSE로 브로드캐스트
+                hub.push(roomId, "llm_answer", out);
+                log.info("DROP→synthetic llm_answer saved & streamed; traceId={} room={}",
+                        msg.getTrace_id(), roomId);
+            }
+
+            log.info("consume filter_result traceId={} topic={} room={}", msg.getTrace_id(), topic, msg.getRoom_id());
 
         } catch (Exception e) {
             log.warn("filter_result consume failed; payload={} cause={}", safeCut(payload), e.toString());

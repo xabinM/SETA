@@ -1,13 +1,8 @@
 spring:
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-
+    bootstrap-servers: 172.26.14.94:9092
     properties:
-      security.protocol: SASL_SSL
-      sasl.mechanism: AWS_MSK_IAM
-      sasl.jaas.config: software.amazon.msk.auth.iam.IAMLoginModule required;
-      sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
-
+      security.protocol: PLAINTEXT
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -18,17 +13,15 @@ spring:
         enable.idempotence: true
         acks: all
         max.in.flight.requests.per.connection: 5
-
     consumer:
       group-id: backend-${spring.profiles.active}
-      auto-offset-reset: latest
+      auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
         fetch.min.bytes: 65536         # 64KB
         fetch.max.wait.ms: 50
-
     listener:
       observation-enabled: true
     template:
@@ -38,7 +31,7 @@ management:
   tracing:
     enabled: true
     sampling:
-      probability: 0.05
+      probability: 1.0
   otlp:
     tracing:
-      endpoint: http://otel-collector:4317
+      endpoint: http://172.26.14.94:4317
