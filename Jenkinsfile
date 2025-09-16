@@ -20,6 +20,14 @@ pipeline {
                         
                         ssh -o StrictHostKeyChecking=no ubuntu@172.26.8.129 "
                             cd ${DEPLOY_DIR}/Data &&
+                            echo 'Creating .env file from Jenkins credentials...' &&
+                            cat > .env << EOF
+                            ELASTICSEARCH_URL=${ELASTICSEARCH_URL}
+                            API_HOST=${API_HOST}
+                            API_PORT=${API_PORT}
+                            LOG_LEVEL=INFO
+                            ENV=development
+                            EOF
                             echo 'Stopping ML API containers...' &&
                             docker-compose down &&
                             docker-compose rm -f &&
