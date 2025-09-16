@@ -8,6 +8,7 @@ variables:
   DOCKER_TLS_CERTDIR: ""                         # DIND 사용 시 TLS 비활성화
   SSH_KNOWN_HOSTS: $SSH_KNOWN_HOSTS
   SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"   # Gradle 캐시를 프로젝트 내부에 저장
 
 # ----------------
 # 1. Backend Build (Java + Gradle)
@@ -15,6 +16,11 @@ variables:
 backend-build:
   stage: build
   image: amazoncorretto:17
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - Backend/.gradle/caches/
+      - Backend/.gradle/wrapper/
   script:
     - cd Backend
     - chmod +x gradlew
