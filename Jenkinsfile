@@ -22,12 +22,12 @@ pipeline {
                             cd ${DEPLOY_DIR}/Data &&
                             echo 'Creating .env file from Jenkins credentials...' &&
                             cat > .env << EOF
-                            ELASTICSEARCH_URL=${ELASTICSEARCH_URL}
-                            API_HOST=${API_HOST}
-                            API_PORT=${API_PORT}
-                            LOG_LEVEL=INFO
-                            ENV=development
-                            EOF
+ELASTICSEARCH_URL=${ELASTICSEARCH_URL}
+API_HOST=${API_HOST}
+API_PORT=${API_PORT}
+LOG_LEVEL=INFO
+ENV=development
+EOF
                             echo 'Stopping ML API containers...' &&
                             docker-compose down &&
                             docker-compose rm -f &&
@@ -52,7 +52,7 @@ pipeline {
                             ls -la &&
                             echo 'Stopping existing Spark services...' &&
                             docker-compose down --remove-orphans || echo 'No existing Spark services to stop' &&
-                            echo 'Starting Spark services...' &&
+                            echo 'Starting Spark services..' &&
                             docker-compose up --build -d &&
                             echo 'Spark deployment completed' &&
                             docker-compose ps
