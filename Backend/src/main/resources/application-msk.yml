@@ -1,6 +1,6 @@
 spring:
   kafka:
-    bootstrap-servers: 172.26.14.94:9092
+    bootstrap-servers: 3.35.206.91:29092
     properties:
       security.protocol: PLAINTEXT
     producer:
@@ -14,7 +14,7 @@ spring:
         acks: all
         max.in.flight.requests.per.connection: 5
     consumer:
-      group-id: backend-${spring.profiles.active}
+      group-id: backend-msk-test
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -34,4 +34,4 @@ management:
       probability: 1.0
   otlp:
     tracing:
-      endpoint: http://172.26.14.94:4317
+      endpoint: http://172.18.0.4:4317

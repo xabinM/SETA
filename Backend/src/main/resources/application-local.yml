@@ -14,7 +14,7 @@ spring:
         acks: all
         max.in.flight.requests.per.connection: 5
     consumer:
-      group-id: backend-${spring.profiles.active}
+      group-id: backend-local
       auto-offset-reset: latest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
