@@ -67,25 +67,25 @@ export default function Header() {
 
             <div className="flex items-center justify-between" style={{ width: '266px', height: '24px' }}>
                 <Link
-                    to="/platform"
+                    to="/chat"
                     className="!text-white visited:!text-white !no-underline hover:!no-underline transition-opacity opacity-90 hover:opacity-100"
                     style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '16px', lineHeight: '24px', textDecoration: 'none', color: '#fff' }}
                 >
-                    Platform
+                    Chat
                 </Link>
                 <Link
-                    to="/solutions"
+                    to="/dashboard"
                     className="!text-white visited:!text-white !no-underline hover:!no-underline transition-opacity opacity-90 hover:opacity-100"
                     style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '16px', lineHeight: '24px', textDecoration: 'none', color: '#fff' }}
                 >
-                    Solutions
+                    Dashboard
                 </Link>
                 <Link
-                    to="/contact"
+                    to="/home"
                     className="!text-white visited:!text-white !no-underline hover:!no-underline transition-opacity opacity-90 hover:opacity-100"
                     style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '16px', lineHeight: '24px', textDecoration: 'none', color: '#fff' }}
                 >
-                    Contact
+                    Logout
                 </Link>
             </div>
         </nav>
