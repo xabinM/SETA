@@ -31,8 +31,11 @@ pipeline {
                             docker container prune -f || true &&
                             docker network prune -f || true &&
                             echo 'Checking for port conflicts...' &&
-                            netstat -tlnp | grep ':8000' || echo 'Port 8000 is free' &&
-                            netstat -tlnp | grep ':9200' || echo 'Port 9200 is free' &&
+                            ss -tlnp | grep ':8000' || echo 'Port 8000 is free' &&
+                            ss -tlnp | grep ':9200' || echo 'Port 9200 is free' &&
+                            echo 'Stopping any conflicting containers...' &&
+                            docker stop seta-ml-api_elasticsearch_1 seta-ml-api_ml-api_1 || true &&
+                            docker rm seta-ml-api_elasticsearch_1 seta-ml-api_ml-api_1 || true &&
                             echo 'Starting ML API containers...' &&
                             docker-compose up -d --build &&
                             echo 'Waiting for containers to start...' &&
@@ -59,10 +62,10 @@ pipeline {
                             docker container prune -f || true &&
                             docker network prune -f || true &&
                             echo 'Checking for Spark port conflicts...' &&
-                            netstat -tlnp | grep ':8888' || echo 'Port 8888 is free' &&
-                            netstat -tlnp | grep ':4040' || echo 'Port 4040 is free' &&
-                            netstat -tlnp | grep ':9092' || echo 'Port 9092 is free' &&
-                            netstat -tlnp | grep ':29092' || echo 'Port 29092 is free' &&
+                            ss -tlnp | grep ':8888' || echo 'Port 8888 is free' &&
+                            ss -tlnp | grep ':4040' || echo 'Port 4040 is free' &&
+                            ss -tlnp | grep ':9092' || echo 'Port 9092 is free' &&
+                            ss -tlnp | grep ':29092' || echo 'Port 29092 is free' &&
                             echo 'Starting Spark services...' &&
                             docker-compose up --build -d &&
                             echo 'Waiting for Spark services to start...' &&
@@ -90,12 +93,12 @@ pipeline {
                             docker ps &&
                             echo '=== Port Usage Check ===' &&
                             echo 'Checking ML API ports:' &&
-                            netstat -tlnp | grep ':8000' || echo 'Port 8000 not in use' &&
-                            netstat -tlnp | grep ':9200' || echo 'Port 9200 not in use' &&
+                            ss -tlnp | grep ':8000' || echo 'Port 8000 not in use' &&
+                            ss -tlnp | grep ':9200' || echo 'Port 9200 not in use' &&
                             echo 'Checking Spark ports:' &&
-                            netstat -tlnp | grep ':8888' || echo 'Port 8888 not in use' &&
-                            netstat -tlnp | grep ':4040' || echo 'Port 4040 not in use' &&
-                            netstat -tlnp | grep ':9092' || echo 'Port 9092 not in use' &&
+                            ss -tlnp | grep ':8888' || echo 'Port 8888 not in use' &&
+                            ss -tlnp | grep ':4040' || echo 'Port 4040 not in use' &&
+                            ss -tlnp | grep ':9092' || echo 'Port 9092 not in use' &&
                             sleep 10 &&
                             echo '=== Health Check ===' &&
                             curl -f http://localhost:8000/health || echo 'ML API Health check failed'
@@ -128,11 +131,11 @@ pipeline {
                         echo '=== Debug Information ===' &&
                         docker ps -a &&
                         echo '=== Port Usage ===' &&
-                        netstat -tlnp | grep ':8000' || echo 'Port 8000 not in use' &&
-                        netstat -tlnp | grep ':9200' || echo 'Port 9200 not in use' &&
-                        netstat -tlnp | grep ':8888' || echo 'Port 8888 not in use' &&
-                        netstat -tlnp | grep ':4040' || echo 'Port 4040 not in use' &&
-                        netstat -tlnp | grep ':9092' || echo 'Port 9092 not in use' &&
+                        ss -tlnp | grep ':8000' || echo 'Port 8000 not in use' &&
+                        ss -tlnp | grep ':9200' || echo 'Port 9200 not in use' &&
+                        ss -tlnp | grep ':8888' || echo 'Port 8888 not in use' &&
+                        ss -tlnp | grep ':4040' || echo 'Port 4040 not in use' &&
+                        ss -tlnp | grep ':9092' || echo 'Port 9092 not in use' &&
                         echo '=== Docker Networks ===' &&
                         docker network ls &&
                         echo '=== .env file contents ===' &&
