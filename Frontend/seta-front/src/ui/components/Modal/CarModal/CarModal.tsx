@@ -215,9 +215,10 @@ export default function CarModal({
                                     <div className="cm-node__box">
                                         <img
                                             className="cm-node__img"
-                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Airplane%20Departure.png"
-                                            alt="Airplane"
+                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Penguin.png"
+                                            alt="Penguin"
                                         />
+
                                     </div>
                                 </div>
                                 <div className="cm-card-lite">
@@ -245,13 +246,13 @@ export default function CarModal({
                                     <div className="cm-node__box">
                                         <img
                                             className="cm-node__img"
-                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Bullet%20Train.png"
-                                            alt="Train"
+                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Rabbit.png"
+                                            alt="Rabbit"
                                         />
-                                    </div>
                                 </div>
-                                <div className="cm-card-lite">
-                                    <div className="cm-item__head">
+                            </div>
+                            <div className="cm-card-lite">
+                            <div className="cm-item__head">
                                         <h3 className="cm-stage">대전 → 대구</h3>
                                         <span className={
                                             getSegmentStatus(1) === "done" ? "cm-st cm-st--done" :
@@ -275,13 +276,13 @@ export default function CarModal({
                                     <div className="cm-node__box">
                                         <img
                                             className="cm-node__img"
-                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Bus.png"
-                                            alt="Bus"
+                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Whale.png"
+                                            alt="Whale"
                                         />
-                                    </div>
                                 </div>
-                                <div className="cm-card-lite">
-                                    <div className="cm-item__head">
+                            </div>
+                            <div className="cm-card-lite">
+                            <div className="cm-item__head">
                                         <h3 className="cm-stage">대구 → 부산</h3>
                                         <span className={
                                             getSegmentStatus(2) === "done" ? "cm-st cm-st--done" :
