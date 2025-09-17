@@ -1,8 +1,10 @@
-# app/main.py
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
 from app.utils.es import get_es, wait_for_es, es_health, close_es
+from app.router.filter_router import router as filter_router
+from app.router.embed_router import router as embed_router
+from app.router.summarize_router import router as summarize_router
 
 load_dotenv()
 
@@ -12,24 +14,22 @@ app = FastAPI(
     version="1.0.0",
 )
 
-
 @app.on_event("startup")
 def on_startup():
-    # ES 클라이언트 준비 및 간단한 대기(선택)
     get_es()
-    wait_for_es(timeout_sec=10)  # ES가 늦게 뜨는 경우를 위한 짧은 재시도
-
+    wait_for_es(timeout_sec=10)
 
 @app.on_event("shutdown")
 def on_shutdown():
-    # 자원 정리 (필요 시)
     close_es()
 
+app.include_router(filter_router)
+app.include_router(embed_router)
+app.include_router(summarize_router)
 
 @app.get("/")
 def root():
     return {"message": "Welcome to the SETA ML API", "status": "running"}
-
 
 @app.get("/health")
 def health_check():
@@ -43,3 +43,4 @@ def health_check():
         "api_version": "1.0.0",
         "error": es.get("error"),
     }
+v
