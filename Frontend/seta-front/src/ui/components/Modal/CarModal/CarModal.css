@@ -1,0 +1,311 @@
+/* ===== Backdrop / Shell ===== */
+.carmodal-backdrop{
+    position: fixed; inset: 0; z-index: 999;
+    display: grid; place-items: center;
+    background: rgba(0,0,0,.4);
+    backdrop-filter: blur(4px);
+    padding: 12px; box-sizing: border-box;
+}
+.carmodal-shell{
+    width: min(960px, 92vw);
+    max-height: 88dvh;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.08);
+    backdrop-filter: blur(20px) saturate(120%);
+    -webkit-backdrop-filter: blur(20px) saturate(120%);
+    box-shadow:
+            0 1px 0 0 rgba(255,255,255,.1),
+            0 8px 32px rgba(0,0,0,.3),
+            inset 0 1px 0 rgba(255,255,255,.05);
+    overflow: hidden;
+}
+
+/* ===== Theme / Tokens ===== */
+:root{
+    --cm-text:#f8fafc;
+    --cm-text-dim:#cbd5e1;
+    --cm-text-muted:#94a3b8;
+
+    --cm-accent1:#60a5fa;
+    --cm-accent2:#34d399;
+    --cm-accent3:#fbbf24;
+    --cm-accent4:#f87171;
+
+    --cm-gradient-primary: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    --cm-gradient-success: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    --cm-gradient-warning: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    --cm-gradient-danger: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+
+    --cm-border:rgba(255,255,255,.15);
+    --cm-border-soft:rgba(255,255,255,.08);
+    --cm-glass-bg:rgba(255,255,255,.1);
+    --cm-surface:linear-gradient(145deg,rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 100%);
+
+    --cm-shadow-subtle:
+            0 1px 0 0 rgba(255,255,255,.15),
+            0 8px 32px rgba(0,0,0,.4),
+            inset 0 1px 0 rgba(255,255,255,.08);
+
+    --cm-r-xl:24px;
+    --cm-r-lg:20px;
+    --cm-r-md:16px;
+
+    --cm-h1:clamp(26px,3.8vw,40px);
+    --cm-h2:clamp(17px,2vw,22px);
+
+    --trip-progress:.0;   /* 타임라인 진행(0~1) */
+    --car-progress:.0;    /* 막대/자동차 진행(0~1) */
+
+    --cm-close-size: 40px;
+    --cm-close-gap: 12px;
+
+    /* 진행바/자동차 크기 */
+    --bar-height: 24px;
+    --car-size: calc(var(--bar-height) * 0.9);
+
+    /* 기본 아이콘 상한(너무 커지는 것 방지용) */
+    --hero-icon-max: 40px;
+    --section-icon-max: 28px;
+    --kpi-icon-max: 24px;
+}
+
+/* 이미지/이모지 공통 정렬/크기 규칙: 네가 준 width/height는 존중하되, 상한으로만 제어 */
+.cm-emoji{
+    display:block;
+    width:auto !important;               /* 네가 준 width/height를 우선 */
+    height:auto !important;
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    line-height:1;
+}
+
+/* ===== Scroll Container ===== */
+.cm-container{
+    position: relative;
+    width: min(960px,92vw);
+    max-height: inherit;
+    margin: 0 auto 8px;
+    padding-top: calc(24px + var(--cm-close-size) + var(--cm-close-gap));
+    padding-right: calc(24px + var(--cm-close-size)/2);
+    padding-bottom: 24px;
+    padding-left: 24px;
+    box-sizing: border-box;
+    display: grid;
+    gap: 32px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.cm-container::-webkit-scrollbar{ display: none; }
+
+/* ===== Close Button ===== */
+.cm-close{
+    position:absolute;
+    top: var(--cm-close-gap);
+    right: var(--cm-close-gap);
+    width: var(--cm-close-size);
+    height: var(--cm-close-size);
+    border-radius: 9999px;
+    display: grid; place-items: center;
+    background: var(--cm-glass-bg);
+    border: 1px solid var(--cm-border);
+    color:#fff;
+    cursor:pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
+    transition: transform .12s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.cm-close:hover{ transform: translateY(-1px); }
+
+/* ===== Card ===== */
+.cm-card{
+    position: relative;
+    border-radius: var(--cm-r-xl);
+    padding: 24px;
+    background: var(--cm-surface);
+    border: 1px solid var(--cm-border);
+    box-shadow: var(--cm-shadow-subtle);
+    transition: all .2s ease;
+    overflow: clip;
+}
+
+/* ===== HERO ===== */
+.cm-header{
+    display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:nowrap;
+    margin-bottom: 16px;
+}
+.cm-icon-wrap{
+    flex:0 0 auto;
+    display:grid; place-items:center;
+    line-height: 0;
+    /* 상한만 지정해서 사용자 크기보다 커지지 않게 */
+    max-width: var(--icon-max, var(--hero-icon-max));
+    max-height: var(--icon-max, var(--hero-icon-max));
+}
+.cm-hero .cm-icon-wrap{ --icon-max: var(--hero-icon-max); }
+.cm-section-head .cm-icon-wrap{ --icon-max: var(--section-icon-max); }
+
+.cm-title{
+    margin:0; text-align:center;
+    font-size: var(--cm-h1); font-weight: 800; letter-spacing: -.02em; line-height:1.2;
+}
+.cm-subtitle{
+    color: var(--cm-text-dim); margin:16px 0 0; text-align:center; line-height:1.6; font-size: 18px;
+}
+
+/* ===== KPI ===== */
+.cm-kpis-grid4{ display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 18px; }
+.cm-kpi{
+    display:flex; flex-direction:column; justify-content:space-between; text-align:center;
+    border-radius: var(--cm-r-lg); padding: 20px 16px; min-width:0; height: 140px;
+    background: var(--cm-surface); border:1px solid var(--cm-border);
+    box-shadow: var(--cm-shadow-subtle);
+}
+.cm-kpi__icon-wrap{
+    flex:0 0 auto;
+    display:grid; place-items:center;
+    margin: 0 auto 8px;
+    line-height: 0;
+    max-width: var(--kpi-icon-max);
+    max-height: var(--kpi-icon-max);
+}
+.cm-kpi__value{ font-weight:700; font-size:22px; color: var(--cm-text); margin-bottom: 4px; }
+.cm-kpi__label{ color: var(--cm-text-dim); font-size:12px; font-weight:500; }
+@media (max-width: 1024px){
+    .cm-kpis-grid4{ grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+}
+@media (max-width: 520px){
+    .cm-kpis-grid4{ grid-template-columns: 1fr; gap: 14px; }
+}
+
+/* ===== Section Head (공통) ===== */
+.cm-section-head{
+    display:flex; align-items:center; gap:8px; margin-bottom:12px;
+}
+.cm-section-title{
+    margin:0; font-size: var(--cm-h2); font-weight:700; color:var(--cm-text);
+}
+
+/* ===== Trip Progress (그래프 + 자동차) ===== */
+.cm-tripbar{ display:grid; gap:12px; }
+.cm-bar{
+    height: var(--bar-height);
+    border-radius: 999px;
+    background: rgba(0,0,0,.2);
+    border: 1px solid var(--cm-border-soft);
+    position: relative;
+    overflow: hidden; /* 막대 내부에 자동차 유지 */
+    box-shadow: inset 0 1px 4px rgba(0,0,0,.25);
+}
+.cm-fill{
+    position:absolute; left:0; top:0; bottom:0;
+    background: var(--cm-gradient-primary);
+    border-radius: inherit;
+    width: 0%;                   /* GSAP가 보간 */
+    transition: none !important; /* 애니메이션은 GSAP에 위임 */
+    z-index: 0;
+}
+.cm-pct{
+    position:absolute; right:10px; top:50%; transform: translateY(-50%);
+    font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5);
+    z-index: 2;
+}
+/* 자동차(아이콘 이미지)는 막대 안에서 진행도에 맞춰 이동 */
+.cm-car{
+    position: absolute; top:50%;
+    left: calc(var(--car-progress) * (100% - var(--car-size)));
+    transform: translate(-50%, -50%);
+    width: var(--car-size); height: var(--car-size);
+    display:grid; place-items:center;
+    z-index: 1; pointer-events:none;
+}
+.cm-car img{
+    width:100%; height:100%; display:block;
+    transform: scaleX(-1);           /* 좌우 반전(필요 없으면 제거) */
+    transform-origin:center;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.4));
+}
+
+.cm-meta{ display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap; }
+.cm-chip{
+    background: rgba(255,255,255,.06);
+    border:1px solid var(--cm-border-soft);
+    color: var(--cm-text-dim);
+    font-size:13px; padding:8px 12px; border-radius: var(--cm-r-md);
+}
+
+/* ===== Timeline ===== */
+.cm-timeline{ display:grid; gap:16px; position:relative; padding-left:72px; }
+.cm-timeline::before{
+    content:""; position:absolute; left:36px; top:6px; bottom:6px; width:2px; border-radius:2px;
+    background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
+}
+.cm-timeline::after{
+    content:""; position:absolute; left:36px; top:6px; width:2px; border-radius:2px;
+    height:calc(var(--trip-progress) * (100% - 12px));
+    background:linear-gradient(180deg,var(--cm-accent1),var(--cm-accent2));
+    transition:height .6s ease;
+}
+.cm-item{ display:grid; grid-template-columns:64px 1fr; gap:14px; align-items:start; }
+.cm-dot{
+    width:64px; height:64px; border-radius:50%;
+    display:grid; place-items:center; font-size:22px; line-height:1;
+    background:var(--cm-glass-bg); border:1px solid var(--cm-border); color:#fff;
+}
+.cm-item--done .cm-dot{ background: rgba(19,227,123,.16); border-color: rgba(19,227,123,.32); }
+.cm-item--progress .cm-dot{ background: rgba(255,179,71,.18); border-color: rgba(255,179,71,.32); }
+
+.cm-card-lite{
+    padding:16px; border-radius: var(--cm-r-lg);
+    background: rgba(255,255,255,.04); border:1px solid var(--cm-border-soft);
+}
+.cm-item__head{ display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap; }
+.cm-stage{ font-weight:800; margin:0; font-size:14px; color: var(--cm-text); }
+.cm-st{
+    padding:5px 8px; border-radius: var(--cm-r-md); font-size:11px; font-weight:800;
+    background: rgba(255,255,255,.08); border:1px solid var(--cm-border-soft); color: var(--cm-text);
+}
+.cm-st--done{ color:#d5ffe9; background: rgba(19,227,123,.16); border-color: rgba(19,227,123,.32); }
+.cm-st--progress{ color:#fff1dc; background: rgba(255,179,71,.18); border-color: rgba(255,179,71,.32); }
+.cm-date{ color: var(--cm-text); font-size:12px; margin-bottom:6px; font-weight:700; opacity:.9; }
+.cm-desc{ color: var(--cm-text); font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+
+/* ===== CTA ===== */
+.cm-cta{ text-align:center; display:grid; gap:14px; }
+.cm-subtext{ color:var(--cm-text-dim); font-size:14px; text-align:center; margin:0; }
+
+.cm-btns{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:4px; }
+.cm-btn{
+    border:1px solid var(--cm-border);
+    background: rgba(255,255,255,.08);
+    color: var(--cm-text);
+    font-weight:700; border-radius: var(--cm-r-md);
+    padding:12px 18px; font-size:14px; cursor:pointer;
+    transition: transform .12s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+}
+.cm-btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.2); }
+
+.cm-btn-primary{
+    background: linear-gradient(135deg, var(--cm-accent1), var(--cm-accent2));
+    color:#0b1220; font-weight:900; border:none;
+    box-shadow: 0 8px 20px rgba(43,210,255,.2);
+}
+.cm-btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 10px 24px rgba(43,210,255,.28); }
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px){
+    .cm-card{ padding:20px; }
+}
+@media (max-width: 480px){
+    :root{ --cm-close-size: 36px; --cm-close-gap: 10px; }
+    .cm-container{
+        gap: 22px;
+        padding-right: calc(16px + var(--cm-close-size)/2);
+        padding-left: 16px;
+    }
+    .cm-timeline{ padding-left:56px; }
+    .cm-item{ grid-template-columns:48px 1fr; gap:10px; }
+    .cm-dot{ width:48px; height:48px; font-size:18px; }
+}
