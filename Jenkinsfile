@@ -6,6 +6,11 @@ pipeline {
         ELASTICSEARCH_URL = credentials('elasticsearch-url')
         API_HOST = credentials('api-host')
         API_PORT = credentials('api-port')
+        POSTGRES_HOST = credentials('postgres-host')
+        POSTGRES_USER = credentials('postgres-user')
+        POSTGRES_PASSWORD = credentials('postgres-password')
+        POSTGRES_DB = credentials('postgres-db')
+        REDIS_HOST = credentials('redis-host')
     }
     
     stages {
@@ -24,6 +29,12 @@ pipeline {
                             echo 'ELASTICSEARCH_URL=${ELASTICSEARCH_URL}' > .env &&
                             echo 'API_HOST=${API_HOST}' >> .env &&
                             echo 'API_PORT=${API_PORT}' >> .env &&
+                            echo 'POSTGRES_HOST=${POSTGRES_HOST}' >> .env &&
+                            echo 'POSTGRES_USER=${POSTGRES_USER}' >> .env &&
+                            echo 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}' >> .env &&
+                            echo 'POSTGRES_DB=${POSTGRES_DB}' >> .env &&
+                            echo 'REDIS_HOST=${REDIS_HOST}' >> .env &&
+                            echo 'REDIS_PORT=6379' >> .env &&
                             echo 'LOG_LEVEL=INFO' >> .env &&
                             echo 'ENV=development' >> .env &&
                             echo 'Forcefully stopping and cleaning up ML API containers...' &&
