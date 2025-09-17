@@ -7,11 +7,13 @@ pipeline {
         API_HOST = credentials('api-host')
         API_PORT = credentials('api-port')
         POSTGRES_HOST = credentials('postgres-host')
+        POSTGRES_PORT = credentials('postgres-port')
         POSTGRES_USER = credentials('postgres-user')
         POSTGRES_PASSWORD = credentials('postgres-password')
         POSTGRES_DB = credentials('postgres-db')
         REDIS_HOST = credentials('redis-host')
         GMS_API_KEY = credentials('gms-api-key')
+        GMS_API_URL = credentials('gms-api-url')
     }
     
     stages {
@@ -31,12 +33,14 @@ pipeline {
                             echo 'API_HOST=${API_HOST}' >> .env &&
                             echo 'API_PORT=${API_PORT}' >> .env &&
                             echo 'POSTGRES_HOST=${POSTGRES_HOST}' >> .env &&
+                            echo 'POSTGRES_PORT=${POSTGRES_PORT}' >> .env &&
                             echo 'POSTGRES_USER=${POSTGRES_USER}' >> .env &&
                             echo 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}' >> .env &&
                             echo 'POSTGRES_DB=${POSTGRES_DB}' >> .env &&
                             echo 'REDIS_HOST=${REDIS_HOST}' >> .env &&
                             echo 'REDIS_PORT=6379' >> .env &&
                             echo 'GMS_API_KEY=${GMS_API_KEY}' >> .env &&
+                            echo 'GMS_API_URL=${GMS_API_URL}' >> .env &&
                             echo 'LOG_LEVEL=INFO' >> .env &&
                             echo 'ENV=development' >> .env &&
                             echo 'Forcefully stopping and cleaning up ML API containers...' &&
