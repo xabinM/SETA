@@ -1,43 +1,45 @@
+# app/main.py
 from fastapi import FastAPI
-from elasticsearch import Elasticsearch
-import os
 from dotenv import load_dotenv
 
-load_dotenv()   
+from app.utils.es import get_es, wait_for_es, es_health, close_es
+
+load_dotenv()
 
 app = FastAPI(
     title="SETA ML API",
     description="ML API for SETA",
-    version="1.0.0"
+    version="1.0.0",
 )
 
-es_client = None
 
 @app.on_event("startup")
-async def startup_event():
-    global es_client
-    es_url = os.getenv("ELASTICSEARCH_URL", "http://elasticsearch:9200")
-    es_client = Elasticsearch([es_url])
-    try:
-        if es_client.ping():
-            print("Connected to Elasticsearch")
-        else:
-            print("Could not connect to Elasticsearch")
-    except Exception as e:
-        print(f"Error connecting to Elasticsearch: {e}")
+def on_startup():
+    # ES 클라이언트 준비 및 간단한 대기(선택)
+    get_es()
+    wait_for_es(timeout_sec=10)  # ES가 늦게 뜨는 경우를 위한 짧은 재시도
+
+
+@app.on_event("shutdown")
+def on_shutdown():
+    # 자원 정리 (필요 시)
+    close_es()
+
 
 @app.get("/")
-async def root():
+def root():
     return {"message": "Welcome to the SETA ML API", "status": "running"}
 
+
 @app.get("/health")
-async def health_check():
-    try:
-        es_status = es_client.ping() if es_client else False
-        return {
-            "status": "healthy",
-            "elasticsearch": "connected" if es_status else "disconnected",
-            "version": "1.0.0"
-        }
-    except Exception as e:
-        return {"status": "unhealthy", "error": str(e)}
+def health_check():
+    es = es_health()
+    status = "healthy" if es.get("connected") else "degraded"
+    return {
+        "status": status,
+        "elasticsearch": "connected" if es.get("connected") else "disconnected",
+        "es_cluster": es.get("cluster_name"),
+        "es_version": es.get("version"),
+        "api_version": "1.0.0",
+        "error": es.get("error"),
+    }
