@@ -1,0 +1,395 @@
+/* 원본 디자인 그대로 + 최소한의 반응형만 추가 */
+/* stylelint-disable property-no-vendor-prefix */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 강제로 어두운 배경 적용 */
+html, body, #root {
+  background: #010205 !important;
+}
+
+body {
+  background: #010205 !important;
+  color: #fff !important;
+}
+
+.frame {
+  background-color: #010205;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.frame .overlap-group-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.frame .overlap-group {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 배경 블러 요소들 - 원본 그대로 */
+.frame .ellipse {
+  position: absolute;
+  width: 60vw;
+  height: 60vh;
+  top: 20vh;
+  left: 70vw;
+  background-color: #0d051a;
+  border-radius: 50%;
+  filter: blur(min(15vw, 200px));
+  transform: translate(-50%, -50%);
+  opacity: 0.8;
+}
+
+.frame .div {
+  position: absolute;
+  width: 60vw;
+  height: 80vh;
+  top: 10vh;
+  left: 70vw;
+  background-color: #050d26;
+  border-radius: 50% / 70%;
+  filter: blur(min(20vw, 250px));
+  transform: translate(-50%, -50%);
+}
+
+.frame .ellipse-2 {
+  position: absolute;
+  width: 100vw;
+  height: 60vh;
+  top: 30vh;
+  left: 40vw;
+  background-color: #030814;
+  border-radius: 50% / 30%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  filter: blur(min(20vw, 250px));
+}
+
+.frame .ellipse-3 {
+  position: absolute;
+  width: 60vw;
+  height: 60vh;
+  top: 25vh;
+  left: 20vw;
+  background-color: #14051f;
+  border-radius: 50%;
+  filter: blur(min(20vw, 250px));
+  transform: translate(-50%, -50%);
+}
+
+.frame .ellipse-4 {
+  position: absolute;
+  width: 60vw;
+  height: 60vh;
+  top: 70vh;
+  left: 30vw;
+  background-color: #080f2e;
+  border-radius: 50%;
+  filter: blur(min(20vw, 250px));
+  transform: translate(-50%, -50%);
+}
+
+/* 별들 - 원본 그대로 */
+.frame .star {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  top: 20vh;
+  left: 20vw;
+  background-color: #e5f2ff;
+  border-radius: 4px;
+}
+
+.frame .star-2 {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  top: 30vh;
+  left: 75vw;
+  background-color: #cce5ff;
+  border-radius: 3px;
+}
+
+.frame .star-3 {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 15vh;
+  left: 55vw;
+  background-color: #ffe5cc;
+  border-radius: 5px;
+}
+
+.frame .star-4 {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  top: 75vh;
+  left: 80vw;
+  background-color: #b2ccff;
+  border-radius: 2.5px;
+}
+
+.frame .star-5 {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  top: 80vh;
+  left: 60vw;
+  background-color: #e5d9ff;
+  border-radius: 3.5px;
+}
+
+/* SETA 메인 텍스트 - 원본 완전 그대로 */
+.frame .text-wrapper {
+  position: absolute;
+  width: min(858px, 80vw);
+  height: min(622px, 60vh);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+
+  font-family: 'Knewave';
+  font-style: normal;
+  font-weight: 400;
+  font-size: min(400px, 25vw);
+  line-height: min(622px, 60vh);
+  display: flex;
+  align-items: center;
+  text-align: center;
+
+  /* 밝은 파란색 그라디언트 */
+  background: linear-gradient(180deg, #6699DA 25.88%, #5783BB 46.97%, #43648F 76.76%, #365173 95.5%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  /* 검정색 문제 해결 - drop-shadow로 스트로크 구현 */
+  filter:
+      drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+      drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+      drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+      drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+      drop-shadow(0 15px 30px rgba(0, 0, 0, 0.6))
+      drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4))
+      drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+
+  mix-blend-mode: hard-light;
+}
+
+/* =========[ 거울 리플렉션 1: text-wrapper-2 ]========= */
+.frame .text-wrapper-2 {
+  position: absolute;
+  width: min(858px, 80vw);
+  height: min(622px, 60vh);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-50% + 350px)) scaleY(-1);
+  z-index: 2;
+
+  font-family: 'Knewave';
+  font-style: normal;
+  font-weight: 400;
+  font-size: min(400px, 25vw);
+  line-height: min(622px, 60vh);
+  display: flex;
+  align-items: flex-start;
+  text-align: center;
+
+  background: linear-gradient(
+      180deg,
+      rgba(102,153,218,0.8) 0%,
+      rgba(87,131,187,0.6) 20%,
+      rgba(67,100,143,0.4) 40%,
+      rgba(54,81,115,0.2) 60%,
+      rgba(54,81,115,0.1) 80%,
+      rgba(54,81,115,0.05) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  mix-blend-mode: normal;
+  filter: blur(15px);
+  opacity: 0.4;
+
+  /* 부드러운 페이드아웃 — 표준 마스크 */
+  mask-image: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.8) 0%,
+      rgba(0,0,0,0.6) 25%,
+      rgba(0,0,0,0.3) 50%,
+      rgba(0,0,0,0.1) 75%,
+      rgba(0,0,0,0) 100%
+  );
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  mask-position: 0 0;
+}
+
+/* =========[ 거울 리플렉션 3: text-wrapper-4 ]========= */
+.frame .text-wrapper-4 {
+  position: absolute;
+  width: min(858px, 80vw);
+  height: min(622px, 60vh);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-50% + 350px)) scaleY(-1);
+  z-index: 3;
+
+  font-family: 'Knewave';
+  font-style: normal;
+  font-weight: 400;
+  font-size: min(400px, 25vw);
+  line-height: min(622px, 60vh);
+  display: flex;
+  align-items: flex-start;
+  text-align: center;
+
+  background: linear-gradient(
+      180deg,
+      rgba(102,153,218,0.3) 0%,
+      rgba(87,131,187,0.2) 20%,
+      rgba(67,100,143,0.1) 40%,
+      rgba(54,81,115,0.05) 60%,
+      rgba(54,81,115,0.02) 80%,
+      rgba(54,81,115,0) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  mix-blend-mode: normal;
+  filter: blur(3px);
+  opacity: 0.6;
+
+  /* 부드러운 페이드아웃 — 표준 마스크 */
+  mask-image: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.9) 0%,
+      rgba(0,0,0,0.7) 30%,
+      rgba(0,0,0,0.4) 60%,
+      rgba(0,0,0,0.1) 80%,
+      rgba(0,0,0,0) 100%
+  );
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  mask-position: 0 0;
+}
+
+/* =========[ 거울 리플렉션 2: text-wrapper-3 ]========= */
+.frame .text-wrapper-3 {
+  position: absolute;
+  width: min(858px, 80vw);
+  height: min(622px, 60vh);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-50% + 311px)) scaleY(-1);
+  z-index: 1;
+
+  font-family: 'Knewave';
+  font-style: normal;
+  font-weight: 400;
+  font-size: min(400px, 25vw);
+  line-height: min(622px, 60vh);
+  display: flex;
+  align-items: flex-start;
+  text-align: center;
+
+  background: linear-gradient(
+      180deg,
+      rgba(102,153,218,0.6) 0%,
+      rgba(87,131,187,0.4) 20%,
+      rgba(67,100,143,0.25) 40%,
+      rgba(54,81,115,0.15) 60%,
+      rgba(54,81,115,0.08) 80%,
+      rgba(54,81,115,0.02) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  mix-blend-mode: normal;
+  filter: blur(0px);
+  opacity: 0.8;
+
+  /* 선 아래는 거의 안 보이게 — 표준 마스크 */
+  mask-image: linear-gradient(
+      to bottom,
+      rgba(0,0,0,1) 0%,
+      rgba(0,0,0,0.8) 30%,
+      rgba(0,0,0,0.2) 60%,
+      rgba(0,0,0,0) 80%
+  );
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  mask-position: 0 0;
+}
+
+/* 모바일 최적화 - 원본 그대로 */
+@media (max-width: 768px) {
+  .frame .text-wrapper {
+    font-size: clamp(4rem, 18vw, 22rem);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .frame .text-wrapper-2 {
+    font-size: clamp(4rem, 18vw, 22rem);
+    top: calc(50% + clamp(3rem, 10vw, 15rem));
+  }
+
+  .frame .text-wrapper-3 {
+    font-size: clamp(4rem, 18vw, 22rem);
+    top: calc(50% + clamp(1.5rem, 6vw, 10rem));
+  }
+}
+
+/* 세로 모드 - 원본 그대로 */
+@media (orientation: portrait) {
+  .frame .text-wrapper,
+  .frame .text-wrapper-2,
+  .frame .text-wrapper-3 {
+    font-size: clamp(3rem, 16vw, 20rem);
+  }
+}
+
+/* 성능 최적화 - 원본 그대로 */
+.frame .text-wrapper,
+.frame .text-wrapper-2,
+.frame .text-wrapper-3 {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* 접근성 - 원본 그대로 */
+@media (prefers-reduced-motion: reduce) {
+  .frame .text-wrapper {
+    transform: translate(-50%, -50%);
+  }
+  .frame .text-wrapper-2,
+  .frame .text-wrapper-3 {
+    filter: none;
+  }
+}
