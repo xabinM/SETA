@@ -2,9 +2,13 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 
 from app.utils.es import get_es, wait_for_es, es_health, close_es
-from app.router.filter_router import router as filter_router
-from app.router.embed_router import router as embed_router
-from app.router.summarize_router import router as summarize_router
+from app.routers.filter_router import router as filter_router
+from app.routers.embed import router as embed_router
+from app.routers.summarize_router import router as summarize_router
+from app.services.embed_service import store_text
+
+
+
 
 load_dotenv()
 
@@ -43,3 +47,7 @@ def health_check():
         "api_version": "1.0.0",
         "error": es.get("error"),
     }
+
+from app.core.config import get_settings
+
+print(get_settings().dict())
