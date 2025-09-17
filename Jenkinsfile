@@ -11,6 +11,7 @@ pipeline {
         POSTGRES_PASSWORD = credentials('postgres-password')
         POSTGRES_DB = credentials('postgres-db')
         REDIS_HOST = credentials('redis-host')
+        GMS_API_KEY = credentials('gms-api-key')
     }
     
     stages {
@@ -35,6 +36,7 @@ pipeline {
                             echo 'POSTGRES_DB=${POSTGRES_DB}' >> .env &&
                             echo 'REDIS_HOST=${REDIS_HOST}' >> .env &&
                             echo 'REDIS_PORT=6379' >> .env &&
+                            echo 'GMS_API_KEY=${GMS_API_KEY}' >> .env &&
                             echo 'LOG_LEVEL=INFO' >> .env &&
                             echo 'ENV=development' >> .env &&
                             echo 'Forcefully stopping and cleaning up ML API containers...' &&
