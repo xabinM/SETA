@@ -3,6 +3,13 @@ import { createPortal } from "react-dom";
 import "./TreeModal.css";
 import type { TreeModalProps } from "./types.ts";
 
+interface TimelineItem {
+    icon: React.ReactNode;
+    title: string;
+    date: string;
+    desc: string;
+}
+
 export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline }: TreeModalProps) {
     const shellRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +44,7 @@ export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline
         return tokens.current >= requiredTokens;
     };
 
-    const getTimelineStatus = (_timelineItem: any, index: number) => {
+    const getTimelineStatus = (_timelineItem: TimelineItem, index: number) => {
         const requiredTokens = (index + 1) * tokens.step;
         if (tokens.current >= requiredTokens) return "done";
         if (tokens.current >= requiredTokens - tokens.step) return "progress";
@@ -57,7 +64,7 @@ export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline
                 aria-labelledby="lgm-hero-title"
             >
                 <main className="lgm-container">
-                    {/* ⬇️ 닫기 버튼: 스크롤 컨테이너 내부에 절대배치 → 스크롤 시 함께 위로 사라짐 */}
+                    {/* X 버튼 */}
                     <button
                         type="button"
                         className="lgm-close"
