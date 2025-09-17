@@ -43,4 +43,3 @@ def health_check():
         "api_version": "1.0.0",
         "error": es.get("error"),
     }
-v
