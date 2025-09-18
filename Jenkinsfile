@@ -6,6 +6,8 @@ pipeline {
         ELASTICSEARCH_URL = credentials('elasticsearch-url')
         API_HOST = credentials('api-host')
         API_PORT = credentials('api-port')
+        API_TITLE = credentials('api-title')
+        API_VERSION = credentials('api-version')
         POSTGRES_HOST = credentials('postgres-host')
         POSTGRES_PORT = credentials('postgres-port')
         POSTGRES_USER = credentials('postgres-user')
@@ -14,6 +16,10 @@ pipeline {
         REDIS_HOST = credentials('redis-host')
         GMS_API_KEY = credentials('gms-api-key')
         GMS_API_URL = credentials('gms-api-url')
+        ENVIRONMENT = credentials('environment')
+        EMBED_INDEX_NAME = credentials('embed-index-name')
+        EMBEDDING_MODEL_PATH = credentials('embedding-model-path')
+        EMBED_DIMS = credentials('embed-dims')
     }
     
     stages {
@@ -32,6 +38,8 @@ pipeline {
                             echo 'ELASTICSEARCH_URL=${ELASTICSEARCH_URL}' > .env &&
                             echo 'API_HOST=${API_HOST}' >> .env &&
                             echo 'API_PORT=${API_PORT}' >> .env &&
+                            echo 'API_TITLE=${API_TITLE}' >> .env &&
+                            echo 'API_VERSION=${API_VERSION}' >> .env &&
                             echo 'POSTGRES_HOST=${POSTGRES_HOST}' >> .env &&
                             echo 'POSTGRES_PORT=${POSTGRES_PORT}' >> .env &&
                             echo 'POSTGRES_USER=${POSTGRES_USER}' >> .env &&
@@ -41,8 +49,11 @@ pipeline {
                             echo 'REDIS_PORT=6379' >> .env &&
                             echo 'GMS_API_KEY=${GMS_API_KEY}' >> .env &&
                             echo 'GMS_API_URL=${GMS_API_URL}' >> .env &&
+                            echo 'ENVIRONMENT=${ENVIRONMENT}' >> .env &&
+                            echo 'EMBED_INDEX_NAME=${EMBED_INDEX_NAME}' >> .env &&
+                            echo 'EMBEDDING_MODEL_PATH=${EMBEDDING_MODEL_PATH}' >> .env &&
+                            echo 'EMBED_DIMS=${EMBED_DIMS}' >> .env &&
                             echo 'LOG_LEVEL=INFO' >> .env &&
-                            echo 'ENV=development' >> .env &&
                             echo 'Forcefully stopping and cleaning up ML API containers...' &&
                             docker-compose down --remove-orphans --volumes || true &&
                             docker container prune -f || true &&
