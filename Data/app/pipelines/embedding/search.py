@@ -36,7 +36,7 @@ def search_similar(
         "query": {
             "bool": {
                 "filter": [
-                    {"term": {"user_seq": str(user_seq)}}
+                    {"term": {"user_seq.keyword": str(user_seq)}}
                 ]
             }
         },

@@ -10,7 +10,7 @@ services:
     depends_on:
       - elasticsearch
     volumes:
-      - ./models:/app/models
+      - /home/ubuntu/models:/app/models
       - ./logs:/app/logs
     restart: unless-stopped
 
