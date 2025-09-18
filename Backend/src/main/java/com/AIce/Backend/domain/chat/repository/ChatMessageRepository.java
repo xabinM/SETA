@@ -12,4 +12,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
 
     @Query("select coalesce(max(m.turnIndex),0) from ChatMessage m where m.chatRoom.chatRoomId = :roomId")
     int findMaxTurnIndex(@Param("roomId") UUID roomId);
+
+    void deleteAllByChatRoom_ChatRoomId(UUID roomId);
 }
