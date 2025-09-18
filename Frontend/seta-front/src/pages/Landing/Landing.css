@@ -10,7 +10,7 @@
   perspective: 1000px;
 }
 
-/* 배경 어둠 오버레이 */
+/* 배경 어둠 오버레이 - 더 부드러운 색상 */
 .background-overlay {
   position: absolute;
   top: 0;
@@ -18,9 +18,9 @@
   width: 100%;
   height: 100%;
   background: 
-    linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%),
-    radial-gradient(circle at 30% 40%, rgba(0, 212, 170, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 70% 60%, rgba(29, 233, 182, 0.05) 0%, transparent 50%);
+    linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(15, 15, 25, 0.9) 100%),
+    radial-gradient(circle at 30% 40%, rgba(60, 140, 120, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(80, 160, 140, 0.04) 0%, transparent 50%);
   pointer-events: none;
   backdrop-filter: blur(1px);
 }
@@ -39,65 +39,38 @@
 
 .stopword {
   position: absolute;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(240, 240, 245, 0.75);
   font-weight: 400;
   pointer-events: none;
   user-select: none;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 0 4px rgba(240, 240, 245, 0.2);
   transition: all 0.3s ease;
   transform-style: preserve-3d;
   will-change: transform, opacity, color;
   image-rendering: crisp-edges;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
 }
 
-/* SETA 로고 중심체 - 토네이도 블랙홀 효과 강화 */
+/* SETA 로고 중심체 - 크기 및 위치 조정 */
 .logo-center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   opacity: 0;
   z-index: 500;
   will-change: transform, scale, opacity;
 }
 
-.logo-center::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(
-    circle,
-    transparent 30%,
-    rgba(0, 212, 170, 0.1) 50%,
-    rgba(0, 212, 170, 0.2) 70%,
-    transparent 100%
-  );
-  border-radius: 50%;
-  opacity: 0;
-  animation: blackHoleGlow 3s ease-in-out infinite;
-}
-
-.logo-center.active::before {
-  opacity: 1;
-}
-
-@keyframes blackHoleGlow {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
-    opacity: 0.3;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.2) rotate(180deg);
-    opacity: 0.6;
-  }
+/* 복잡한 링 효과 제거 */
+.logo-outer-ring,
+.logo-inner-ring {
+  display: none;
 }
 
 /* 로고 주변 링들 */
@@ -152,19 +125,19 @@
 .seta-text {
   font-size: 72px;
   font-weight: 900;
-  background: linear-gradient(45deg, #00d4aa, #64ffda, #1de9b6);
+  background: linear-gradient(45deg, #4a9d8e, #7ab8a8, #5eb09f);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: 8px;
   margin-bottom: 10px;
-  filter: drop-shadow(0 0 30px rgba(100, 255, 218, 0.6));
-  animation: gradientShift 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(122, 184, 168, 0.3));
+  animation: gentleGradientShift 4s ease-in-out infinite;
   will-change: filter;
 }
 
-@keyframes gradientShift {
+@keyframes gentleGradientShift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
@@ -178,7 +151,6 @@
   text-shadow: 0 0 10px rgba(100, 255, 218, 0.4);
 }
 
-/* 진행 텍스트 */
 .progress-text {
   position: absolute;
   bottom: 80px;
@@ -191,144 +163,24 @@
 }
 
 .step {
-  color: #64ffda;
-  font-size: 20px;
+  color: #7ab8a8;
+  font-size: 18px;
   font-weight: 500;
-  margin-bottom: 20px;
-  text-shadow: 0 0 15px rgba(100, 255, 218, 0.6);
+  text-shadow: 0 0 8px rgba(122, 184, 168, 0.3);
 }
 
-.loading-bar {
-  width: 400px;
-  height: 3px;
-  background: rgba(100, 255, 218, 0.2);
-  border-radius: 2px;
-  overflow: hidden;
-  position: relative;
-}
-
+/* 로딩바 완전 제거 */
+.loading-bar,
 .loading-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #00d4aa, #64ffda);
-  width: 100%;
-  transform: translateX(-100%);
-  box-shadow: 0 0 15px rgba(100, 255, 218, 0.8);
-  animation: loadingSlide 4s ease-in-out forwards;
+  display: none;
 }
 
-@keyframes loadingSlide {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(0%); }
-}
-
-/* HUD 요소들 - 스캔라인 제거 */
-.hud-elements {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0;
-  z-index: 100;
-  will-change: opacity;
-}
-
-.hud-corner {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  border: 1px solid rgba(100, 255, 218, 0.6);
-  transition: border-color 0.3s ease;
-}
-
-.hud-corner::before {
-  content: '';
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: rgba(100, 255, 218, 0.8);
-  border-radius: 50%;
-}
-
-.hud-top-left {
-  top: 30px;
-  left: 30px;
-  border-right: none;
-  border-bottom: none;
-}
-
-.hud-top-left::before {
-  top: -5px;
-  left: -5px;
-}
-
-.hud-top-right {
-  top: 30px;
-  right: 30px;
-  border-left: none;
-  border-bottom: none;
-}
-
-.hud-top-right::before {
-  top: -5px;
-  right: -5px;
-}
-
-.hud-bottom-left {
-  bottom: 30px;
-  left: 30px;
-  border-right: none;
-  border-top: none;
-}
-
-.hud-bottom-left::before {
-  bottom: -5px;
-  left: -5px;
-}
-
-.hud-bottom-right {
-  bottom: 30px;
-  right: 30px;
-  border-left: none;
-  border-top: none;
-}
-
-.hud-bottom-right::before {
-  bottom: -5px;
-  right: -5px;
-}
-
+/* HUD, 데이터스트림 등 복잡한 요소들 완전 제거 */
+.hud-elements,
+.hud-corner,
+.data-stream,
 .scan-line {
-  display: none; /* 스캔라인 완전 제거 */
-}
-
-.data-stream {
-  position: absolute;
-  top: 80px;
-  right: 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  font-size: 13px;
-  color: rgba(100, 255, 218, 0.8);
-  font-family: 'Courier New', monospace;
-  text-shadow: 0 0 5px rgba(100, 255, 218, 0.3);
-}
-
-.data-stream span {
-  opacity: 0;
-  transform: translateX(30px);
-  padding: 8px 12px;
-  background: rgba(0, 212, 170, 0.1);
-  border: 1px solid rgba(100, 255, 218, 0.3);
-  border-radius: 4px;
-  backdrop-filter: blur(5px);
-}
-
-.data-stream span::before {
-  content: '> ';
-  color: #00d4aa;
+  display: none;
 }
 
 /* 성능 최적화를 위한 will-change 및 transform3d 활용 */
@@ -358,8 +210,8 @@
   }
   
   .logo-outer-ring {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     top: -30px;
     left: -30px;
   }
