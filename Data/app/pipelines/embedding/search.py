@@ -14,7 +14,7 @@ def search_similar(
     query: str,
     k: int = 5,
     num_candidates: int = 100,
-    min_score: Optional[float] = 0.7,
+    min_score: Optional[float] = -1.0,
 ) -> List[Dict[str, Any]]:
     """
     주어진 쿼리(query)에 대해 user_seq 범위 내에서 KNN 검색 수행
@@ -22,28 +22,29 @@ def search_similar(
     - query: 검색 질의 텍스트
     - k: 최종 반환할 결과 개수
     - num_candidates: 후보군 (ES 내부에서 먼저 뽑는 수)
-    - min_score: 유사도 최소 기준
+    - min_score: 유사도 최소 기준 (cosineSimilarity → -1 ~ 1)
     """
     emb = get_embedding(query)
 
     body = {
-        "knn": {
-            "field": "embedding",
-            "query_vector": emb,
-            "k": k,
-            "num_candidates": num_candidates,
-        },
+        "size": k,
         "query": {
-            "bool": {
-                "filter": [
-                    {"term": {"user_seq.keyword": str(user_seq)}}
-                ]
+            "script_score": {
+                "query": {
+                    "bool": {
+                        "filter": [
+                            {"term": {"user_seq.keyword": str(user_seq)}}
+                        ]
+                    }
+                },
+                "script": {
+                    "source": "cosineSimilarity(params.query_vector, 'embedding')",
+                    "params": {"query_vector": emb},
+                },
             }
         },
-        "size": k,
     }
 
-    # min_score는 최상위에서 지원됨
     kwargs = {"index": INDEX_NAME, "body": body}
     if isinstance(min_score, (int, float)):
         kwargs["min_score"] = float(min_score)
@@ -60,7 +61,6 @@ def search_similar(
         for h in hits
     ]
 
-    # min_score 필터링 (추가 안전장치)
     if isinstance(min_score, (int, float)):
         results = [
             r for r in results if r["score"] is not None and r["score"] >= float(min_score)
