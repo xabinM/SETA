@@ -2,9 +2,10 @@
 import math, hashlib
 from sentence_transformers import SentenceTransformer
 from app.core.config import get_settings
+from typing import Optional
 
 _settings = get_settings()
-_model: SentenceTransformer | None = None
+_model: Optional[SentenceTransformer] = None
 
 
 def _fallback_hash_embedding(text: str) -> list[float]:
@@ -23,7 +24,7 @@ def _fallback_hash_embedding(text: str) -> list[float]:
     return [v / norm for v in vec]
 
 
-def get_model() -> SentenceTransformer | None:
+def get_model() -> Optional[SentenceTransformer]:
     global _model
     if _model is None:
         try:

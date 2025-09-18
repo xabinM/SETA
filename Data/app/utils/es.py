@@ -1,10 +1,12 @@
 # app/utils/es.py
 from elasticsearch import Elasticsearch
 from app.core.config import get_settings
+from typing import Optional
 import time
 
+
 _settings = get_settings()
-_es: Elasticsearch | None = None
+_es: Optional[Elasticsearch] = None
 
 
 def get_es() -> Elasticsearch:
