@@ -30,6 +30,13 @@ class Settings(BaseSettings):
     REDIS_PORT: int = Field(6379, env="REDIS_PORT")
     REDIS_PASSWORD: Optional[str] = Field(default=None, env="REDIS_PASSWORD")
 
+    # Postgres
+    POSTGRES_HOST: str = Field("localhost", env="POSTGRES_HOST")
+    POSTGRES_PORT: int = Field(5432, env="POSTGRES_PORT")
+    POSTGRES_USER: str = Field("postgres", env="POSTGRES_USER")
+    POSTGRES_PASSWORD: str = Field("password", env="POSTGRES_PASSWORD")
+    POSTGRES_DB: str = Field("postgres", env="POSTGRES_DB")
+
     class Config:
         env_file = ".env"
         case_sensitive = True
