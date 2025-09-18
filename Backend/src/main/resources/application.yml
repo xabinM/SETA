@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create                 # 운영 환경에서는 validate 또는 none
+      ddl-auto: update                 # 운영 환경에서는 validate 또는 none
     show-sql: true
     properties:
       hibernate:
@@ -37,7 +37,7 @@ logging:
 gms:
   openai:
     base-url: ${GMS_OPENAI_BASE_URL}
-    completions-path: ${GMS_OPENAI_COMPLETIONS_PATH}
+    completions-path: ${GMS_OPENAI_ㄱCOMPLETIONS_PATH}
     model: ${GMS_OPENAI_MODEL}
     api-key: ${GMS_OPENAI_API_KEY}
     timeout-ms: ${GMS_OPENAI_TIMEOUT_MS}
