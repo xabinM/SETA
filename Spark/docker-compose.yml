@@ -1,33 +1,5 @@
 services:
-  kafka:
-    image: confluentinc/cp-kafka:7.5.3
-    container_name: kafka
-    ports:
-      - "9092:9092"
-      - "29092:29092"
-    environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
-
-      KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093,INTERNAL://:29092'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092,INTERNAL://kafka:29092'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT'
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      CLUSTER_ID: 'Yg5tAiu6RQe1kLIgFfjVwQ'
-    volumes:
-      - kafka-data:/var/lib/kafka/data
-    healthcheck:
-      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
+  # 기존 Spark Streaming (메시지 필터링)
   spark:
     build: 
       context: .
@@ -41,9 +13,42 @@ services:
       - .:/home/jovyan/work
     environment:
       - SPARK_OPTS=--driver-java-options=-Xms1g --driver-java-options=-Xmx4g --driver-java-options=-Dlog4j.logLevel=info
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-    depends_on:
-      kafka:
-        condition: service_healthy
-volumes:
-  kafka-data:
+      # 서버1 Kafka 연결로 변경
+      - KAFKA_BOOTSTRAP_SERVERS=172.26.14.94:9092
+      # 서버1 메인 PostgreSQL 연결
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - app-network
+
+  # 배치 처리용 Spark (토큰 사용량 집계)
+  spark-batch:
+    image: bitnami/spark:3.5
+    container_name: spark-batch-processor
+    volumes:
+      - ./spark_batch_aggregation.py:/opt/bitnami/spark/app/spark_batch_aggregation.py
+    environment:
+      # 서버1 메인 PostgreSQL 연결
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    command: /bin/bash -c "
+      echo 'Waiting for dependencies...' &&
+      sleep 30 &&
+      echo 'Starting token usage aggregation...' &&
+      /opt/bitnami/spark/bin/spark-submit 
+      --master local[*] 
+      --packages org.postgresql:postgresql:42.7.3 
+      /opt/bitnami/spark/app/spark_batch_aggregation.py"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge

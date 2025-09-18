@@ -84,6 +84,12 @@ pipeline {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@172.26.8.129 "
                             cd ${DEPLOY_DIR}/Spark &&
+                            echo 'Creating .env file for Spark services...' &&
+                            echo 'POSTGRES_HOST=${POSTGRES_HOST}' > .env &&
+                            echo 'POSTGRES_PORT=${POSTGRES_PORT}' >> .env &&
+                            echo 'POSTGRES_USER=${POSTGRES_USER}' >> .env &&
+                            echo 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}' >> .env &&
+                            echo 'POSTGRES_DB=${POSTGRES_DB}' >> .env &&
                             echo 'Current directory:' && pwd &&
                             echo 'Files in Spark directory:' &&
                             ls -la &&
