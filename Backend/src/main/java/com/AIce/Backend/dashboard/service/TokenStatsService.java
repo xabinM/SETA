@@ -1,6 +1,8 @@
 package com.AIce.Backend.dashboard.service;
 
+import com.AIce.Backend.domain.dashboard.entity.GlobalSavedTokenDaily;
 import com.AIce.Backend.domain.dashboard.entity.GlobalSavedTokenTotal;
+import com.AIce.Backend.domain.dashboard.entity.UserSavedTokenDaily;
 import com.AIce.Backend.domain.dashboard.entity.UserSavedTokenTotal;
 import com.AIce.Backend.domain.dashboard.repository.GlobalSavedTokenDailyRepository;
 import com.AIce.Backend.domain.dashboard.repository.GlobalSavedTokenTotalRepository;
@@ -21,25 +23,31 @@ public class TokenStatsService {
     private final UserSavedTokenTotalRepository userSavedTokenTotalRepository;
     private final GlobalSavedTokenTotalRepository globalSavedTokenTotalRepository;
 
-    // 로그인한 유저의 특정 날짜 daily 통계
-    public UserSavedTokenTotal getUserStatsByDate(Long userId, LocalDate today) {
-        return userSavedTokenTotalRepository.findByUserIdAndStatDate(userId.toString(), today)
+    // 로그인한 유저의 최신 daily 통계
+    public UserSavedTokenDaily getUserDaily(Long userId) {
+        return userSavedTokenDailyRepository
+                .findTopByUserIdOrderByWindowStartDesc(userId.toString())
                 .orElse(null);
     }
 
-    // 로그인한 유저의 total 통계
-    public List<UserSavedTokenTotal> getUserStatsByUserId(Long userId) {
-        return userSavedTokenTotalRepository.findByUserId(userId.toString());
-    }
-
-    // 특정 날짜 글로벌 daily
-    public GlobalSavedTokenTotal getGlobalTotalByDate(LocalDate date) {
-        return globalSavedTokenTotalRepository.findByStatDate(date)
+    // 로그인한 유저의 최신 total 통계
+    public UserSavedTokenTotal getUserTotal(Long userId) {
+        return userSavedTokenTotalRepository
+                .findTopByUserIdOrderByStatDateDesc(userId.toString())
                 .orElse(null);
     }
 
-    // 글로벌 total
-    public List<GlobalSavedTokenTotal> getGlobalTotal() {
-        return globalSavedTokenTotalRepository.findAll();
+    // 최신 글로벌 daily
+    public GlobalSavedTokenDaily getGlobalDaily() {
+        return globalSavedTokenDailyRepository
+                .findTopByOrderByWindowStartDesc()
+                .orElse(null);
+    }
+
+    // 최신 글로벌 total
+    public GlobalSavedTokenTotal getGlobalTotal() {
+        return globalSavedTokenTotalRepository
+                .findTopByOrderByStatDateDesc()
+                .orElse(null);
     }
 }

@@ -14,7 +14,7 @@ import java.time.*;
 @Table(name = "global_saved_token_daily")
 public class GlobalSavedTokenDaily {
     @Id
-    private LocalDateTime windowStart;
+    private OffsetDateTime windowStart;
 
     private Long requestCount;
     private Long savedTokens;

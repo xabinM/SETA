@@ -9,6 +9,5 @@ import java.time.*;
 import java.util.*;
 
 public interface UserSavedTokenDailyRepository extends JpaRepository<UserSavedTokenDaily, UserSavedTokenDailyId> {
-    // 특정 userId + window_start 기준 조회
-    Optional<UserSavedTokenDaily> findByUserIdAndWindowStart(String userId, LocalDateTime windowStart);
+    Optional<UserSavedTokenDaily> findTopByUserIdOrderByWindowStartDesc(String userId);
 }

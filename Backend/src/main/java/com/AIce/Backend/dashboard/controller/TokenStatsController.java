@@ -27,17 +27,11 @@ public class TokenStatsController {
     @GetMapping
     @Operation(summary = "대시보드 KPI 조회", description = "로그인한 유저와 전체 유저의 Daily/Total 통계를 반환")
     public Object getStats(@AuthenticationPrincipal Long userId) {
-
-        // 오늘 날짜 (시스템 타임존)
-        LocalDate today = LocalDate.now();
-        LocalDateTime start = today.atStartOfDay();
-
-        return TokenStatsResponse.builder()
-                .window(today)
-                // 로그인한 유저의 daily 통계
-                .userTotal(tokenStatsService.getUserStatsByDate(userId, today))
-                // 전체 유저의 daily 통계
-                .globalTotal(tokenStatsService.getGlobalTotalByDate(today))
-                .build();
+        return TokenStatsResponse.from(
+                tokenStatsService.getUserTotal(userId),
+                tokenStatsService.getUserDaily(userId),
+                tokenStatsService.getGlobalDaily(),
+                tokenStatsService.getGlobalTotal()
+                );
     }
 }
