@@ -57,7 +57,7 @@ pipeline {
                             echo 'FILTER_MODEL_PATH=${FILTER_MODEL_PATH}' >> .env &&
                             echo 'LOG_LEVEL=INFO' >> .env &&
                             echo 'Forcefully stopping and cleaning up ML API containers...' &&
-                            docker-compose down --remove-orphans --volumes || true &&
+                            docker-compose down --remove-orphans || true &&
                             docker container prune -f || true &&
                             docker network prune -f || true &&
                             echo 'Checking for port conflicts...' &&
