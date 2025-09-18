@@ -5,6 +5,7 @@ stages:
 
 variables:
   BACKEND_IMAGE: $DOCKER_REGISTRY/$DOCKER_USERNAME/backend:$CI_COMMIT_SHORT_SHA
+  FRONTEND_IMAGE: $DOCKER_REGISTRY/$DOCKER_USERNAME/frontend:$CI_COMMIT_SHORT_SHA
   DOCKER_TLS_CERTDIR: ""                         # DIND 사용 시 TLS 비활성화
   SSH_KNOWN_HOSTS: $SSH_KNOWN_HOSTS
   SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
@@ -31,14 +32,40 @@ backend-build:
     paths:
       - Backend/build/libs/*.jar
     expire_in: 1 hour
-  only:
-    - Devops_config
-    - Devops_main
-    - master
-    - Back_main
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Back_main)$/'
+      changes:
+        - Backend/**/*
+      when: always
+    - when: never
 
 # ----------------
-# 2. Build Docker Image & Push to Registry
+# 2. Frontend Build (React + Node)
+# ----------------
+frontend-build:
+  stage: build
+  image: node:18-alpine
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - Frontend/node_modules/
+  script:
+    - cd Frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - Frontend/dist
+    expire_in: 1 hour
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Front_main)$/'
+      changes:
+        - Frontend/**/*
+      when: always
+    - when: never
+
+# ----------------
+# 3. Build Docker Image & Push to Registry
 # ----------------
 backend-build-docker:
   stage: build-docker
@@ -56,60 +83,119 @@ backend-build-docker:
   script:
     - docker build -t $BACKEND_IMAGE ./Backend
     - docker push $BACKEND_IMAGE
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Back_main)$/'
+      changes:
+        - Backend/**/*
+      when: always
+    - when: never
   dependencies:
     - backend-build
-  only:
-    - Devops_config
-    - Devops_main
-    - master
-    - Back_main
 
 # ----------------
-# 3. Deploy to Server via SSH
+# 4. Frontend Docker Build & Push
 # ----------------
-deploy-to-server-a:
+frontend-build-docker:
+  stage: build-docker
+  image: docker:25
+  services:
+    - name: docker:dind
+      alias: docker
+      command: ["--host=tcp://0.0.0.0:2375"]
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+  before_script:
+    - docker info
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
+  script:
+    - docker build -t $FRONTEND_IMAGE ./Frontend
+    - docker push $FRONTEND_IMAGE
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Front_main)$/'
+      changes:
+        - Frontend/**/*
+      when: always
+    - when: never
+  dependencies:
+    - frontend-build
+
+# ----------------
+# 5. Deploy backend
+# ----------------
+deploy-backend:
   stage: deploy
   image: alpine:latest
+  needs:
+    - job: backend-build-docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Back_main)$/'
+      when: always
+    - when: never
   before_script:
-    # SSH 클라이언트 설치
     - apk add --no-cache openssh-client bash rsync
-    # Known hosts 등록 (호스트 key 체크 방지)
     - mkdir -p ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    # SSH 키 등록
     - eval "$(ssh-agent -s)"
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   script:
-    # SCP 대신 rsync 사용 (더 안정적)
-    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
-    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.server-a.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    # 파일 전송
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy-backend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.backend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
 
-    # .env 파일 생성 (Redis 관련 변수 제거)
+    # .env 파일 생성 (모든 Backend 환경변수 포함)
     - |
       ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
-      SPRING_REDIS_HOST=${REDIS_HOST}
-      SPRING_REDIS_PORT=${REDIS_PORT}
       DB_USER=${DB_USER}
       DB_PASSWORD=${DB_PASSWORD}
       DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       DB_NAME=${DB_NAME}
+
+      SPRING_REDIS_HOST=${REDIS_HOST}
+      SPRING_REDIS_PORT=${REDIS_PORT}
+
       JWT_SECRET=${JWT_SECRET}
       JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
       JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
+
       SPRING_KAFKA_BOOTSTRAP_SERVERS=${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+
       BACKEND_IMAGE=${BACKEND_IMAGE}
+
       GMS_OPENAI_API_KEY=${GMS_OPENAI_API_KEY}
       GMS_OPENAI_BASE_URL=${GMS_OPENAI_BASE_URL}
       GMS_OPENAI_COMPLETIONS_PATH=${GMS_OPENAI_COMPLETIONS_PATH}
       GMS_OPENAI_MODEL=${GMS_OPENAI_MODEL}
       GMS_OPENAI_TIMEOUT_MS=${GMS_OPENAI_TIMEOUT_MS}
       EOF"
+      
+      # 파일 실행
+    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-backend.sh && ./deploy-backend.sh '${DEPLOY_USER}'"
 
-    # 배포 스크립트 실행 (구문 오류 수정)
-    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy.sh && ./deploy.sh '${BACKEND_IMAGE}' '${DEPLOY_USER}'"
-  only:
-    - Devops_config
-    - Devops_main
-    - master
-    - Back_main
+# ----------------
+# 6. Deploy frontend
+# ----------------
+deploy-frontend:
+  stage: deploy
+  image: alpine:latest
+  needs:
+    - job: frontend-build-docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Front_main)$/'
+      when: always
+    - when: never
+  before_script:
+    - apk add --no-cache openssh-client bash rsync
+    - mkdir -p ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - eval "$(ssh-agent -s)"
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  script:
+      # 파일 전송
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy-frontend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.frontend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+
+      # 파일 실행
+    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-frontend.sh && ./deploy-frontend.sh '${FRONTEND_IMAGE}' '${DEPLOY_USER}'"
