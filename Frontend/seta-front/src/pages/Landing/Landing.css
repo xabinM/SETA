@@ -1,395 +1,444 @@
-/* 원본 디자인 그대로 + 최소한의 반응형만 추가 */
-/* stylelint-disable property-no-vendor-prefix */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* 강제로 어두운 배경 적용 */
-html, body, #root {
-  background: #010205 !important;
-}
-
-body {
-  background: #010205 !important;
-  color: #fff !important;
-}
-
-.frame {
-  background-color: #010205;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100vw;
+.landing-container {
+  width: 100%;
   height: 100vh;
-  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Arial', sans-serif;
+  perspective: 1000px;
+}
+
+/* 배경 어둠 오버레이 */
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%),
+    radial-gradient(circle at 30% 40%, rgba(0, 212, 170, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(29, 233, 182, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  backdrop-filter: blur(1px);
+}
+
+/* 커스텀 커서 - 제거됨 */
+
+/* 불용어 파티클들 */
+.particles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.stopword {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+  pointer-events: none;
+  user-select: none;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  transition: all 0.3s ease;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, color;
+  image-rendering: crisp-edges;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* SETA 로고 중심체 - 토네이도 블랙홀 효과 강화 */
+.logo-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  opacity: 0;
+  z-index: 500;
+  will-change: transform, scale, opacity;
+}
+
+.logo-center::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(
+    circle,
+    transparent 30%,
+    rgba(0, 212, 170, 0.1) 50%,
+    rgba(0, 212, 170, 0.2) 70%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  animation: blackHoleGlow 3s ease-in-out infinite;
+}
+
+.logo-center.active::before {
+  opacity: 1;
+}
+
+@keyframes blackHoleGlow {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2) rotate(180deg);
+    opacity: 0.6;
+  }
+}
+
+/* 로고 주변 링들 */
+.logo-outer-ring {
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  width: 140px;
+  height: 140px;
+  border: 2px solid rgba(0, 212, 170, 0.6);
+  border-radius: 50%;
+  border-style: dashed;
+  will-change: transform, scale, opacity;
+}
+
+.logo-inner-ring {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: 120px;
+  height: 120px;
+  border: 1px solid rgba(100, 255, 218, 0.8);
+  border-radius: 50%;
+  will-change: transform, scale, opacity;
+}
+
+/* SETA 로고 이미지 (.ico 파일) */
+.seta-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: 
+    drop-shadow(0 0 20px rgba(0, 212, 170, 0.8))
+    drop-shadow(0 0 40px rgba(29, 233, 182, 0.4))
+    brightness(1.2)
+    contrast(1.1);
+  will-change: transform, filter;
+}
+
+/* SETA 텍스트 */
+.seta-text-container {
+  position: absolute;
+  top: 65%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: 0;
+  z-index: 600;
+  will-change: transform, opacity;
+}
+
+.seta-text {
+  font-size: 72px;
+  font-weight: 900;
+  background: linear-gradient(45deg, #00d4aa, #64ffda, #1de9b6);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 8px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 30px rgba(100, 255, 218, 0.6));
+  animation: gradientShift 3s ease-in-out infinite;
+  will-change: filter;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.subtitle {
+  font-size: 20px;
+  color: rgba(100, 255, 218, 0.8);
+  font-weight: 300;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.4);
+}
+
+/* 진행 텍스트 */
+.progress-text {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translate(-50%, 20px);
+  text-align: center;
+  opacity: 0;
+  z-index: 700;
+  will-change: transform, opacity;
+}
+
+.step {
+  color: #64ffda;
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  text-shadow: 0 0 15px rgba(100, 255, 218, 0.6);
+}
+
+.loading-bar {
+  width: 400px;
+  height: 3px;
+  background: rgba(100, 255, 218, 0.2);
+  border-radius: 2px;
   overflow: hidden;
   position: relative;
 }
 
-.frame .overlap-group-wrapper {
+.loading-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00d4aa, #64ffda);
+  width: 100%;
+  transform: translateX(-100%);
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.8);
+  animation: loadingSlide 4s ease-in-out forwards;
+}
+
+@keyframes loadingSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(0%); }
+}
+
+/* HUD 요소들 - 스캔라인 제거 */
+.hud-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 100;
+  will-change: opacity;
 }
 
-.frame .overlap-group {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* 배경 블러 요소들 - 원본 그대로 */
-.frame .ellipse {
+.hud-corner {
   position: absolute;
-  width: 60vw;
-  height: 60vh;
-  top: 20vh;
-  left: 70vw;
-  background-color: #0d051a;
-  border-radius: 50%;
-  filter: blur(min(15vw, 200px));
-  transform: translate(-50%, -50%);
-  opacity: 0.8;
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgba(100, 255, 218, 0.6);
+  transition: border-color 0.3s ease;
 }
 
-.frame .div {
-  position: absolute;
-  width: 60vw;
-  height: 80vh;
-  top: 10vh;
-  left: 70vw;
-  background-color: #050d26;
-  border-radius: 50% / 70%;
-  filter: blur(min(20vw, 250px));
-  transform: translate(-50%, -50%);
-}
-
-.frame .ellipse-2 {
-  position: absolute;
-  width: 100vw;
-  height: 60vh;
-  top: 30vh;
-  left: 40vw;
-  background-color: #030814;
-  border-radius: 50% / 30%;
-  transform: translate(-50%, -50%) rotate(-90deg);
-  filter: blur(min(20vw, 250px));
-}
-
-.frame .ellipse-3 {
-  position: absolute;
-  width: 60vw;
-  height: 60vh;
-  top: 25vh;
-  left: 20vw;
-  background-color: #14051f;
-  border-radius: 50%;
-  filter: blur(min(20vw, 250px));
-  transform: translate(-50%, -50%);
-}
-
-.frame .ellipse-4 {
-  position: absolute;
-  width: 60vw;
-  height: 60vh;
-  top: 70vh;
-  left: 30vw;
-  background-color: #080f2e;
-  border-radius: 50%;
-  filter: blur(min(20vw, 250px));
-  transform: translate(-50%, -50%);
-}
-
-/* 별들 - 원본 그대로 */
-.frame .star {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  top: 20vh;
-  left: 20vw;
-  background-color: #e5f2ff;
-  border-radius: 4px;
-}
-
-.frame .star-2 {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  top: 30vh;
-  left: 75vw;
-  background-color: #cce5ff;
-  border-radius: 3px;
-}
-
-.frame .star-3 {
+.hud-corner::before {
+  content: '';
   position: absolute;
   width: 10px;
   height: 10px;
-  top: 15vh;
-  left: 55vw;
-  background-color: #ffe5cc;
-  border-radius: 5px;
+  background: rgba(100, 255, 218, 0.8);
+  border-radius: 50%;
 }
 
-.frame .star-4 {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  top: 75vh;
-  left: 80vw;
-  background-color: #b2ccff;
-  border-radius: 2.5px;
+.hud-top-left {
+  top: 30px;
+  left: 30px;
+  border-right: none;
+  border-bottom: none;
 }
 
-.frame .star-5 {
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  top: 80vh;
-  left: 60vw;
-  background-color: #e5d9ff;
-  border-radius: 3.5px;
+.hud-top-left::before {
+  top: -5px;
+  left: -5px;
 }
 
-/* SETA 메인 텍스트 - 원본 완전 그대로 */
-.frame .text-wrapper {
-  position: absolute;
-  width: min(858px, 80vw);
-  height: min(622px, 60vh);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 3;
+.hud-top-right {
+  top: 30px;
+  right: 30px;
+  border-left: none;
+  border-bottom: none;
+}
 
-  font-family: 'Knewave';
-  font-style: normal;
-  font-weight: 400;
-  font-size: min(400px, 25vw);
-  line-height: min(622px, 60vh);
+.hud-top-right::before {
+  top: -5px;
+  right: -5px;
+}
+
+.hud-bottom-left {
+  bottom: 30px;
+  left: 30px;
+  border-right: none;
+  border-top: none;
+}
+
+.hud-bottom-left::before {
+  bottom: -5px;
+  left: -5px;
+}
+
+.hud-bottom-right {
+  bottom: 30px;
+  right: 30px;
+  border-left: none;
+  border-top: none;
+}
+
+.hud-bottom-right::before {
+  bottom: -5px;
+  right: -5px;
+}
+
+.scan-line {
+  display: none; /* 스캔라인 완전 제거 */
+}
+
+.data-stream {
+  position: absolute;
+  top: 80px;
+  right: 80px;
   display: flex;
-  align-items: center;
-  text-align: center;
-
-  /* 밝은 파란색 그라디언트 */
-  background: linear-gradient(180deg, #6699DA 25.88%, #5783BB 46.97%, #43648F 76.76%, #365173 95.5%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-
-  /* 검정색 문제 해결 - drop-shadow로 스트로크 구현 */
-  filter:
-      drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
-      drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
-      drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
-      drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
-      drop-shadow(0 15px 30px rgba(0, 0, 0, 0.6))
-      drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4))
-      drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))
-      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-
-  mix-blend-mode: hard-light;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(100, 255, 218, 0.8);
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 5px rgba(100, 255, 218, 0.3);
 }
 
-/* =========[ 거울 리플렉션 1: text-wrapper-2 ]========= */
-.frame .text-wrapper-2 {
-  position: absolute;
-  width: min(858px, 80vw);
-  height: min(622px, 60vh);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, calc(-50% + 350px)) scaleY(-1);
-  z-index: 2;
-
-  font-family: 'Knewave';
-  font-style: normal;
-  font-weight: 400;
-  font-size: min(400px, 25vw);
-  line-height: min(622px, 60vh);
-  display: flex;
-  align-items: flex-start;
-  text-align: center;
-
-  background: linear-gradient(
-      180deg,
-      rgba(102,153,218,0.8) 0%,
-      rgba(87,131,187,0.6) 20%,
-      rgba(67,100,143,0.4) 40%,
-      rgba(54,81,115,0.2) 60%,
-      rgba(54,81,115,0.1) 80%,
-      rgba(54,81,115,0.05) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-
-  mix-blend-mode: normal;
-  filter: blur(15px);
-  opacity: 0.4;
-
-  /* 부드러운 페이드아웃 — 표준 마스크 */
-  mask-image: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.8) 0%,
-      rgba(0,0,0,0.6) 25%,
-      rgba(0,0,0,0.3) 50%,
-      rgba(0,0,0,0.1) 75%,
-      rgba(0,0,0,0) 100%
-  );
-  mask-repeat: no-repeat;
-  mask-size: 100% 100%;
-  mask-position: 0 0;
+.data-stream span {
+  opacity: 0;
+  transform: translateX(30px);
+  padding: 8px 12px;
+  background: rgba(0, 212, 170, 0.1);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  border-radius: 4px;
+  backdrop-filter: blur(5px);
 }
 
-/* =========[ 거울 리플렉션 3: text-wrapper-4 ]========= */
-.frame .text-wrapper-4 {
-  position: absolute;
-  width: min(858px, 80vw);
-  height: min(622px, 60vh);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, calc(-50% + 350px)) scaleY(-1);
-  z-index: 3;
-
-  font-family: 'Knewave';
-  font-style: normal;
-  font-weight: 400;
-  font-size: min(400px, 25vw);
-  line-height: min(622px, 60vh);
-  display: flex;
-  align-items: flex-start;
-  text-align: center;
-
-  background: linear-gradient(
-      180deg,
-      rgba(102,153,218,0.3) 0%,
-      rgba(87,131,187,0.2) 20%,
-      rgba(67,100,143,0.1) 40%,
-      rgba(54,81,115,0.05) 60%,
-      rgba(54,81,115,0.02) 80%,
-      rgba(54,81,115,0) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-
-  mix-blend-mode: normal;
-  filter: blur(3px);
-  opacity: 0.6;
-
-  /* 부드러운 페이드아웃 — 표준 마스크 */
-  mask-image: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.9) 0%,
-      rgba(0,0,0,0.7) 30%,
-      rgba(0,0,0,0.4) 60%,
-      rgba(0,0,0,0.1) 80%,
-      rgba(0,0,0,0) 100%
-  );
-  mask-repeat: no-repeat;
-  mask-size: 100% 100%;
-  mask-position: 0 0;
+.data-stream span::before {
+  content: '> ';
+  color: #00d4aa;
 }
 
-/* =========[ 거울 리플렉션 2: text-wrapper-3 ]========= */
-.frame .text-wrapper-3 {
-  position: absolute;
-  width: min(858px, 80vw);
-  height: min(622px, 60vh);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, calc(-50% + 311px)) scaleY(-1);
-  z-index: 1;
-
-  font-family: 'Knewave';
-  font-style: normal;
-  font-weight: 400;
-  font-size: min(400px, 25vw);
-  line-height: min(622px, 60vh);
-  display: flex;
-  align-items: flex-start;
-  text-align: center;
-
-  background: linear-gradient(
-      180deg,
-      rgba(102,153,218,0.6) 0%,
-      rgba(87,131,187,0.4) 20%,
-      rgba(67,100,143,0.25) 40%,
-      rgba(54,81,115,0.15) 60%,
-      rgba(54,81,115,0.08) 80%,
-      rgba(54,81,115,0.02) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-
-  mix-blend-mode: normal;
-  filter: blur(0px);
-  opacity: 0.8;
-
-  /* 선 아래는 거의 안 보이게 — 표준 마스크 */
-  mask-image: linear-gradient(
-      to bottom,
-      rgba(0,0,0,1) 0%,
-      rgba(0,0,0,0.8) 30%,
-      rgba(0,0,0,0.2) 60%,
-      rgba(0,0,0,0) 80%
-  );
-  mask-repeat: no-repeat;
-  mask-size: 100% 100%;
-  mask-position: 0 0;
+/* 성능 최적화를 위한 will-change 및 transform3d 활용 */
+.stopword,
+.logo-center,
+.seta-text-container,
+.progress-text,
+.cursor {
+  transform: translate3d(0, 0, 0);
 }
 
-/* 모바일 최적화 - 원본 그대로 */
+/* 반응형 */
 @media (max-width: 768px) {
-  .frame .text-wrapper {
-    font-size: clamp(4rem, 18vw, 22rem);
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  .seta-text {
+    font-size: 54px;
+    letter-spacing: 4px;
   }
-
-  .frame .text-wrapper-2 {
-    font-size: clamp(4rem, 18vw, 22rem);
-    top: calc(50% + clamp(3rem, 10vw, 15rem));
+  
+  .subtitle {
+    font-size: 16px;
+    letter-spacing: 2px;
   }
-
-  .frame .text-wrapper-3 {
-    font-size: clamp(4rem, 18vw, 22rem);
-    top: calc(50% + clamp(1.5rem, 6vw, 10rem));
+  
+  .logo-center {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .logo-outer-ring {
+    width: 120px;
+    height: 120px;
+    top: -30px;
+    left: -30px;
+  }
+  
+  .logo-inner-ring {
+    width: 100px;
+    height: 100px;
+    top: -20px;
+    left: -20px;
+  }
+  
+  .progress-text {
+    bottom: 60px;
+  }
+  
+  .loading-bar {
+    width: 300px;
+  }
+  
+  .step {
+    font-size: 18px;
+  }
+  
+  .data-stream {
+    right: 30px;
+    top: 80px;
+    font-size: 11px;
+  }
+  
+  .hud-corner {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .hud-top-left,
+  .hud-top-right,
+  .hud-bottom-left,
+  .hud-bottom-right {
+    margin: 20px;
   }
 }
 
-/* 세로 모드 - 원본 그대로 */
-@media (orientation: portrait) {
-  .frame .text-wrapper,
-  .frame .text-wrapper-2,
-  .frame .text-wrapper-3 {
-    font-size: clamp(3rem, 16vw, 20rem);
+@media (max-width: 480px) {
+  .seta-text {
+    font-size: 42px;
+    letter-spacing: 2px;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  
+  .loading-bar {
+    width: 250px;
+  }
+  
+  .data-stream {
+    display: none; /* 작은 화면에서는 숨김 */
   }
 }
 
-/* 성능 최적화 - 원본 그대로 */
-.frame .text-wrapper,
-.frame .text-wrapper-2,
-.frame .text-wrapper-3 {
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-/* 접근성 - 원본 그대로 */
+/* 접근성: 모션 민감도 사용자 배려 */
 @media (prefers-reduced-motion: reduce) {
-  .frame .text-wrapper {
-    transform: translate(-50%, -50%);
+  .stopword,
+  .logo-center,
+  .scan-line,
+  .seta-text {
+    animation: none !important;
   }
-  .frame .text-wrapper-2,
-  .frame .text-wrapper-3 {
-    filter: none;
+  
+  .cursor {
+    display: none;
+  }
+}
+
+/* 브라우저 최적화 */
+@supports (backdrop-filter: blur(10px)) {
+  .data-stream span {
+    backdrop-filter: blur(10px);
   }
 }
