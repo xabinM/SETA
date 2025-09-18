@@ -13,12 +13,14 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = Field("INFO", env="LOG_LEVEL")
     ENVIRONMENT: str = Field("development", env="ENVIRONMENT")
 
+    FILTER_MODEL_PATH: str = Field("/app/models/filter", env="FILTER_MODEL_PATH")
+    
     # Elasticsearch
     ELASTICSEARCH_URL: str = Field("http://elasticsearch:9200", env="ELASTICSEARCH_URL")
     EMBED_INDEX_NAME: str = Field("user_memory_embedding", env="EMBED_INDEX_NAME")
 
     # Embedding
-    EMBEDDING_MODEL_PATH: str = Field("/opt/models/embedding", env="EMBEDDING_MODEL_PATH")
+    EMBEDDING_MODEL_PATH: str = Field("/app/models/embedding", env="EMBEDDING_MODEL_PATH")
     EMBED_DIMS: int = Field(768, env="EMBED_DIMS")
 
     # GPT(GMS)
