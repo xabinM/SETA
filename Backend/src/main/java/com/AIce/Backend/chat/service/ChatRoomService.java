@@ -1,14 +1,15 @@
 package com.AIce.Backend.chat.service;
 
+import com.AIce.Backend.auth.exception.NotFoundUserException;
 import com.AIce.Backend.chat.dto.ChatMessageResponse;
 import com.AIce.Backend.chat.dto.ChatRoomResponse;
 import com.AIce.Backend.chat.exception.NotFoundChatRoomException;
 import com.AIce.Backend.domain.chat.entity.ChatMessage;
 import com.AIce.Backend.domain.chat.entity.ChatRoom;
-import com.AIce.Backend.domain.chat.entity.RoomSummaryState;
 import com.AIce.Backend.domain.chat.repository.ChatMessageRepository;
 import com.AIce.Backend.domain.chat.repository.ChatRoomRepository;
 import com.AIce.Backend.domain.chat.repository.RoomSummaryStateRepository;
+import com.AIce.Backend.domain.user.entity.User;
 import com.AIce.Backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,10 @@ public class ChatRoomService {
 
     @Transactional
     public ChatRoomResponse createRoom(Long userId) {
+        User user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new NotFoundUserException();
+        }
         ChatRoom room = ChatRoom.builder()
                 .user(userRepository.findByUserId(userId))
                 .title("New Chat")
@@ -66,6 +71,8 @@ public class ChatRoomService {
     public void deleteRoom(Long userId, UUID roomId) {
         ChatRoom room = chatRoomRepository.findByChatRoomIdAndUser(roomId, userRepository.findByUserId(userId))
                 .orElseThrow(() -> new NotFoundChatRoomException("ChatRoom not found"));
+        chatMessageRepository.deleteAllByChatRoom_ChatRoomId(roomId);
+        roomSummaryStateRepository.deleteByChatRoom_ChatRoomId(roomId);
         chatRoomRepository.delete(room);
     }
 
