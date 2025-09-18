@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings 
 from pydantic import Field
+from typing import Optional
 
 class Settings(BaseSettings):
     API_TITLE: str = "SETA ML API"
@@ -27,7 +28,7 @@ class Settings(BaseSettings):
     # Redis (필요 시)
     REDIS_HOST: str = Field("redis", env="REDIS_HOST")
     REDIS_PORT: int = Field(6379, env="REDIS_PORT")
-    REDIS_PASSWORD: str | None = Field(None, env="REDIS_PASSWORD")
+    REDIS_PASSWORD: Optional[str] = Field(default=None, env="REDIS_PASSWORD")
 
     class Config:
         env_file = ".env"

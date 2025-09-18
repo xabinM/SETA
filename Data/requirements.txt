@@ -1,12 +1,23 @@
+# Web framework
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
+
+# Config & Env
 python-dotenv==1.0.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
 
+# Data stores
 elasticsearch==8.11.1
 redis==5.0.8
-sentence-transformers==2.2.2
-torch>=2.0.0
-transformers>=4.30.0
 requests==2.32.3
+
+# Embedding / NLP
+sentence-transformers==2.2.2
+transformers>=4.30.0
+
+# PyTorch (CPU 전용, 빌드 속도 최적화)
+torch==2.0.1+cpu
+torchvision==0.15.2+cpu
+torchaudio==2.0.2+cpu
+-f https://download.pytorch.org/whl/cpu/torch_stable.html
