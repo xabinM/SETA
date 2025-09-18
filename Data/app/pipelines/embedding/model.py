@@ -35,10 +35,13 @@ def get_model() -> Optional[SentenceTransformer]:
             _model = None
     return _model
 
-
 def get_embedding(text: str) -> list[float]:
     m = get_model()
     if m is None:
         return _fallback_hash_embedding(text)
-    emb = m.encode(text, normalize_embeddings=True)
-    return emb.tolist() if hasattr(emb, "tolist") else list(emb)
+    emb = m.encode(
+        [text],
+        convert_to_numpy=True,
+        normalize_embeddings=True
+    )[0]
+    return emb.tolist()
