@@ -33,10 +33,17 @@ def search_similar(
             "k": k,
             "num_candidates": num_candidates,
         },
+        "query": {
+            "bool": {
+                "filter": [
+                    {"term": {"user_seq": str(user_seq)}}
+                ]
+            }
+        },
         "size": k,
-        "filter": [{"term": {"user_seq": str(user_seq)}}],
     }
 
+    # min_score는 최상위에서 지원됨
     kwargs = {"index": INDEX_NAME, "body": body}
     if isinstance(min_score, (int, float)):
         kwargs["min_score"] = float(min_score)
@@ -53,7 +60,7 @@ def search_similar(
         for h in hits
     ]
 
-    # min_score 필터링
+    # min_score 필터링 (추가 안전장치)
     if isinstance(min_score, (int, float)):
         results = [
             r for r in results if r["score"] is not None and r["score"] >= float(min_score)
