@@ -15,8 +15,10 @@ import io.micrometer.tracing.Tracer;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,18 +34,20 @@ public class ChatMessageService {
     private final ChatKafkaProducer producer;
     private final ChatRoomTitleService chatRoomTitleService;
     private final DropResponder dropResponder;
+    private final StringRedisTemplate redisTemplate;
+
+    private static final String TURN_KEY_PREFIX = "chat:turn:";
 
     @Observed(name = "chat.handleUserMessage")
     @Transactional
     public void handleUserMessage(String roomId, Long userId, String text) {
         String traceId = tracer.currentSpan().context().traceId();
-
-        var roomUuid = UUID.fromString(roomId);
-        var room = chatRoomrepo.findById(roomUuid)
+        UUID roomUuid = UUID.fromString(roomId);
+        ChatRoom room = chatRoomrepo.findById(roomUuid)
                 .orElseThrow(() -> new IllegalArgumentException("chat room not found: " + roomUuid));
 
         // turn 계산
-        int turnIdx = chatMessagerepo.findMaxTurnIndex(room.getChatRoomId()) + 1;
+        int turnIdx = getNextTurnIndexForUser(room.getChatRoomId());
 
         // DB 저장
         ChatMessage entity = ChatMessage.builder()
@@ -85,7 +89,7 @@ public class ChatMessageService {
         String content = out.getResponse() != null ? out.getResponse().getText() : "";
 
         // turn 계산
-        int turnIndex = chatMessagerepo.findMaxTurnIndex(room.getChatRoomId());
+        int turnIndex = getCurrentTurnIndex(room.getChatRoomId());
 
         ChatMessage saved = chatMessagerepo.save(ChatMessage.builder()
             .chatRoom(room)
@@ -107,7 +111,7 @@ public class ChatMessageService {
         String content = text != null ? text : "";
 
         // turn 계산
-        int turnIndex = chatMessagerepo.findMaxTurnIndex(room.getChatRoomId());
+        int turnIndex = getCurrentTurnIndex(room.getChatRoomId());
 
         ChatMessage saved = chatMessagerepo.save(ChatMessage.builder()
                 .chatRoom(room)
@@ -119,5 +123,34 @@ public class ChatMessageService {
                 .turnIndex(turnIndex)
                 .build());
         return content;
+    }
+
+    // === Turn Index Util ===
+    private int getNextTurnIndexForUser(UUID roomId) {
+        String key = TURN_KEY_PREFIX + roomId;
+
+        // Redis에 값 없으면 DB에서 조회 (최초 1회)
+        if (!Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+            int maxTurn = chatMessagerepo.findMaxTurnIndex(roomId);
+            // DB 값이 0이면 아직 메시지 없음 → 0 저장
+            redisTemplate.opsForValue().set(key, String.valueOf(maxTurn));
+        }
+
+        // User 메시지는 새로운 턴 시작 → INCR
+        Long next = redisTemplate.opsForValue().increment(key);
+        return next != null ? next.intValue() : 1;
+    }
+
+    private int getCurrentTurnIndex(UUID roomId) {
+        String key = TURN_KEY_PREFIX + roomId;
+
+        String cached = redisTemplate.opsForValue().get(key);
+        if (cached != null) {
+            return Integer.parseInt(cached);
+        }
+
+        // 안전장치: Redis에 없으면 DB fallback
+        int maxTurn = chatMessagerepo.findMaxTurnIndex(roomId);
+        return maxTurn > 0 ? maxTurn : 1;
     }
 }

@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: msk
+    active: local
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}        # PostgreSQL JDBC URL
