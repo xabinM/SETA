@@ -20,6 +20,7 @@ pipeline {
         EMBED_INDEX_NAME = credentials('embed-index-name')
         EMBEDDING_MODEL_PATH = credentials('embedding-model-path')
         EMBED_DIMS = credentials('embed-dims')
+        FILTER_MODEL_PATH = credentials('filter-model-path')
     }
     
     stages {
@@ -53,6 +54,7 @@ pipeline {
                             echo 'EMBED_INDEX_NAME=${EMBED_INDEX_NAME}' >> .env &&
                             echo 'EMBEDDING_MODEL_PATH=${EMBEDDING_MODEL_PATH}' >> .env &&
                             echo 'EMBED_DIMS=${EMBED_DIMS}' >> .env &&
+                            echo 'FILTER_MODEL_PATH=${FILTER_MODEL_PATH}' >> .env &&
                             echo 'LOG_LEVEL=INFO' >> .env &&
                             echo 'Forcefully stopping and cleaning up ML API containers...' &&
                             docker-compose down --remove-orphans --volumes || true &&
