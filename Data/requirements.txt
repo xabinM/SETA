@@ -14,7 +14,7 @@ requests==2.32.3
 
 # Embedding / NLP
 sentence-transformers==2.6.1
-transformers==4.33.3
+transformers==4.35.2
 huggingface-hub==0.17.3
 
 # PyTorch (CPU 전용, 빌드 속도 최적화)
