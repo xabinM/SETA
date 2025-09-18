@@ -88,7 +88,7 @@ pipeline {
                             echo 'Files in Spark directory:' &&
                             ls -la &&
                             echo 'Forcefully stopping existing Spark services...' &&
-                            docker-compose down --remove-orphans --volumes || true &&
+                            docker-compose down --remove-orphans || true &&
                             docker container prune -f || true &&
                             docker network prune -f || true &&
                             echo 'Checking for Spark port conflicts...' &&
@@ -147,7 +147,6 @@ pipeline {
                         echo 'Cleaning up unused Docker resources...' &&
                         docker image prune -f || true &&
                         docker builder prune -af || true &&
-                        docker volume prune -f || true &&
                         echo 'Cleanup completed'
                     "
                 '''

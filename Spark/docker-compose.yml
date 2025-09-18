@@ -20,6 +20,8 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       CLUSTER_ID: 'Yg5tAiu6RQe1kLIgFfjVwQ'
+    volumes:
+      - kafka-data:/var/lib/kafka/data
     healthcheck:
       test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
       interval: 30s
@@ -43,3 +45,5 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+volumes:
+  kafka-data:
