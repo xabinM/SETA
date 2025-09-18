@@ -37,7 +37,7 @@ logging:
 gms:
   openai:
     base-url: ${GMS_OPENAI_BASE_URL}
-    completions-path: ${GMS_OPENAI_ㄱCOMPLETIONS_PATH}
+    completions-path: ${GMS_OPENAI_COMPLETIONS_PATH}
     model: ${GMS_OPENAI_MODEL}
     api-key: ${GMS_OPENAI_API_KEY}
     timeout-ms: ${GMS_OPENAI_TIMEOUT_MS}
