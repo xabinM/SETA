@@ -130,6 +130,8 @@ deploy-backend:
     - job: backend-build-docker
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Back_main)$/'
+      changes:
+        - Backend/**/*
       when: always
     - when: never
   before_script:
@@ -183,6 +185,8 @@ deploy-frontend:
     - job: frontend-build-docker
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Front_main)$/'
+      changes:
+        - Frontend/**/*
       when: always
     - when: never
   before_script:
