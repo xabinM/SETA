@@ -41,9 +41,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         
                         .requestMatchers(
-                                "/auth/signup",
-                                "/auth/login",
-                                "/auth/reissue",
+                                "/api/auth/signup",
+                                "/api/auth/login",
+                                "/api/auth/reissue",
                                 "/actuator/**"
                         ).permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
