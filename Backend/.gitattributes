@@ -1,3 +1,5 @@
 /gradlew text eol=lf
 *.bat text eol=crlf
 *.jar binary
+*.sql text eol=lf working-tree-encoding=UTF-8
+*.yml text eol=lf

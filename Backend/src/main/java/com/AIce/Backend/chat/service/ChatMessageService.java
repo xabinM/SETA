@@ -14,6 +14,7 @@ import io.micrometer.observation.annotation.Observed;
 import io.micrometer.tracing.Tracer;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatMessageService {
@@ -43,11 +45,14 @@ public class ChatMessageService {
     public void handleUserMessage(String roomId, Long userId, String text) {
         String traceId = tracer.currentSpan().context().traceId();
         UUID roomUuid = UUID.fromString(roomId);
+        log.info("[HandleMessage] roomId={} userId={} traceId={} text='{}'",
+                roomId, userId, traceId, text);
         ChatRoom room = chatRoomrepo.findById(roomUuid)
                 .orElseThrow(() -> new IllegalArgumentException("chat room not found: " + roomUuid));
 
         // turn 계산
         int turnIdx = getNextTurnIndexForUser(room.getChatRoomId());
+        log.debug("[HandleMessage] roomId={} turnIdx={}", roomId, turnIdx);
 
         // DB 저장
         ChatMessage entity = ChatMessage.builder()
@@ -62,11 +67,14 @@ public class ChatMessageService {
         chatMessagerepo.save(entity);
 
         if (turnIdx == 1) {
+            log.info("[HandleMessage] trigger title update for roomId={}", roomId);
             // 요약 비동기 + 타임아웃 + 폴백 처리
             chatRoomTitleService.tryUpdateTitleAsync(roomUuid, text);
         }
 
         // raw 발행
+        log.debug("[HandleMessage] publishing raw to Kafka traceId={} roomId={}", traceId, roomId);
+
         var payload = new RawRequestV1();
         payload.setTrace_id(traceId);
         payload.setRoom_id(roomId);
