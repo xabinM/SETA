@@ -15,10 +15,38 @@ const meTrees: Tree[] = [
 ];
 
 const meKpis: KPI[] = [
-    { icon: "💰", value: "₩2,480", label: "누적 비용 절약", hint: "평균 ₩2.00/토큰" },
-    { icon: "🌍", value: "0.8kg",  label: "CO₂ 절감량",    hint: "나무 3그루 흡수량과 동일" },
-    { icon: "⚡", value: "2.4kWh",  label: "에너지 절약",    hint: "가정용 전력 1일 사용량" },
-    { icon: "📈", value: "15일",    label: "연속 절약 일수", hint: "하루 83토큰 절약" },
+    {
+        icon: "💰",
+        value: "₩2,480",
+        label: "누적 비용 절약",
+        hint: "평균 ₩2.00/토큰"
+    },
+    {
+        icon: "🌍",
+        value: "0.8kg",
+        label: "CO₂ 절감량",
+        hint: "나무 3그루 흡수량과 동일"
+    },
+    {
+        icon: (
+            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png" alt="High Voltage" width="25" height="25" />
+        ),
+        value: "2.4kWh",
+        label: "에너지 절약",
+        hint: "가정용 전력 1일 사용량"
+    },
+    {
+        icon: (
+            <img
+                src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Spiral%20Calendar.png"
+                alt="Spiral Calendar"
+                width={25}
+                height={25}
+            />
+        ),
+        value: "15일",
+        label: "연속 절약 일수",
+        hint: "하루 83토큰 절약" },
 ];
 
 const meTimeline: TimelineItem[] = [
@@ -40,11 +68,40 @@ const allTrees: Tree[] = [
     { emoji: "🌴", label: `${fmt(30000)}토큰`,  achieved: false },
 ];
 
-const allKpis: KPI[] = [
-    { icon: "💰", value: "₩27,350", label: "누적 비용 절약", hint: "평균 ₩2.03/토큰" },
-    { icon: "🌍", value: "9.1kg",   label: "CO₂ 절감량",    hint: "나무 36그루 흡수량과 동일" },
-    { icon: "⚡", value: "24.8kWh", label: "에너지 절약",    hint: "소형 사무실 1일 사용량" },
-    { icon: "📈", value: "22일",    label: "연속 절약 일수", hint: "하루 612토큰 절약" },
+export const allKpis: KPI[] = [
+    {
+        icon: "💰",
+        value: "₩27,350",
+        label: "누적 비용 절약",
+        hint: "평균 ₩2.03/토큰"
+    },
+    {
+        icon: "🌍",
+        value: "9.1kg",
+        label: "CO₂ 절감량",
+        hint: "나무 36그루 흡수량과 동일"
+    },
+    {
+        icon: (
+            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png" alt="High Voltage" width="25" height="25" />
+        ),
+        value: "24.8kWh",
+        label: "에너지 절약",
+        hint: "소형 사무실 1일 사용량"
+    },
+    {
+        icon: (
+            <img
+                src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Spiral%20Calendar.png"
+                alt="Spiral Calendar"
+                width={25}
+                height={25}
+            />
+        ),
+        value: "22일",
+        label: "연속 절약 일수",
+        hint: "하루 612토큰 절약",
+    },
 ];
 
 const allTimeline: TimelineItem[] = [

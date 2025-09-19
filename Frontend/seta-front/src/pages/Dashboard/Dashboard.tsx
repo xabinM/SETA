@@ -5,7 +5,7 @@ import ChatBg from "@/assets/ChatBackground.png";
 
 /* ===== Modals ===== */
 import TreeModal from "@/ui/components/Modal/TreeModal/TreeModal";
-import { treeModalDataByScope } from "@/ui/components/Modal/TreeModal/data.ts";
+import { treeModalDataByScope } from "@/ui/components/Modal/TreeModal/data";
 import CarModal from "@/ui/components/Modal/CarModal/CarModal";
 import { mockCarModalData } from "@/ui/components/Modal/CarModal/data";
 

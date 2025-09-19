@@ -1,14 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import "./TreeModal.css";
-import type { TreeModalProps } from "./types.ts";
-
-interface TimelineItem {
-    icon: React.ReactNode;
-    title: string;
-    date: string;
-    desc: string;
-}
+import type { TreeModalProps, TimelineItem } from "./types"; // ← 여기서 TimelineItem 사용
 
 export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline }: TreeModalProps) {
     const shellRef = useRef<HTMLDivElement>(null);
@@ -52,39 +45,22 @@ export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline
     };
 
     return createPortal(
-        <div
-            className="treemodal-backdrop"
-            onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
-        >
-            <div
-                ref={shellRef}
-                className="treemodal-shell"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="lgm-hero-title"
-            >
+        <div className="treemodal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+            <div ref={shellRef} className="treemodal-shell" role="dialog" aria-modal="true" aria-labelledby="lgm-hero-title">
                 <main className="lgm-container">
                     {/* X 버튼 */}
-                    <button
-                        type="button"
-                        className="lgm-close"
-                        aria-label="닫기"
-                        onClick={onClose}
-                    >
+                    <button type="button" className="lgm-close" aria-label="닫기" onClick={onClose}>
                         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                            <path
-                                d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                            />
+                            <path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                         </svg>
                     </button>
 
                     {/* Hero */}
                     <section className="lgm-card" aria-labelledby="lgm-hero-title">
                         <div className="lgm-header">
-                            <div className="lgm-badge" aria-hidden="true">🌱</div>
+                            <div className="lgm-badge" aria-hidden="true">
+                                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Christmas%20Tree.png" alt="Christmas Tree" width="50" height="50" />
+                            </div>
                             <h1 id="lgm-hero-title" className="lgm-title">MY SETA TREE</h1>
                         </div>
                         <p className="lgm-subtitle">
@@ -100,11 +76,7 @@ export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline
                                 const isAchieved = getTreeStatus(i);
                                 return (
                                     <div key={i} className={`lgm-tree ${isAchieved ? "lgm-tree--ok" : ""}`}>
-                                        <div
-                                            className="lgm-tree__emoji"
-                                            aria-hidden="true"
-                                            style={{ opacity: isAchieved ? 1 : i === trees.length - 1 ? .35 : .65 }}
-                                        >
+                                        <div className="lgm-tree__emoji" aria-hidden="true" style={{ opacity: isAchieved ? 1 : i === trees.length - 1 ? .35 : .65 }}>
                                             {t.emoji}
                                         </div>
                                         <div className={`lgm-tag ${isAchieved ? "lgm-tag--ok" : ""}`}>{t.label}</div>
@@ -116,15 +88,11 @@ export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline
 
                     {/* Progress */}
                     <section className="lgm-card" aria-labelledby="lgm-progress-title">
-                        <h2 id="lgm-progress-title" className="lgm-section-title">🎯 다음 나무까지의 진행상황</h2>
+                        <h2 id="lgm-progress-title" className="lgm-section-title">
+                            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Maracas.png" alt="Maracas" width="25" height="25" /> 다음 나무까지의 진행상황
+                        </h2>
                         <div className="lgm-progress">
-                            <div
-                                className="lgm-bar"
-                                role="progressbar"
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                                aria-valuenow={pct}
-                            >
+                            <div className="lgm-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
                                 <div className="lgm-fill" style={{ width: `${pct}%` }} />
                                 <div className="lgm-pct">{pct}%</div>
                             </div>
@@ -152,9 +120,7 @@ export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline
 
                     {/* Timeline */}
                     <section className="lgm-card" aria-labelledby="lgm-timeline-title">
-                        <h2 id="lgm-timeline-title" className="lgm-section-title" style={{ marginBottom: 8 }}>
-                            🌳 나무 심기 여정
-                        </h2>
+                        <h2 id="lgm-timeline-title" className="lgm-section-title" style={{ marginBottom: 8 }}>🌳 나무 심기 여정</h2>
                         <div className="lgm-timeline">
                             {timeline.map((t, i) => {
                                 const status = getTimelineStatus(t, i);
@@ -164,12 +130,7 @@ export default function TreeModal({ open, onClose, tokens, trees, kpis, timeline
                                         <div className="lgm-card-lite">
                                             <div className="lgm-item__head">
                                                 <h3 className="lgm-stage">{t.title}</h3>
-                                                <span
-                                                    className={`lgm-st ${
-                                                        status === "done" ? "lgm-st--done" :
-                                                            status === "progress" ? "lgm-st--progress" : ""
-                                                    }`}
-                                                >
+                                                <span className={`lgm-st ${status === "done" ? "lgm-st--done" : status === "progress" ? "lgm-st--progress" : ""}`}>
                           {status === "done" ? "완료" : status === "progress" ? "진행중" : "예정"}
                         </span>
                                             </div>

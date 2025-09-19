@@ -134,19 +134,17 @@
 /* ===== Hero ===== */
 .lgm-header{ display:flex; align-items:center; justify-content:center; gap:14px; text-align:center; flex-wrap:wrap; }
 .lgm-badge{
-    position: relative;
-    width:60px;height:60px;
-    border-radius:50%;
-    display:grid; place-items:center;
-    background:var(--glass-bg);
-    border:1px solid var(--border);
-    /* 배지는 유리 느낌 유지 */
-    backdrop-filter:blur(16px) saturate(115%);
-    -webkit-backdrop-filter:blur(16px) saturate(115%);
-    font-size:28px;
-    transition:transform .2s ease;
-    overflow: clip;
+    background: none;
+    border: 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    place-items: center;
+    font-size: 28px;
 }
+
 .lgm-badge:hover{ transform:scale(1.02); }
 .lgm-badge::after{
     content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
