@@ -2,17 +2,16 @@
 # Kafka -> Spark Structured Streaming
 # 1) filter_word.json 기반으로 트리거 탐지/제거
 # 2) 비트마스크 및 우선순위 결정
-# 3) 남은 내용이 의미 없으면 response.json에서 neutral 톤 3문장 중 랜덤 반환
+# 3) 남은 내용이 의미 없으면 빈 텍스트('') 반환
 # 4) 남아있으면 그 남은 텍스트를 반환
+# 5) Kafka 토픽 던지기
 #
 # 실행 전 요구:
 # - Kafka 접속 가능
-# - filter_word.json / response.json 파일이 현재 작업 디렉터리에 존재
+# - filter_word.json 파일이 현재 작업 디렉터리에 존재
 # - pyspark, org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0
 
 import json
-import uuid
-import random
 import os
 import re
 from typing import Dict, List, Tuple, Any
@@ -27,21 +26,17 @@ from pyspark.sql.types import (
 # Config
 # -----------------------
 KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "kafka:29092")
-INPUT_TOPIC = os.environ.get("INPUT_TOPIC", "prompts-topic")
+INPUT_TOPIC = os.environ.get("INPUT_TOPIC", "chat.raw.request.v1")
 OUTPUT_TO_KAFKA = os.environ.get("OUTPUT_TO_KAFKA", "false").lower() == "true"
-OUTPUT_TOPIC = os.environ.get("OUTPUT_TOPIC", "responses-topic")
+OUTPUT_TOPIC = os.environ.get("OUTPUT_TOPIC", "chat.filter.result.v1")
 
 FILTER_JSON_PATH = os.environ.get("FILTER_JSON_PATH", "filter_word.json")
-RESPONSES_JSON_PATH = os.environ.get("RESPONSES_JSON_PATH", "response.json")
 
 # -----------------------
 # Load configs (driver)
 # -----------------------
 with open(FILTER_JSON_PATH, "r", encoding="utf-8") as f:
     FILTER_CFG = json.load(f)
-
-with open(RESPONSES_JSON_PATH, "r", encoding="utf-8") as f:
-    RESPONSES = json.load(f)
 
 # Bit mask: LSB = goodbye
 BIT_INDEX = {
@@ -54,7 +49,7 @@ BIT_INDEX = {
     "no_meaning": 6,
 }
 
-# Priority config. Must be same filter_word.json's priority
+# Priority config
 CATEGORY_PRIORITY = {
     f["category"]: f.get("priority", 9999)
     for f in FILTER_CFG.get("filters", [])
@@ -69,7 +64,7 @@ def _escape_spaces_to_ws_regex(s: str) -> str:
     parts = [re.escape(p) for p in parts]
     return r"\s+".join(parts)
 
-# Build regex group for allowed trailing phrases
+# Build regex group
 def _build_trailer_group(trailers: List[str]) -> str:
     if not trailers:
         return r""
@@ -116,7 +111,7 @@ COMPILED = compile_filters(FILTER_CFG)
 # -----------------------
 MEANINGFUL_RE = re.compile(r"[0-9A-Za-z가-힣]")
 
-# remove spans from text
+# remove spans
 def remove_spans(text: str, spans: List[Tuple[int, int]]) -> str:
     if not spans:
         return text
@@ -132,15 +127,8 @@ def remove_spans(text: str, spans: List[Tuple[int, int]]) -> str:
     result = re.sub(r"\n\s+", "\n", result)
     return result.strip()
 
-# Detect and remove all category patterns
+# Filter once
 def filter_once(text: str) -> Tuple[str, int, List[Tuple[int,int,str]]]:
-    """
-    텍스트에서 모든 카테고리 패턴을 탐지하여 제거.
-    반환:
-      - filtered_text
-      - bitmask (LSB=goodbye)
-      - matches: [(start,end,category), ...] (제거된 span)
-    """
     matches = []
     for cat, patterns in COMPILED.items():
         for pat in patterns:
@@ -180,15 +168,6 @@ def top_category_from_mask(mask: int) -> str:
             return cat
     return ""
 
-def choose_auto_response(category: str, tone: str = "neutral") -> str:
-    pool = RESPONSES.get(category, {}).get(tone, [])
-    if not pool:
-        for alt in ["neutral","friendly","polite","cheerful","calm","cynical"]:
-            pool = RESPONSES.get(category, {}).get(alt, [])
-            if pool:
-                break
-    return random.choice(pool) if pool else ""
-
 def route_message(text: str) -> Tuple[str, str, int, str]:
     """
     입력 텍스트를 필터링하고 최종 라우팅 결과를 생성.
@@ -201,18 +180,16 @@ def route_message(text: str) -> Tuple[str, str, int, str]:
 
     filtered, mask, _ = filter_once(text)
 
-    text = re.sub(r"ㅋ{2,}", "ㅋㅋ", text)
-
     if filtered and MEANINGFUL_RE.search(filtered):
-        return (filtered.strip(), "", mask, "pass")
+        final_text = re.sub(r"ㅋ{2,}", "ㅋㅋ", filtered)
+        return (final_text.strip(), "", mask, "pass")
 
     top_cat = top_category_from_mask(mask)
-    if top_cat:
-        resp = choose_auto_response(top_cat, "neutral")
-        return (resp, top_cat, mask, "auto")
+    if not top_cat:
+        top_cat = "no_meaning"
+        mask |= (1 << BIT_INDEX["no_meaning"])
 
-    resp = choose_auto_response("no_meaning", "neutral")
-    return (resp, "no_meaning", (1 << BIT_INDEX["no_meaning"]), "auto")
+    return ("", top_cat, mask, "auto")
 
 # -----------------------
 # Spark UDF
@@ -237,10 +214,8 @@ apply_udf = make_udf_return()
 # -----------------------
 spark = SparkSession.builder \
     .appName("SETA - Save Earth Through AI") \
-    .master("local[*]") \
     .config("spark.sql.shuffle.partitions", "4") \
     .config("spark.ui.showConsoleProgress", "true") \
-    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")
@@ -250,7 +225,7 @@ kafka_schema = StructType([
     StructField("room_id", StringType(), True),
     StructField("message_id", StringType(), True),
     StructField("user_id", StringType(), True),
-    StructField("timestamp", LongType(), True), # Unix epoch milliseconds는 Long 타입이 적합
+    StructField("timestamp", LongType(), True),
     StructField("text", StringType(), True),
     StructField("schema_version", StringType(), True)
 ])
@@ -263,7 +238,7 @@ kafka_stream = spark.readStream \
     .load()
 
 parsed_stream = kafka_stream.select(
-    F.from_json(F.col("value").cast("string"), kafka_schema).alias("data")
+    F.from_json(F.decode(F.col("value"), "UTF-8"), kafka_schema).alias("data")
 ).select("data.*")
 
 # apply filtering + routing
@@ -282,16 +257,15 @@ applied = parsed_stream.withColumn("r", apply_udf(F.col("text"))) \
         F.col("r.mode").alias("mode")
     )
 
-# console sink (Demo)
+# console sink
 console_q = applied.writeStream \
     .outputMode("append") \
     .format("console") \
     .option("truncate", "false") \
     .start()
 
-# (선택) Kafka sink
+# Kafka sink
 if OUTPUT_TO_KAFKA:
-    # 최종 결과를 JSON 형태로 다시 Kafka에 전송
     kafka_out = applied.select(
         F.to_json(F.struct("*")).alias("value")
     )
@@ -299,7 +273,7 @@ if OUTPUT_TO_KAFKA:
         .format("kafka") \
         .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS) \
         .option("topic", OUTPUT_TOPIC) \
-        .option("checkpointLocation", "./chkpt-filter-router") \
+        .option("checkpointLocation", "/tmp/chkpt-filter-router") \
         .start()
 
 console_q.awaitTermination()

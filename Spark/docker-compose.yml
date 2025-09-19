@@ -1,5 +1,5 @@
 services:
-  # 기존 Spark Streaming (메시지 필터링)
+  # Spark Streaming (메시지 필터링)
   spark:
     build: 
       context: .
@@ -13,8 +13,13 @@ services:
       - .:/home/jovyan/work
     environment:
       - SPARK_OPTS=--driver-java-options=-Xms1g --driver-java-options=-Xmx4g --driver-java-options=-Dlog4j.logLevel=info
-      # 서버1 Kafka 연결로 변경
+      # 서버1 Kafka 연결
       - KAFKA_BOOTSTRAP_SERVERS=172.26.14.94:9092
+      # 새로운 토픽 구조 추가
+      - INPUT_TOPIC=chat.raw.request.v1
+      - OUTPUT_TO_KAFKA=true
+      - OUTPUT_TOPIC=chat.filter.result.v1
+      - FILTER_JSON_PATH=filter_word.json
       # 서버1 메인 PostgreSQL 연결
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
@@ -24,7 +29,63 @@ services:
     networks:
       - app-network
 
-  # 배치 처리용 Spark (토큰 사용량 집계)
+  # Spark Master 
+  spark-master:
+    image: bitnami/spark:3.5
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+    ports:
+      - '8081:8080'
+    networks:
+      - app-network
+
+  # Spark Worker
+  spark-worker:
+    image: bitnami/spark:3.5
+    container_name: spark-worker
+    mem_limit: 4g
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+    networks:
+      - app-network
+    depends_on:
+      - spark-master
+
+  # Spark Streaming Application (새로운 필터링 로직)
+  spark-streaming-app:
+    image: bitnami/spark:3.5
+    container_name: spark-streaming-app-new
+    mem_limit: 4g
+    ports:
+      - "4042:4040"
+      - "4043:4041"
+    working_dir: /opt/bitnami/spark/app
+    volumes:
+      - ./stream_filter_router.py:/opt/bitnami/spark/app/stream_filter_router.py
+      - ./filter_word.json:/opt/bitnami/spark/app/filter_word.json
+    command: /bin/bash -c "sleep 5 && /opt/bitnami/spark/bin/spark-submit --master spark://spark-master:7077 --driver-memory 2g --executor-memory 2g --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0 --conf \"spark.driver.extraJavaOptions=-Dfile.encoding=UTF-8\" --conf \"spark.executor.extraJavaOptions=-Dfile.encoding=UTF-8\" --conf spark.driver.port=4040 --conf spark.ui.port=4041 /opt/bitnami/spark/app/stream_filter_router.py"
+    environment:
+      # 서버1 Kafka 연결
+      - KAFKA_BOOTSTRAP_SERVERS=172.26.14.94:9092
+      - INPUT_TOPIC=chat.raw.request.v1
+      - OUTPUT_TO_KAFKA=true
+      - OUTPUT_TOPIC=chat.filter.result.v1
+      - SPARK_DRIVER_HOST=spark-streaming-app-new
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+      - PYTHONIOENCODING=UTF-8
+    networks:
+      - app-network
+    depends_on:
+      - spark-worker
+
+  # 배치 처리용 Spark (토큰 사용량 집계) 
   spark-batch:
     image: bitnami/spark:3.5
     container_name: spark-batch-processor

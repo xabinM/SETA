@@ -16,9 +16,9 @@ COPY requirements.txt /tmp/
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # 작업 파일들 복사
-COPY kafka_spark_filtering.py /home/jovyan/work/
+COPY stream_filter_router.py /home/jovyan/work/
 COPY filter_word.json /home/jovyan/work/
-COPY response.json /home/jovyan/work/
+
 
 # 작업 디렉토리 설정
 WORKDIR /home/jovyan/work
