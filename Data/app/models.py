@@ -1,8 +1,10 @@
 from sqlalchemy import Column, String, Integer, Float, Text, TIMESTAMP, ForeignKey, JSON, Enum, Numeric
-from sqlalchemy.dialects.postgresql import UUID, JSONB, VECTOR
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
 import enum
+from sqlalchemy.dialects.postgresql import UUID, JSONB
+from pgvector.sqlalchemy import Vector
+
 
 Base = declarative_base()
 

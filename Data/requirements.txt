@@ -36,3 +36,5 @@ openai==1.3.7
 # Optional Utils
 orjson==3.9.10
 tenacity==8.2.3
+
+sqlalchemy-pgvector==0.2.4

@@ -20,7 +20,7 @@ class RawFilteredMessageSchema(BaseModel):
     mode: str = Field("pass", description="auto=룰 기반 DROP / pass=ML 필터링")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "trace_id": "t-2",
                 "room_id": "room-123",
