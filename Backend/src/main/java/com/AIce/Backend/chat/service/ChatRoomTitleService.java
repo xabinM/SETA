@@ -24,18 +24,33 @@ public class ChatRoomTitleService {
     @Async("titleUpdateExecutor")
     @Transactional
     public void tryUpdateTitleAsync(UUID roomId, String firstUserMessage) {
-        if (inFlight.putIfAbsent(roomId, true) != null)
-            return; // 이미 실행 중
+        log.info("[TitleUpdate] start roomId={} thread={}", roomId, Thread.currentThread().getName());
+
+        if (inFlight.putIfAbsent(roomId, true) != null) {
+            log.debug("[TitleUpdate] already in-flight roomId={}", roomId);
+            return;
+        }
         try {
             chatRoomRepository.findById(roomId).ifPresent(room -> {
-                String title = summarizer.summarizeToTitle(firstUserMessage)
-                        .orElseGet(() -> fallback(firstUserMessage));
+                String title;
+                try {
+                    title = summarizer.summarizeToTitle(firstUserMessage)
+                            .orElseGet(() -> {
+                                log.warn("[TitleUpdate] summarizer empty, using fallback. msg={}", firstUserMessage);
+                                return fallback(firstUserMessage);
+                            });
+                } catch (Exception e) {
+                    log.error("[TitleUpdate] summarizer failed, using fallback. msg={}", firstUserMessage, e);
+                    title = fallback(firstUserMessage);
+                }
 
+                log.info("[TitleUpdate] roomId={} title='{}'", roomId, title);
                 room.setTitle(title);
                 chatRoomRepository.save(room);
             });
         } finally {
             inFlight.remove(roomId);
+            log.debug("[TitleUpdate] finish roomId={}", roomId);
         }
     }
 
