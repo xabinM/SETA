@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sse")
+@RequestMapping("/api/sse")
 public class SseController {
     private final SseHub hub;
     private final ChatRoomService chatRoomService;
