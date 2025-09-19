@@ -61,7 +61,7 @@ def classify_text(text, model, tokenizer):
     pred_idx = torch.argmax(logits).item()
     pred_label = id2label[pred_idx]
     prob_dict = {id2label[i]: float(p) for i, p in enumerate(probs)}
-    return pred_label, prob_dict, float(probs[pred_idx])
+    return pred_label, prob_dict
 
 def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0.05) -> Dict[str, Any]:
     """
