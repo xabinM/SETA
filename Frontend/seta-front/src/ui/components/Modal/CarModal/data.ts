@@ -1,63 +1,32 @@
+// src/ui/components/Modal/CarModal/data.ts
 import type { CarModalData } from "./types";
 
-// 자동 계산 함수들
-const calculateKPIs = (currentKwh: number, efficiency: number) => {
-    const co2Reduction = Math.round(currentKwh * 0.2); // 1kWh당 0.2kg CO2 절감
-    const costSavings = Math.round(currentKwh * 110); // 1kWh당 110원 절약
-    const equivKm = Math.round(currentKwh * efficiency);
-    
-    return {
-        power: `${currentKwh} kWh`,
-        co2: `${co2Reduction} kg`,
-        cost: `${costSavings.toLocaleString()} 원`,
-        efficiency: `${efficiency} km/kWh`,
-        equivKm: `${equivKm} km`
-    };
-};
-
+// 여기 "입력값"만 바꾸면 CarModal이 내부에서 전부 자동 계산됨
 export const mockCarModalData: CarModalData = {
-    // 전력량 기반 데이터 (TreeModal의 tokens와 동일한 구조)
-    power: {
-        current: 10,  // 현재 절약 전력량 (kWh) - 이 값만 바꾸면 모든 것이 자동 계산됨!
-        goal: 200,     // 목표 전력량 (kWh)
-        step: 20,      // 단계별 전력량 (kWh)
-    },
-    
-    // 여행 정보
-    trip: {
-        origin: "서울",
-        destination: "부산",
-        totalKm: 400,
-    },
-    
-    // 전기차 정보
-    vehicle: {
-        efficiencyKmPerKwh: 6, // 1kWh당 6km 주행
-    },
-    
-    // 구간 정보
+    power: { current: 10, goal: 200, step: 20 }, // ← current 바꾸면 KPI/진행률/등가 km/구간 상태 자동 반영
+    trip: { origin: "서울", destination: "부산", totalKm: 400 },
+    vehicle: { efficiencyKmPerKwh: 6 }, // 1kWh로 6km
     segments: [
         { title: "서울 → 대전", km: 140 },
         { title: "대전 → 대구", km: 130 },
         { title: "대구 → 부산", km: 130 },
     ],
-    
-    // KPI 정보 (자동 계산)
-    kpis: (() => {
-        const currentKwh = 140; // power.current 값
-        const efficiency = 6; // vehicle.efficiencyKmPerKwh 값
-        const kpis = calculateKPIs(currentKwh, efficiency);
-        
-        return [
-            { icon: "🔋", label: "누적 전력 절약", value: kpis.power },
-            { icon: "🌿", label: "CO₂ 절감", value: kpis.co2 },
-            { icon: "💰", label: "비용 절감", value: kpis.cost },
-            { icon: "⚙️", label: "전비", value: kpis.efficiency },
-        ];
-    })(),
-    
-    // 옵션
-    cta: {
-        share: true,
+    // kpis 생략 가능(컴포넌트에서 power.current로 자동 생성)
+    cta: { share: true },
+};
+
+// 범위별 더미도 제공 (대시보드 scope 연동 시 사용)
+export const carModalDataByScope: Record<"me" | "all", CarModalData> = {
+    me: mockCarModalData,
+    all: {
+        power: { current: 65, goal: 800, step: 50 },
+        trip: { origin: "서울", destination: "제주", totalKm: 470 },
+        vehicle: { efficiencyKmPerKwh: 5.5 },
+        segments: [
+            { title: "서울 → 대전", km: 140 },
+            { title: "대전 → 광주", km: 190 },
+            { title: "광주 → 목포(항)", km: 140 },
+        ],
+        cta: { share: true },
     },
 };

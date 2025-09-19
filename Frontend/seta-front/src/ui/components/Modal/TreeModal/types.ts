@@ -1,5 +1,15 @@
+import type { ReactNode } from "react";
+
+export type Tokens = { current: number; goal: number; step: number };
+
+export type Tree = {
+    emoji: string;
+    label: string;
+    achieved: boolean;
+};
+
 export type KPI = {
-    icon: string;
+    icon: ReactNode;       // ← string → ReactNode 로 변경
     value: string;
     label: string;
     hint?: string;
@@ -7,16 +17,12 @@ export type KPI = {
 };
 
 export type TimelineItem = {
-    icon: string;
+    icon: ReactNode;       // ← string → ReactNode 로 변경 (이모지/이미지 모두 허용)
     title: string;
     status: "done" | "progress" | "upcoming";
     date: string;
     desc: string;
 };
-
-export type Tokens = { current: number; goal: number; step: number };
-
-export type Tree = { emoji: string; label: string; achieved: boolean };
 
 export interface TreeModalProps {
     open: boolean;

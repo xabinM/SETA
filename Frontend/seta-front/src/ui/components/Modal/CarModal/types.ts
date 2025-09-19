@@ -1,44 +1,27 @@
-// 전력량 기반 간단한 데이터 구조 (TreeModal 스타일)
+// src/ui/components/Modal/CarModal/types.ts
+
 export interface CarModalData {
-    // 핵심 전력 데이터
-    power: {
-        current: number;  // 현재 절약 전력량 (kWh)
-        goal: number;     // 목표 전력량 (kWh) 
-        step: number;     // 단계별 전력량 (kWh)
-    };
+    // 핵심 전력 데이터 (kWh)
+    power: { current: number; goal: number; step: number };
 
     // 여행 정보
-    trip: {
-        origin: string;
-        destination: string;
-        totalKm: number;
-    };
+    trip: { origin: string; destination: string; totalKm: number };
 
-    // 전기차 정보 (자동 계산용)
-    vehicle: {
-        efficiencyKmPerKwh: number; // 전비 (km/kWh) - 기본값 5
-    };
+    // 전비 (km/kWh)
+    vehicle: { efficiencyKmPerKwh: number };
 
-    // 구간 정보
+    // 구간 정보 (UI 표시용)
     segments: Array<{ title: string; km: number }>;
 
-    // KPI 정보
-    kpis: Array<{ icon: string; label: string; value: string; hint?: string }>;
+    // KPI 정보 (넘겨주지 않으면 CarModal이 내부에서 power.current로 자동 생성)
+    kpis?: Array<{ icon: string; label: string; value: string; hint?: string }>;
 
     // 옵션
-    cta?: {
-        share?: boolean;
-    };
+    cta?: { share?: boolean };
 }
 
-// 컴포넌트 Props = 데이터 + 제어
-export interface CarModalProps {
+// CarModal 컴포넌트 props (데이터는 부분적으로만 넘겨도 됨)
+export interface CarModalProps extends Partial<CarModalData> {
     open: boolean;
     onClose: () => void;
-    power?: CarModalData['power'];
-    trip?: CarModalData['trip'];
-    vehicle?: CarModalData['vehicle'];
-    segments?: CarModalData['segments'];
-    kpis?: CarModalData['kpis'];
-    cta?: CarModalData['cta'];
 }
