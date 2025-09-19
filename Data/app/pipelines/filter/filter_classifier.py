@@ -1,4 +1,8 @@
 import torch
+from typing import Dict, Any, List
+from app.my_engine import classify_text
+from app.filter_engine import resolve_final_label
+
 
 # === 필터 라벨 세트 ===
 PREFIX_FILTER_LABELS = {
@@ -61,132 +65,87 @@ def classify_text(text, model, tokenizer):
     prob_dict = {id2label[i]: float(p) for i, p in enumerate(probs)}
     return pred_label, prob_dict, float(probs[pred_idx])
 
-def filter_classifier(input_text, model, tokenizer, margin: float = 0.1):
-    drop_logs = []
-    kept_sentences = []
-    top_score = 0.0
+def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0.05) -> Dict[str, Any]:
+    """
+    문장을 토큰 단위로 분리 → 슬라이딩 윈도우 기반으로 분류 → 필터링 수행.
+    최종적으로 PASS / DROP 여부와 cleaned_text, 라벨, 로그를 반환.
+    """
 
-    sentences = [
-        s.strip() for s in input_text.replace("?", ".").replace("!", ".").split(".")
-        if s.strip()
-    ]
+    drop_logs: List[Dict[str, Any]] = []
+    kept_sentences: List[str] = []
 
+    # 문장 분리 (. ? ! 기준)
+    sentences = []
+    buf = ""
+    for ch in input_text:
+        buf += ch
+        if ch in ".?!":
+            sentences.append(buf.strip())
+            buf = ""
+    if buf.strip():
+        sentences.append(buf.strip())
+
+    # 각 문장 처리
     for sent in sentences:
         tokens = sent.split()
-        if not tokens:
-            continue
+        filtered_out = False
 
-        while tokens:
-            matched = False
-            for n in [1, 2, 3]:
-                if len(tokens) < n:
-                    continue
-                prefix = " ".join(tokens[:n])
-                pred, probs, best_score = classify_text(prefix, model, tokenizer)
-                top_score = max(top_score, best_score)
+        # 앞부분 1~3gram 슬라이딩 검사
+        for n in [1, 2, 3]:
+            if len(tokens) < n:
+                continue
+            prefix = " ".join(tokens[:n])
+            pred, probs = classify_text(prefix, model, tokenizer)
+            top_score = probs[pred]
 
-                if pred == "meaningful":
-                    kept_sentences.append(" ".join(tokens))
-                    drop_logs.append({
-                        "원문": sent,
-                        "단계": f"{n}-gram prefix (force-pass)",
-                        "라벨": pred,
-                        "확률": best_score
-                    })
-                    tokens = []
-                    matched = True
-                    break
-
-                probs_sorted = sorted(probs.values(), reverse=True)
-                top_p, second_p = probs_sorted[0], (probs_sorted[1] if len(probs_sorted) > 1 else 0.0)
-                margin_diff = top_p - second_p
-                threshold = LABEL_THRESHOLDS.get(pred, 0.9)
-
+            if top_score >= threshold:
                 drop_logs.append({
                     "원문": sent,
-                    "시도_prefix": prefix,
-                    "단계": f"{n}-gram prefix (try)",
-                    "라벨": pred,
-                    "확률": probs[pred]
+                    "단계": f"{n}-gram",
+                    "span": (0, n),
+                    "text": prefix,
+                    "label": pred,
+                    "confidence": float(top_score),
+                    "probs": probs
                 })
-
-                if (pred in PREFIX_FILTER_LABELS) and (top_p >= threshold) and (margin_diff >= margin):
-                    tokens = tokens[n:]
-                    drop_logs.append({
-                        "원문": sent,
-                        "필터된 내용": prefix,
-                        "남은 내용": " ".join(tokens),
-                        "단계": f"{n}-gram prefix (success)",
-                        "라벨": pred,
-                        "확률": float(top_p)
-                    })
-                    matched = True
-                    break
-            if not matched:
+                filtered_out = True
                 break
 
-        remaining = " ".join(tokens).strip()
-        if not remaining:
-            continue
+        if not filtered_out:
+            # 문장 전체 검사
+            pred, probs = classify_text(sent, model, tokenizer)
+            top_score = probs[pred]
+            if top_score >= threshold:
+                drop_logs.append({
+                    "원문": sent,
+                    "단계": "full-sentence",
+                    "label": pred,
+                    "confidence": float(top_score),
+                    "probs": probs
+                })
+            else:
+                kept_sentences.append(sent)
 
-        pred, probs, best_score = classify_text(remaining, model, tokenizer)
-        top_score = max(top_score, best_score)
+    # 최종 라벨 결정
+    final_label = resolve_final_label(drop_logs) if drop_logs else None
 
-        if pred == "meaningful":
-            kept_sentences.append(remaining)
-            drop_logs.append({
-                "원문": sent,
-                "단계": "문장 전체 (force-pass)",
-                "라벨": pred,
-                "확률": best_score
-            })
-            continue
-
-        probs_sorted = sorted(probs.values(), reverse=True)
-        top_p, second_p = probs_sorted[0], (probs_sorted[1] if len(probs_sorted) > 1 else 0.0)
-        margin_diff = top_p - second_p
-        threshold = LABEL_THRESHOLDS.get(pred, 0.9)
-
-        drop_logs.append({
-            "원문": sent,
-            "단계": "문장 전체 (try)",
-            "라벨": pred,
-            "확률": probs[pred]
-        })
-
-        if (pred in FULL_FILTER_LABELS) and (top_p >= threshold) and (margin_diff >= margin):
-            drop_logs.append({
-                "원문": sent,
-                "단계": "문장 전체 (success-drop)",
-                "라벨": pred,
-                "확률": float(top_p)
-            })
-            continue
-
-        kept_sentences.append(remaining)
-        drop_logs.append({
-            "원문": sent,
-            "단계": "문장 전체 (success-pass)",
-            "라벨": pred,
-            "확률": float(top_p)
-        })
-
+    # === 최종 반환 ===
     if kept_sentences:
         return {
             "status": "pass",
-            "content": " ".join(kept_sentences),
-            "label": None,
-            "score": top_score,
+            "content": " ".join(kept_sentences),   # cleaned_text에 들어갈 부분
+            "label": final_label,
+            "score": max([log["confidence"] for log in drop_logs], default=0.0),
             "drop_logs": drop_logs,
             "kept_sentences": kept_sentences
         }
     else:
-        final_label = resolve_final_label(drop_logs)
         return {
             "status": "drop",
             "content": "",
             "label": final_label,
-            "score": top_score,
+            "score": max([log["confidence"] for log in drop_logs], default=0.0),
             "drop_logs": drop_logs,
-            "kept_sentences": []
+            "kept_sentences": kept_sentences
         }
+
