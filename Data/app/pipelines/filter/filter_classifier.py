@@ -1,6 +1,5 @@
 import torch
 from typing import Dict, Any, List
-from app.filter_engine import resolve_final_label
 
 
 # === 필터 라벨 세트 ===
