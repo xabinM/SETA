@@ -38,10 +38,4 @@ public class SseController {
 
         return ResponseEntity.ok().headers(h).body(emitter);
     }
-
-    @Operation(summary="실시간 차트")
-    @GetMapping(value="/metrics/live", produces=MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter metrics() {
-        return hub.subscribe("metrics");
-    }
 }

@@ -16,5 +16,7 @@ public interface RoomSummaryStateRepository extends JpaRepository<RoomSummarySta
         ON CONFLICT (chat_room_id) DO NOTHING
         """, nativeQuery = true)
     void insertIfNotExist(@Param("roomId") UUID roomId);
+
+    void deleteByChatRoom_ChatRoomId(UUID roomId);
 }
 
