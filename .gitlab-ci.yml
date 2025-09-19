@@ -184,7 +184,7 @@ deploy-frontend:
   needs:
     - job: frontend-build-docker
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Front_main)$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Front_main)$/'
       changes:
         - Frontend/**/*
       when: always
