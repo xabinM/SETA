@@ -1,0 +1,16 @@
+# Node modules는 빌드 컨텍스트에 포함하지 않음
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Git 관련 파일 제외
+.git
+.gitignore
+
+# 빌드 아티팩트 제외 (dist는 Dockerfile에서 COPY할 예정)
+dist
+
+# OS/IDE 관련 파일 제외
+.DS_Store
+.vscode
+*.swp
