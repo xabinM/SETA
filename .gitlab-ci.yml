@@ -65,7 +65,7 @@ frontend-build:
     - when: never
 
 # ----------------
-# 3. Build Docker Image & Push to Registry
+# 3. Build Docker Image & Push to Registry.
 # ----------------
 backend-build-docker:
   stage: build-docker
