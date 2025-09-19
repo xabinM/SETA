@@ -24,7 +24,7 @@ from pyspark.sql.types import (
 
 # -----------------------
 # Config
-KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "172.26.14.94:9092")
+KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "3.35.206.91:29092")
 INPUT_TOPIC = os.environ.get("INPUT_TOPIC", "chat.raw.request.v1")
 OUTPUT_TO_KAFKA = os.environ.get("OUTPUT_TO_KAFKA", "false").lower() == "true"
 OUTPUT_TOPIC = os.environ.get("OUTPUT_TOPIC", "chat.filter.result.v1")

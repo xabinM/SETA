@@ -14,8 +14,7 @@ services:
     environment:
       - SPARK_OPTS=--driver-java-options=-Xms1g --driver-java-options=-Xmx4g --driver-java-options=-Dlog4j.logLevel=info
       # 서버1 Kafka 연결
-      - KAFKA_BOOTSTRAP_SERVERS=172.26.14.94:9092
-      # 새로운 토픽 구조 추가
+      - KAFKA_BOOTSTRAP_SERVERS=3.35.206.91:29092
       - INPUT_TOPIC=chat.raw.request.v1
       - OUTPUT_TO_KAFKA=true
       - OUTPUT_TOPIC=chat.filter.result.v1
