@@ -1,5 +1,3 @@
-// Home.tsx
-import { Header } from '@/ui/components/Header'
 import HomeBg from '@/assets/homebackground.png'
 import { useNavigate } from "react-router-dom";
 import './Home.css';
@@ -14,7 +12,6 @@ export default function Home() {
                 backgroundImage: `url('${HomeBg}')`,
             }}
         >
-            <Header />
 
             <div className="home-overlay" />
 
