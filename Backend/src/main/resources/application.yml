@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: msk
+    active: local
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}        # PostgreSQL JDBC URL
@@ -19,7 +19,7 @@ spring:
 
   sql:
     init:
-      mode: never
+      mode: always
       encoding: UTF-8
 
   data:
