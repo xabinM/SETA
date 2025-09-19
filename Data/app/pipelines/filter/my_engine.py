@@ -24,7 +24,7 @@ class MyFilterEngine:
             action="DROP",
             score=1.0,
             threshold=1.0,
-            reason_type="auto_rule",
+            reason_type="rule",
             reason_text="Spark 1차 룰 필터링 결과",
             explanations=["Spark 룰 기반 필터링 결과"]
         )
