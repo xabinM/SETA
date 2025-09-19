@@ -1,3 +1,5 @@
+/* src/ui/components/Modal/CarModal/CarModal.css */
+
 .carmodal-backdrop{
     position: fixed; inset: 0; z-index: 999;
     display: grid; place-items: center;
@@ -128,7 +130,8 @@
     position:absolute; left:28px; top:50%; transform: translateY(-50%);
     width: var(--hero-badge-size); height: var(--hero-badge-size);
     display:grid; place-items:center; line-height:0; background:transparent; border:none;
-    margin-left: 10px;
+    margin-right: 20px;
+    margin-top: -10px;
 }
 .cm-title{
     margin:0; text-align:center;
@@ -140,7 +143,7 @@
     margin: 4px 0 0;
     text-align:center;
     line-height:1.65; font-size:18px;
-    margin-top: -30px;
+    margin-top: 15px;
 }
 
 /* ===== KPI ===== */
@@ -162,7 +165,7 @@
     width: var(--kpi-icon-size); height: var(--kpi-icon-size); font-size: var(--kpi-icon-size);
 }
 .cm-kpi__icon-wrap > *{ width:100%; height:100%; object-fit:contain; display:block; }
-.cm-kpi__value{ font-weight:800; font-size:28px; color: var(--cm-text); margin-bottom: 6px; }
+.cm-kpi__value{ font-weight:800; font-size:25px; color: var(--cm-text); margin-bottom: 6px; }
 .cm-kpi__label{ color: var(--cm-text-muted); font-size:13px; font-weight:600; }
 
 /* ===== Section Head (공통) ===== */

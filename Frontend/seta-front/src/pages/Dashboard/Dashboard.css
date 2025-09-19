@@ -177,7 +177,7 @@ body{ margin:0; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "
     right: calc(50% - 600px + 20px);
     /* 헤더 바로 아래 위치 — 필요 시 숫자만 미세 조정 */
     top: calc(var(--header-total) - 126px);
-    z-index: 3000; /* 카드/블롭보다 확실히 위 */
+    z-index: 800; /* 카드/블롭보다 확실히 위 */
     pointer-events: auto;
 }
 
@@ -203,6 +203,8 @@ body{ margin:0; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "
     height: 36px;
     padding: 2px;
     border-radius: 999px;
+    margin-top: 120px;
+    margin-right: 8px;
 
     /* 유리감 배경/보더 */
     background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));

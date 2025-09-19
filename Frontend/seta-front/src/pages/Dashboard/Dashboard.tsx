@@ -2,10 +2,14 @@ import { memo, useState } from "react";
 import Header from "@/ui/components/Header/Header";
 import { Icon } from "@iconify/react";
 import ChatBg from "@/assets/ChatBackground.png";
+
+/* ===== Modals ===== */
 import TreeModal from "@/ui/components/Modal/TreeModal/TreeModal";
-import { tokens, trees, kpis, timeline } from "@/ui/components/Modal/TreeModal/data.ts";
+import { treeModalDataByScope } from "@/ui/components/Modal/TreeModal/data.ts";
 import CarModal from "@/ui/components/Modal/CarModal/CarModal";
 import { mockCarModalData } from "@/ui/components/Modal/CarModal/data";
+
+/* ===== Styles ===== */
 import "./Dashboard.css";
 
 /* ================= Scope Toggle (Glass Segmented) ================= */
@@ -47,6 +51,9 @@ function Dashboard() {
 
     // 개인/전체 전환 상태
     const [scope, setScope] = useState<"me" | "all">("me");
+
+    // ✅ 현재 scope에 맞는 TreeModal 데이터 선택
+    const { tokens, trees, kpis, timeline } = treeModalDataByScope[scope];
 
     return (
         <div
@@ -336,7 +343,7 @@ function Dashboard() {
                 </div>
             </main>
 
-            {/* TreeModal */}
+            {/* ===== TreeModal ===== */}
             <TreeModal
                 open={isTreeModalOpen}
                 onClose={() => setIsTreeModalOpen(false)}
@@ -346,7 +353,7 @@ function Dashboard() {
                 timeline={timeline}
             />
 
-            {/* CarModal */}
+            {/* ===== CarModal ===== */}
             <CarModal
                 open={isCarModalOpen}
                 onClose={() => setIsCarModalOpen(false)}
