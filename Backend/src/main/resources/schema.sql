@@ -60,9 +60,9 @@ CREATE TABLE IF NOT EXISTS llm_response (
 
 -- token_usage
 CREATE TABLE IF NOT EXISTS token_usage (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id BIGINT REFERENCES users(user_id),
-    message_id UUID,
+    message_id UUID REFERENCES chat_message(message_id),
     prompt_tokens INT,
     completion_tokens INT,
     total_tokens INT,
