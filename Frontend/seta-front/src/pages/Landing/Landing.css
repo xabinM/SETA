@@ -18,14 +18,19 @@
   width: 100%;
   height: 100%;
   background: 
-    linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(15, 15, 25, 0.9) 100%),
-    radial-gradient(circle at 30% 40%, rgba(60, 140, 120, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 70% 60%, rgba(80, 160, 140, 0.04) 0%, transparent 50%);
+    linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(15, 15, 25, 0.7) 100%),
+  radial-gradient(circle at 30% 40%, rgba(60, 140, 120, 0.08) 0%, transparent 50%),
+  radial-gradient(circle at 70% 60%, rgba(80, 160, 140, 0.04) 0%, transparent 50%);
   pointer-events: none;
   backdrop-filter: blur(1px);
+  animation: subtleColorShift 15s linear infinite alternate;
 }
 
-/* 커스텀 커서 - 제거됨 */
+@keyframes subtleColorShift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
 
 /* 불용어 파티클들 */
 .particles-container {
@@ -57,11 +62,11 @@
 /* SETA 로고 중심체 - 크기 및 위치 조정 */
 .logo-center {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100px;
-  height: 100px;
+  top: 45%;
+  left: 48%;
+  transform: translate(-50%, calc(-50% + 20px)) scale(0.5);
+  width: 120px;
+  height: 120px;
   opacity: 0;
   z-index: 500;
   will-change: transform, scale, opacity;
@@ -103,10 +108,10 @@
   height: 100%;
   object-fit: contain;
   filter: 
-    drop-shadow(0 0 20px rgba(0, 212, 170, 0.8))
-    drop-shadow(0 0 40px rgba(29, 233, 182, 0.4))
-    brightness(1.2)
-    contrast(1.1);
+    drop-shadow(0 0 20px rgba(0, 212, 170, 0.5))
+    drop-shadow(0 0 40px rgba(29, 233, 182, 0.3))
+    brightness(1.1)
+    contrast(1.05);
   will-change: transform, filter;
 }
 
@@ -133,13 +138,7 @@
   letter-spacing: 8px;
   margin-bottom: 10px;
   filter: drop-shadow(0 0 15px rgba(122, 184, 168, 0.3));
-  animation: gentleGradientShift 4s ease-in-out infinite;
   will-change: filter;
-}
-
-@keyframes gentleGradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 
 .subtitle {
@@ -210,8 +209,8 @@
   }
   
   .logo-outer-ring {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     top: -30px;
     left: -30px;
   }

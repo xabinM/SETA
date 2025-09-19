@@ -33,8 +33,8 @@ const Landing: React.FC = () => {
     '...', '!!', '??', '***', '###', '@@@', '&&&', '$$$', '%%%', '^^^',
     '~~~', '---', '+++', '===', '|||', '\\\\\\', '>>>', '<<<', '***',
     // 채팅/SNS 노이즈
-    'ㅋㅋㅋ', 'ㅎㅎㅎ', 'ㅠㅠ', 'ㅜㅜ', 'ㅡㅡ', 'ㅗㅗ', '흠냠', '헐', '와우',
-    'lol', 'omg', 'wtf', 'tbh', 'imo', 'btw', 'fyi', 'asap', 'etc'
+    'ㅋㅋㅋ', 'ㅎㅎㅎ', 'ㅠㅠ', 'ㅜㅜ', 'ㅡㅡ','어머','흠냠', '헐', '와우',
+    'lol', 'omg', 'lmao', 'tbh', 'imo', 'btw', 'fyi', 'asap', 'etc'
   ];
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const Landing: React.FC = () => {
       nullTargetWarn: false 
     });
 
-    // 초기 파티클 떠다니는 애니메이션 (성능 최적화)
+    // 초기 파티클 떠다니는 애니메이션 
     particlesRef.current.forEach((particle, index) => {
       if (particle) {
         // GPU 가속을 위한 초기 transform 설정
@@ -108,7 +108,7 @@ const Landing: React.FC = () => {
           gsap.to(particle, {
             opacity: 0.2,
             scale: 0.9,
-            duration: 0.8,
+            duration: 0.7,
             delay: index * 0.002,
             ease: "power2.out"
           });
@@ -118,14 +118,14 @@ const Landing: React.FC = () => {
     
     // 4단계: 로고가 커지면서 강력한 회전 시작 (블랙홀 효과)
     .to('.logo-center', {
-      scale: 2,
+      scale: 2.5,
       rotation: 720,
       duration: 2,
       ease: "power2.in"
     }, 3)
     
     .to('.logo-outer-ring, .logo-inner-ring', {
-      scale: 3,
+      scale: 4,
       opacity: 0.8,
       duration: 2,
       ease: "power2.in"
@@ -158,34 +158,34 @@ const Landing: React.FC = () => {
           const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
           const angle = Math.atan2(deltaY, deltaX);
           
-          // 거리별 그룹핑으로 성능 최적화
-          const spiralRadius = Math.min(distance * 0.5, 200);
-          const spiralTurns = 1.5 + (distance / 200);
+          // 거리별 그룹핑으로 성능 최적화 (토네이도 얌전하게)
+          const spiralRadius = Math.min(distance * 0.3, 120);
+          const spiralTurns = 0.8 + (distance / 300);
           
           // GPU 가속 토네이도 애니메이션
           const particleTl = gsap.timeline();
           
           particleTl
-            // 1단계: 부드러운 궤도 진입
+            // 1단계: 부드러운 궤도 진입 (더 얌전하게)
             .to(particle, {
               x: centerX + Math.cos(angle) * spiralRadius - currentX,
               y: centerY + Math.sin(angle) * spiralRadius - currentY,
-              rotation: "+=90",
-              scale: 1.1,
-              duration: 0.8,
+              rotation: "+=45",
+              scale: 1.05,
+              duration: 1.2,
               ease: "power2.out",
               force3D: true
             })
             
-            // 2단계: 나선 회전 (CustomEase 대신 power 사용)
+            // 2단계: 나선 회전 (더 부드럽고 얌전하게)
             .to(particle, {
-              rotation: `+=${360 * spiralTurns}`,
-              scale: 0.6,
-              duration: 1.8,
+              rotation: `+=${180 * spiralTurns}`,
+              scale: 0.7,
+              duration: 2.2,
               ease: "power1.inOut",
               onUpdate: function() {
                 const progress = this.progress();
-                const currentRadius = spiralRadius * (1 - progress * 0.9);
+                const currentRadius = spiralRadius * (1 - progress * 0.85);
                 const currentAngle = angle + (progress * spiralTurns * Math.PI * 2);
                 
                 gsap.set(particle, {
@@ -194,7 +194,7 @@ const Landing: React.FC = () => {
                   force3D: true
                 });
               }
-            }, 0.3)
+            }, 0.4)
             
             // 3단계: 최종 흡수 (로고 중심으로 정확히)
             .to(particle, {
@@ -203,7 +203,7 @@ const Landing: React.FC = () => {
               rotation: "+=180",
               scale: 0,
               opacity: 0,
-              duration: 0.6,
+              duration: 0.3,
               ease: "power3.in",
               force3D: true
             });
@@ -211,38 +211,27 @@ const Landing: React.FC = () => {
           // 인덱스별 지연을 줄여서 더 부드럽게
           particleTl.delay(index * 0.002);
           masterTl.add(particleTl, 0);
+
+        //   gsap.to(particle, {
+        //     filter: "drop-shadow(0 0 4px #00ffdb)",
+        //     duration: 0.6,
+        //     repeat: -1,
+        //     yoyo: true,
+        //     ease: "sine.inOut",
+        //     delay: index * 0.05
+        //     });
         }
       });
     }, 3.5)
     
-    // 6단계: 로고 정리 및 SETA 텍스트 등장
-    .to('.logo-center', {
-      scale: 1,
-      rotation: 0,
-      duration: 1,
-      ease: "elastic.out(1, 0.3)"
-    }, 5)
     
-    .to('.seta-text-container', {
-      opacity: 1,
-      y: -20,
-      duration: 1,
-      ease: "back.out(1.7)"
-    }, 5.5)
-    
-    .to('.progress-text', {
-      opacity: 1,
-      y: 0,
-      duration: 0.5
-    }, 5.5)
-    
-    // 7단계: 완료 후 페이지 전환
+    // 6단계: 완료 후 페이지 전환
     .add(() => {
       setTimeout(() => {
         // 페이드아웃 효과와 함께 홈으로 이동
         gsap.to(containerRef.current, {
           opacity: 0,
-          duration: 1,
+          duration: 0.6,
           ease: "power2.inOut",
           onComplete: () => {
             navigate('/home');
@@ -270,7 +259,7 @@ const Landing: React.FC = () => {
       
       {/* 불용어 파티클들 */}
       <div className="particles-container">
-        {[...Array(3)].map((_, groupIndex) => 
+        {[...Array(4)].map((_, groupIndex) => 
           stopwords.map((word, index) => (
             <div
               key={`${groupIndex}-${index}`}
@@ -303,7 +292,8 @@ const Landing: React.FC = () => {
       
       
       
-  </div>    
+      
+    </div>
   );
 };
 
