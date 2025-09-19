@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS user_memory_embedding (
 -- filter_result
 CREATE TABLE IF NOT EXISTS filter_result (
   filter_id    BIGSERIAL PRIMARY KEY,
+  trace_id      VARCHAR(64) PRIMARY KEY,
   chat_room_id UUID REFERENCES chat_room(chat_room_id),
   message_id   UUID REFERENCES chat_message(message_id),
   stage        VARCHAR(16) CHECK (stage IN ('rule', 'ml')),
@@ -35,6 +36,7 @@ CREATE TABLE IF NOT EXISTS filter_result (
   rule_name    VARCHAR(64),
   score        NUMERIC(5,3),
   created_at   TIMESTAMPTZ DEFAULT now()
+  PRIMARY KEY (filter_id, trace_id)
 );
 
 -- prompt_built
