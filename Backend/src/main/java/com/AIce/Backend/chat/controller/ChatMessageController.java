@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/chat/rooms")
+@RequestMapping("/api/chat/rooms")
 public class ChatMessageController {
 
     private final Tracer tracer;
