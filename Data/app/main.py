@@ -6,8 +6,7 @@ from app.routers.filter_router import router as filter_router
 from app.routers.embed import router as embed_router
 from app.routers.summarize_router import router as summarize_router
 from app.services.embed_service import store_text
-
-
+from app.routers import debug_filter 
 
 
 load_dotenv()
@@ -17,6 +16,9 @@ app = FastAPI(
     description="ML API for SETA",
     version="1.0.0",
 )
+
+app.include_router(debug_filter.router, prefix="/api", tags=["debug"])
+
 
 @app.on_event("startup")
 def on_startup():
