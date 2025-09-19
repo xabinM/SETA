@@ -27,36 +27,39 @@ public class ErrorLogConsumer {
     private final Tracer tracer;
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
-    // error SSE 중계
-    @Observed(name = "chat.error.consume")
-    @KafkaListener(topics = "chat.error.v1", containerFactory = "stringKafkaListenerFactory")
-    public void onError(@Payload String payload,
-                        @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                        @Headers Map<String, Object> headers) throws JsonProcessingException {
-        try {
-            ErrorLogV1 msg = objectMapper.readValue(payload, ErrorLogV1.class);
-            String room = (msg.getRoom_id() != null) ? msg.getRoom_id() : "GLOBAL";
+    // Error SSE 중계
+    // 현재는 error producer가 없어서 미사용 상태.
+    // 추후 error 이벤트 producer 추가 시 아래 Listener 주석 해제할 것.
 
-            String traceId =
-                    coalesce(
-                            msg.getTrace_id(),
-                            headerAsString(headers, "trace_id"),
-                            Optional.ofNullable(tracer)
-                                    .map(Tracer::currentSpan)
-                                    .map(span -> span.context().traceId())
-                                    .orElse(null),
-                            ""
-                    );
-
-            log.info("consume error traceId={} topic={} room={}", traceId, topic, msg.getRoom_id());
-
-            // SSE 브로드캐스트
-            hub.push(room, "error", msg);
-
-        } catch (Exception e) {
-            log.warn("error consume failed; payload={} cause={}", safeCut(payload), e.toString());
-        }
-    }
+//    @Observed(name = "chat.error.consume")
+//    @KafkaListener(topics = "chat.error.v1", containerFactory = "stringKafkaListenerFactory")
+//    public void onError(@Payload String payload,
+//                        @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+//                        @Headers Map<String, Object> headers) throws JsonProcessingException {
+//        try {
+//            ErrorLogV1 msg = objectMapper.readValue(payload, ErrorLogV1.class);
+//            String room = (msg.getRoom_id() != null) ? msg.getRoom_id() : "GLOBAL";
+//
+//            String traceId =
+//                    coalesce(
+//                            msg.getTrace_id(),
+//                            headerAsString(headers, "trace_id"),
+//                            Optional.ofNullable(tracer)
+//                                    .map(Tracer::currentSpan)
+//                                    .map(span -> span.context().traceId())
+//                                    .orElse(null),
+//                            ""
+//                    );
+//
+//            log.info("consume error traceId={} topic={} room={}", traceId, topic, msg.getRoom_id());
+//
+//            // SSE 브로드캐스트
+//            hub.push(room, "error", msg);
+//
+//        } catch (Exception e) {
+//            log.warn("error consume failed; payload={} cause={}", safeCut(payload), e.toString());
+//        }
+//    }
 
     private static String headerAsString(Map<String, Object> headers, String key) {
         Object v = headers.get(key);
