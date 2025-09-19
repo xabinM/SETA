@@ -110,4 +110,4 @@ class FilterResult(Base):
     rule_name = Column(String(64))
     score = Column(Numeric(5, 3))
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
-    trace_id = Column(String(64), index=True)
+    trace_id = Column(String(64), index=True)  # 연동/조회 자주 하므로 index
