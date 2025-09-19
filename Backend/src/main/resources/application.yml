@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: msk
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}        # PostgreSQL JDBC URL
@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none                 # 운영 환경에서는 validate 또는 none
+      ddl-auto: validate                 # 운영 환경에서는 validate 또는 none
     defer-datasource-initialization: true
     show-sql: true
     properties:
