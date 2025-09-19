@@ -1,6 +1,5 @@
 import torch
 from typing import Dict, Any, List
-from app.pipelines.filter.my_engine import classify_text
 from app.filter_engine import resolve_final_label
 
 
