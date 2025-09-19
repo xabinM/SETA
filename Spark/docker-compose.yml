@@ -71,7 +71,7 @@ services:
     command: /bin/bash -c "sleep 5 && /opt/bitnami/spark/bin/spark-submit --master spark://spark-master:7077 --driver-memory 2g --executor-memory 2g --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0 --conf \"spark.driver.extraJavaOptions=-Dfile.encoding=UTF-8\" --conf \"spark.executor.extraJavaOptions=-Dfile.encoding=UTF-8\" --conf spark.driver.port=4040 --conf spark.ui.port=4041 /opt/bitnami/spark/app/stream_filter_router.py"
     environment:
       # 서버1 Kafka 연결
-      - KAFKA_BOOTSTRAP_SERVERS=172.26.14.94:9092
+      - KAFKA_BOOTSTRAP_SERVERS=3.35.206.91:29092
       - INPUT_TOPIC=chat.raw.request.v1
       - OUTPUT_TO_KAFKA=true
       - OUTPUT_TOPIC=chat.filter.result.v1
