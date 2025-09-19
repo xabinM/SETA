@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS user_saved_token_total (
     saved_tokens BIGINT,
     token_sum BIGINT,
     cost_sum_usd NUMERIC(14, 6),
-    PRIMARY KEY (user_id, stat_time)
+    PRIMARY KEY (user_id, stat_date)
 );
 
 -- global_saved_token_total
