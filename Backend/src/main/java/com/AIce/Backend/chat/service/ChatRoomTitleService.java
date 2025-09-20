@@ -6,10 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 @Service
@@ -22,7 +23,6 @@ public class ChatRoomTitleService {
     private final ConcurrentMap<UUID, Boolean> inFlight = new ConcurrentHashMap<>();
 
     @Async("titleUpdateExecutor")
-    @Transactional
     public void tryUpdateTitleAsync(UUID roomId, String firstUserMessage) {
         log.info("[TitleUpdate] start roomId={} thread={}", roomId, Thread.currentThread().getName());
 
@@ -30,28 +30,26 @@ public class ChatRoomTitleService {
             log.debug("[TitleUpdate] already in-flight roomId={}", roomId);
             return;
         }
-        try {
-            chatRoomRepository.findById(roomId).ifPresent(room -> {
-                String title;
-                try {
-                    title = summarizer.summarizeToTitle(firstUserMessage)
-                            .orElseGet(() -> {
-                                log.warn("[TitleUpdate] summarizer empty, using fallback. msg={}", firstUserMessage);
-                                return fallback(firstUserMessage);
-                            });
-                } catch (Exception e) {
-                    log.error("[TitleUpdate] summarizer failed, using fallback. msg={}", firstUserMessage, e);
-                    title = fallback(firstUserMessage);
-                }
 
-                log.info("[TitleUpdate] roomId={} title='{}'", roomId, title);
-                room.setTitle(title);
-                chatRoomRepository.save(room);
-            });
-        } finally {
-            inFlight.remove(roomId);
-            log.debug("[TitleUpdate] finish roomId={}", roomId);
-        }
+        Mono<String> titleMono = summarizer.summarizeToTitleAsync(firstUserMessage)
+                .onErrorResume(e -> {
+                    log.warn("[TitleUpdate] summarizer failed, using fallback. msg={} cause={}", firstUserMessage, e.toString());
+                    return Mono.just(fallback(firstUserMessage));
+                })
+                .map(title -> (title == null || title.isBlank()) ? fallback(firstUserMessage) : title);
+
+        titleMono.subscribe(title -> {
+            try {
+                chatRoomRepository.findById(roomId).ifPresent(room -> {
+                    room.setTitle(title);
+                    chatRoomRepository.save(room);
+                    log.info("[TitleUpdate] roomId={} title='{}'", roomId, title);
+                });
+            } finally {
+                inFlight.remove(roomId);
+                log.debug("[TitleUpdate] finish roomId={}", roomId);
+            }
+        });
     }
 
     private String fallback(String msg) {
