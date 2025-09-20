@@ -18,14 +18,14 @@ public class KafkaTestListener {
 
     private final Tracer tracer;
 
-    @Observed(name = "chat.raw.consume", contextualName = "kafka.consume.raw")
-    @KafkaListener(topics = "chat.raw.request.v1", groupId = "backend-local")
-    public void listen(
-            @Payload RawRequestV1 payload,
-            @Header(KafkaHeaders.RECEIVED_KEY) String roomId,
-            @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-
-        String traceId = tracer.currentSpan().context().traceId();
-        log.info("raw consumed traceId={} topic={} roomId={} payload={}", traceId, topic, roomId, payload);
-    }
+//    @Observed(name = "chat.raw.consume", contextualName = "kafka.consume.raw")
+//    @KafkaListener(topics = "chat.raw.request.v1", groupId = "backend-local")
+//    public void listen(
+//            @Payload RawRequestV1 payload,
+//            @Header(KafkaHeaders.RECEIVED_KEY) String roomId,
+//            @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+//
+//        String traceId = tracer.currentSpan().context().traceId();
+//        log.info("raw consumed traceId={} topic={} roomId={} payload={}", traceId, topic, roomId, payload);
+//    }
 }
