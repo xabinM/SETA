@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: backend # Jaeger에서 사용
+
   profiles:
     active: msk
 
