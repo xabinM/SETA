@@ -18,6 +18,15 @@ class PreferredToneEnum(enum.Enum):
     cheerful = "cheerful"
     calm = "calm"
 
+class User(Base):
+    __tablename__ = "users"
+
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(64), unique=True)
+    name = Column(String(255))
+    password = Column(String(255))
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class ChatMessage(Base):
     __tablename__ = "chat_message"
