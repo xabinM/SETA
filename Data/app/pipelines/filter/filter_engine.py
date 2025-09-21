@@ -20,6 +20,7 @@ class IntentDecision:
     reason_type: Optional[Reason] = None
     reason_text: Optional[str] = None
     explanations: Optional[List[str]] = None
+    cleaned_text: Optional[str] = None
 
 class FilterEngine:
     def filler_removal(self, text: str) -> FillerRemovalResult: ...
