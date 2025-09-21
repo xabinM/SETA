@@ -28,7 +28,7 @@ def save_filter_results(raw: RawFilteredMessage, decision: IntentDecision, rule_
             message_id=raw.message_id,
             stage="ml",                          # stage는 rule/ml 구분
             action=decision.action,              # PASS or DROP
-            rule_name=decision.label or "None",  # 필터링된 이유 (thank, greeting ...) 없으면 None
+            rule_name=decision.intent or "None",  # 필터링된 이유 (thank, greeting ...) 없으면 None
             score=decision.score,                # 확률값
             created_at=datetime.now(timezone.utc),
         )
@@ -47,7 +47,7 @@ def save_to_es(raw: RawFilteredMessage, decision: IntentDecision):
         "message_id": raw.message_id,
         "original_text": raw.text,
         "cleaned_text": decision.cleaned_text or raw.final_text or raw.text,
-        "reason_type": decision.label,
+        "reason_type": decision.intent,
         "action": decision.action,
         "score": decision.score,
         "created_at": datetime.now(timezone.utc).isoformat(),
