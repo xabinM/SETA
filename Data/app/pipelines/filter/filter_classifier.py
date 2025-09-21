@@ -18,7 +18,7 @@ LABEL_THRESHOLDS = {
     "goodbye": 0.90,
     "connector_filler": 0.90,
     "no_meaning": 0.90,
-    "meaningful": 0.00,
+    "meaningful": 0.00,   # meaningful → 무조건 PASS
 }
 
 # === 라벨 우선순위 (낮을수록 우선) ===
@@ -93,8 +93,21 @@ def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0
                 continue
             prefix = " ".join(tokens[:n])
             pred, probs = classify_text(prefix, model, tokenizer)
-            top_score = probs[pred]
 
+            # ✅ meaningful → 무조건 PASS
+            if pred == "meaningful":
+                kept_sentences.append(sent)
+                drop_logs.append({
+                    "원문": sent,
+                    "단계": f"{n}-gram (force-pass)",
+                    "label": pred,
+                    "confidence": float(probs[pred]),
+                    "probs": probs
+                })
+                filtered_out = False
+                break
+
+            top_score = probs[pred]
             if top_score >= threshold:
                 drop_logs.append({
                     "원문": sent,
@@ -111,6 +124,19 @@ def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0
         if not filtered_out:
             # 문장 전체 검사
             pred, probs = classify_text(sent, model, tokenizer)
+
+            # ✅ meaningful → 무조건 PASS
+            if pred == "meaningful":
+                kept_sentences.append(sent)
+                drop_logs.append({
+                    "원문": sent,
+                    "단계": "full-sentence (force-pass)",
+                    "label": pred,
+                    "confidence": float(probs[pred]),
+                    "probs": probs
+                })
+                continue
+
             top_score = probs[pred]
             if top_score >= threshold:
                 drop_logs.append({
