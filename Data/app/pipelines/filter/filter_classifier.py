@@ -1,5 +1,6 @@
 import torch
 from typing import Dict, Any, List, Optional
+
 PREFIX_FILTER_LABELS = {
     "call_only", "reaction_only", "greeting",
     "thank", "goodbye", "apology", "connector_filler", "no_meaning"
@@ -29,6 +30,7 @@ LABEL_PRIORITY = {
     "connector_filler": 8,
 }
 
+
 def resolve_final_label(drop_logs: List[Dict[str, Any]]) -> Optional[str]:
     if not drop_logs:
         return None
@@ -37,6 +39,7 @@ def resolve_final_label(drop_logs: List[Dict[str, Any]]) -> Optional[str]:
         if label in detected:
             return label
     return "no_meaning"
+
 
 def classify_text(text, model, tokenizer):
     model.eval()
@@ -50,16 +53,23 @@ def classify_text(text, model, tokenizer):
     prob_dict = {id2label[i]: float(p) for i, p in enumerate(probs)}
     return pred_label, prob_dict
 
-def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0.05) -> Dict[str, Any]:
+
+def filter_classifier(
+    input_text: str,
+    model,
+    tokenizer,
+    threshold: float = 0.8,
+    margin: float = 0.05
+) -> Dict[str, Any]:
     drop_logs: List[Dict[str, Any]] = []
     kept_sentences: List[str] = []
 
-    # 문장 분리
+    # 문장 분리 (.?! 기준)
     sentences = []
     buf = ""
     for ch in input_text:
         buf += ch
-        if ch in ".?!,":
+        if ch in ".?!":
             if buf.strip():
                 sentences.append(buf.strip())
             buf = ""
@@ -72,9 +82,8 @@ def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0
             continue
 
         sentence_force_pass = False
-        # 토큰 수준 전처리 루프: 앞 1~3gram 필터 → 제거 후 계속
+
         while tokens:
-            # 1~3gram 검사 (긴 n 우선 또는 짧은 n 우선은 정책에 따라; 여기서는 1→3)
             matched_prefix = False
             for n in [1, 2, 3]:
                 if len(tokens) < n:
@@ -82,7 +91,7 @@ def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0
                 prefix = " ".join(tokens[:n])
                 pred, probs = classify_text(prefix, model, tokenizer)
 
-                # meaningful → 즉시 PASS (해당 문장 종료, drop_logs에 기록하지 않음)
+                # meaningful → 문장 전체 PASS
                 if pred == "meaningful":
                     kept_sentences.append(" ".join(tokens))
                     sentence_force_pass = True
@@ -90,8 +99,8 @@ def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0
                     break
 
                 top_score = probs[pred]
-                if pred in PREFIX_FILTER_LABELS and top_score >= threshold:
-                    # 앞 n 토큰만 제거하고 계속 검사
+                if pred in PREFIX_FILTER_LABELS and top_score >= LABEL_THRESHOLDS.get(pred, threshold):
+                    # 앞 n 토큰만 제거
                     drop_logs.append({
                         "원문": sent,
                         "단계": f"{n}-gram",
@@ -101,47 +110,56 @@ def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0
                         "confidence": float(top_score),
                         "probs": probs
                     })
-                    tokens = tokens[n:]  # 앞부분 절단
+                    tokens = tokens[n:]
                     matched_prefix = True
                     break
 
             if sentence_force_pass:
                 break
-            if not matched_prefix:
-                # 더 이상 자를 prefix가 없으면 full-sentence 검사
-                remaining = " ".join(tokens)
-                pred, probs = classify_text(remaining, model, tokenizer)
 
-                if pred == "meaningful":
-                    kept_sentences.append(remaining)
-                    sentence_force_pass = True
-                    break
-
-                top_score = probs[pred]
-                if pred in FULL_FILTER_LABELS and top_score >= threshold:
-                    # 전체 문장도 필터 라벨 → 해당 문장은 드랍(토큰 비움)
-                    drop_logs.append({
-                        "원문": sent,
-                        "단계": "full-sentence",
-                        "label": pred,
-                        "confidence": float(top_score),
-                        "probs": probs
-                    })
-                    tokens = []  # 문장 드랍
+            if matched_prefix:
+                # 잘린 토큰이 남아있으면 다시 검사
+                if not tokens:
+                    tokens = []
                     break
                 else:
-                    kept_sentences.append(remaining)
-                    break
+                    continue
 
-        # while 종료: sentence_force_pass면 이미 kept_sentences에 들어감
-        # tokens가 남아있다면 그 자체가 kept에 반영됐으므로 추가 처리 불필요
+            # prefix 매칭 안 된 경우 → 남은 tokens 전체 검사
+            remaining = " ".join(tokens)
+            pred, probs = classify_text(remaining, model, tokenizer)
+
+            if pred == "meaningful":
+                kept_sentences.append(remaining)
+                sentence_force_pass = True
+                break
+
+            top_score = probs[pred]
+            if pred in FULL_FILTER_LABELS and top_score >= LABEL_THRESHOLDS.get(pred, threshold):
+                drop_logs.append({
+                    "원문": sent,
+                    "단계": "full-sentence",
+                    "label": pred,
+                    "confidence": float(top_score),
+                    "probs": probs
+                })
+                tokens = []
+                break
+            else:
+                kept_sentences.append(remaining)
+                break
+
+        # while 종료
+        if sentence_force_pass:
+            continue
+        if tokens:
+            kept_sentences.append(" ".join(tokens))
 
     final_label = resolve_final_label(drop_logs)
     max_conf = max([log["confidence"] for log in drop_logs], default=0.0)
 
     if kept_sentences:
-        # 실제 드랍이 하나도 없었다면 라벨/스코어 비우기
-        if not drop_logs:
+        if not drop_logs:  # 아무것도 안 잘렸다면 라벨/스코어 없음
             final_label = None
             max_conf = 0.0
         return {
