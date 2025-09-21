@@ -24,7 +24,7 @@ class ChatMessage(Base):
 
     message_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     chat_room_id = Column(UUID(as_uuid=True), ForeignKey("chat_room.chat_room_id"))
-    author_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=True)
+    author_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)
     role = Column(String(16))  # user / assistant / system
     content = Column(Text)
     filtered_content = Column(Text)
@@ -37,7 +37,7 @@ class ChatRoom(Base):
     __tablename__ = "chat_room"
 
     chat_room_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
+    owner_id = Column(Integer, ForeignKey("users.user_id"))
     title = Column(String(255))
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -56,7 +56,7 @@ class UserSetting(Base):
     __tablename__ = "user_setting"
 
     user_setting_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
+    user_id = Column(Integer, ForeignKey("users.user_id"))
     call_me = Column(String(64))
     role_description = Column(Text)
     preferred_tone = Column(SAEnum(PreferredToneEnum, name="preferred_tone_enum"))
@@ -95,7 +95,7 @@ class TokenUsage(Base):
     saved_cost_usd = Column(Numeric(14, 6))
     saved_energy_wh = Column(Numeric(14, 6))
     saved_co2_g = Column(Numeric(14, 6))
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
+    user_id = Column(Integer, ForeignKey("users.user_id"))
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
 
 
