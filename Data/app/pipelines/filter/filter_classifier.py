@@ -1,7 +1,6 @@
 import torch
 from typing import Dict, Any, List
 
-
 # === 필터 라벨 세트 ===
 PREFIX_FILTER_LABELS = {
     "call_only", "reaction_only", "greeting",
@@ -22,35 +21,36 @@ LABEL_THRESHOLDS = {
     "meaningful": 0.00,
 }
 
-# === 라벨 우선순위 ===
+# === 라벨 우선순위 (낮을수록 우선) ===
 LABEL_PRIORITY = {
-    "goodbye": 1,
-    "apology": 2,
-    "thank": 4,
-    "greeting": 8,
-    "call_only": 16,
-    "reaction_only": 32,
-    "no_meaning": 64,
-    "connector_filler": 128,
-    "meaningful": 0
+    "goodbye": 1,          # 🙇 작별
+    "apology": 2,          # 🙏 사과
+    "thank": 3,            # 🙏 감사
+    "greeting": 4,         # 👋 인사
+    "call_only": 5,        # 🎯 단순 호출
+    "reaction_only": 6,    # 😮 감탄사
+    "no_meaning": 7,       # ❌ 의미 없음
+    "connector_filler": 8, # 🔗 연결어
 }
 
-def resolve_final_label(drop_logs):
-    dropped_labels = [log["라벨"] for log in drop_logs if "success" in log.get("단계", "")]
-    if not dropped_labels:
-        return "no_meaning"
+def resolve_final_label(drop_logs: List[Dict[str, Any]]) -> str:
+    """
+    여러 라벨이 감지될 경우, 미리 정의한 우선순위(LABEL_PRIORITY)에 따라 최종 라벨을 결정한다.
+    """
+    if not drop_logs:
+        return None
 
-    mask = 0
-    for label in dropped_labels:
-        mask |= LABEL_PRIORITY.get(label, 0)
-
-    for label, bit in sorted(LABEL_PRIORITY.items(), key=lambda x: x[1]):
-        if bit > 0 and (mask & bit):
+    detected = {log.get("label") for log in drop_logs if log.get("label")}
+    for label, _ in sorted(LABEL_PRIORITY.items(), key=lambda x: x[1]):
+        if label in detected:
             return label
 
     return "no_meaning"
 
 def classify_text(text, model, tokenizer):
+    """
+    텍스트를 분류 모델에 넣어 (예측 라벨, 확률 딕셔너리) 반환
+    """
     model.eval()
     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=128)
     with torch.no_grad():
@@ -68,7 +68,6 @@ def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0
     문장을 토큰 단위로 분리 → 슬라이딩 윈도우 기반으로 분류 → 필터링 수행.
     최종적으로 PASS / DROP 여부와 cleaned_text, 라벨, 로그를 반환.
     """
-
     drop_logs: List[Dict[str, Any]] = []
     kept_sentences: List[str] = []
 
@@ -124,7 +123,7 @@ def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0
             else:
                 kept_sentences.append(sent)
 
-    # 최종 라벨 결정
+    # 최종 라벨 결정 (우선순위 반영)
     final_label = resolve_final_label(drop_logs) if drop_logs else None
 
     # === 최종 반환 ===
@@ -146,4 +145,3 @@ def filter_classifier(input_text: str, model, tokenizer, threshold=0.8, margin=0
             "drop_logs": drop_logs,
             "kept_sentences": kept_sentences
         }
-
