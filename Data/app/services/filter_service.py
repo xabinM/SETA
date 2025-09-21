@@ -45,8 +45,8 @@ def save_to_es(raw: RawFilteredMessage, decision: IntentDecision):
         "room_id": raw.room_id,
         "message_id": raw.message_id,
         "original_text": raw.text,
-        "cleaned_text": raw.final_text or raw.text,    # ← 여기 수정 (decision.cleaned_text 제거)
-        "reason_type": decision.reason_type,           # ← 여기 수정
+        "cleaned_text": decision.cleaned_text or raw.final_text or raw.text,
+        "reason_type": decision.reason_type,         
         "action": decision.action,
         "score": decision.score,
         "created_at": datetime.now(timezone.utc).isoformat(),
