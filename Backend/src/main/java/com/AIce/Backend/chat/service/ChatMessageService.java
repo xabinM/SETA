@@ -12,14 +12,13 @@ import com.AIce.Backend.domain.usersetting.repository.UserSettingRepository;
 import com.AIce.Backend.global.enums.ChatMessageRole;
 import io.micrometer.observation.annotation.Observed;
 import io.micrometer.tracing.Tracer;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,7 +63,7 @@ public class ChatMessageService {
                 .createdAt(LocalDateTime.now())
                 .turnIndex(turnIdx)
                 .build();
-        chatMessagerepo.save(entity);
+        chatMessagerepo.saveAndFlush(entity);
 
         if (turnIdx == 1) {
             log.info("[HandleMessage] trigger title update for roomId={}", roomId);

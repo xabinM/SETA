@@ -33,9 +33,7 @@ backend-build:
       - Backend/build/libs/*.jar
     expire_in: 1 hour
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Back_main)$/'
-      changes:
-        - Backend/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
       when: always
     - when: never
 
@@ -58,14 +56,12 @@ frontend-build:
       - Frontend/seta-front/dist
     expire_in: 1 hour
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Front_main)$/'
-      changes:
-        - Frontend/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
       when: always
     - when: never
 
 # ----------------
-# 3. Build Docker Image & Push to Registry.
+# 3. Backend Docker Image & Push to Registry.
 # ----------------
 backend-build-docker:
   stage: build-docker
@@ -84,16 +80,14 @@ backend-build-docker:
     - docker build -t $BACKEND_IMAGE ./Backend
     - docker push $BACKEND_IMAGE
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Back_main)$/'
-      changes:
-        - Backend/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
       when: always
     - when: never
   dependencies:
     - backend-build
 
 # ----------------
-# 4. Frontend Docker Build & Push
+# 4. Frontend Docker Image Build & Push
 # ----------------
 frontend-build-docker:
   stage: build-docker
@@ -112,9 +106,7 @@ frontend-build-docker:
     - docker build -t $FRONTEND_IMAGE ./Frontend/seta-front
     - docker push $FRONTEND_IMAGE
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Front_main)$/'
-      changes:
-        - Frontend/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
       when: always
     - when: never
   dependencies:
@@ -129,9 +121,7 @@ deploy-backend:
   needs:
     - job: backend-build-docker
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Back_main)$/'
-      changes:
-        - Backend/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
       when: always
     - when: never
   before_script:
@@ -184,9 +174,7 @@ deploy-frontend:
   needs:
     - job: frontend-build-docker
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main|Devops_config|Front_main)$/'
-      changes:
-        - Frontend/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
       when: always
     - when: never
   before_script:

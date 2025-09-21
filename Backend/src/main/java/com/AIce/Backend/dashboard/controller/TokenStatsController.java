@@ -18,7 +18,7 @@ import java.time.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/dashboard/kpi")
+@RequestMapping("/api/dashboard/kpi")
 @RequiredArgsConstructor
 public class TokenStatsController {
 
