@@ -1,6 +1,5 @@
 import torch
-from typing import Dict, Any, List
-
+from typing import Dict, Any, List, Optional
 PREFIX_FILTER_LABELS = {
     "call_only", "reaction_only", "greeting",
     "thank", "goodbye", "apology", "connector_filler", "no_meaning"
@@ -30,7 +29,7 @@ LABEL_PRIORITY = {
     "connector_filler": 8,
 }
 
-def resolve_final_label(drop_logs: List[Dict[str, Any]]) -> str | None:
+def resolve_final_label(drop_logs: List[Dict[str, Any]]) -> Optional[str]:
     if not drop_logs:
         return None
     detected = {log.get("label") for log in drop_logs if log.get("label")}
