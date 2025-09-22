@@ -49,12 +49,11 @@ for i in {1..12}; do
 done
 
 # nginx 업스트림 전환 (backend_upstream.conf 사용)
-echo "=== Nginx 업스트림 전환: $NEXT_PORT ==="
-sudo bash -c "cat > /etc/nginx/conf.d/backend_upstream.conf <<EOF
+sudo tee /etc/nginx/conf.d/backend_upstream.conf > /dev/null <<EOF
 upstream backend_upstream {
     server 127.0.0.1:$NEXT_PORT;
 }
-EOF"
+EOF
 
 sudo nginx -s reload
 
