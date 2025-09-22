@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate                 # 운영 환경에서는 validate 또는 none
+      ddl-auto: create                 # 운영 환경에서는 validate 또는 none
     defer-datasource-initialization: false
     show-sql: true
     properties:
