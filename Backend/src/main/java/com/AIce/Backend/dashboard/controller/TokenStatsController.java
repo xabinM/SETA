@@ -23,9 +23,9 @@ public class TokenStatsController {
                 tokenStatsService.getUserTotal(userId),
                 tokenStatsService.getUserDaily(userId),
                 tokenStatsService.getGlobalDaily(),
-                tokenStatsService.getGlobalTotal(),
-                tokenStatsService.getTopDroppedTexts(userId),
-                tokenStatsService.getTopReasons()
+                tokenStatsService.getGlobalTotal()
+//                tokenStatsService.getTopDroppedTexts(userId),
+//                tokenStatsService.getTopReasons()
                 );
     }
 }

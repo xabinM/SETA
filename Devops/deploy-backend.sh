@@ -34,8 +34,15 @@ fi
 
 echo "현재 활성화: $CURRENT → 신규 배포 대상: $NEXT (port $NEXT_PORT)"
 
+# 기존 동일 이름 컨테이너가 있으면 제거
+EXISTING_CONTAINER=$(docker ps -aq -f name="backend_$NEXT")
+if [ -n "$EXISTING_CONTAINER" ]; then
+    echo "⚠️ 기존 $NEXT 컨테이너($EXISTING_CONTAINER) 발견 → 제거"
+    docker rm -f "$EXISTING_CONTAINER"
+fi
+
 # 새 컨테이너 실행
-docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_FILE" up -d backend_$NEXT
+docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_FILE" up -d --remove-orphans backend_$NEXT
 
 # 헬스체크
 echo "=== 헬스 체크 시작 (http://localhost:$NEXT_PORT$HEALTH_PATH) ==="
