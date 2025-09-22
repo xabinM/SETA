@@ -50,13 +50,13 @@ done
 
 # nginx 업스트림 전환 (backend_upstream.conf 사용)
 echo "=== Nginx 업스트림 전환: $NEXT_PORT ==="
-cat > /etc/nginx/conf.d/backend_upstream.conf <<EOF
+sudo bash -c "cat > /etc/nginx/conf.d/backend_upstream.conf <<EOF
 upstream backend_upstream {
     server 127.0.0.1:$NEXT_PORT;
 }
-EOF
+EOF"
 
-nginx -s reload
+sudo nginx -s reload
 
 echo "=== 트래픽 전환 완료 → $NEXT 컨테이너 서비스 시작 ==="
 
