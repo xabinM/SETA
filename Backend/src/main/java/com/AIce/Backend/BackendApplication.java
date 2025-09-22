@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "com.AIce.Backend.domain")  // JPA repo 경로
-@EnableElasticsearchRepositories(basePackages = "com.AIce.Backend.domain.dashboard.repository") // ES repo 경로
+//@EnableElasticsearchRepositories(basePackages = "com.AIce.Backend.domain.dashboard.repository") // ES repo 경로
 @EnableJpaAuditing
 public class BackendApplication {
 
