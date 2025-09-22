@@ -1,4 +1,5 @@
 import {http} from "@/shared/api/http";
+import {tokenStore} from "@/shared/auth/token.ts";
 
 export type SignUpPayload = {
     username: string;
@@ -13,7 +14,7 @@ export type SignUpResponse = {
 };
 
 export function signUp(payload: SignUpPayload, signal?: AbortSignal) {
-    return http<SignUpResponse>("/api/auth/signup", {
+    return http<SignUpResponse>("/auth/signup", {
         method: "POST",
         body: payload,
         signal,
@@ -38,10 +39,22 @@ export type LoginResponse = {
 };
 
 export function login(payload: LoginPayload, signal?: AbortSignal) {
-    return http<LoginResponse>("/api/auth/login", {
+    return http<LoginResponse>("/auth/login", {
         method: "POST",
         body: payload,
         signal,
         auth: false,
+    });
+}
+
+export async function logout(signal?: AbortSignal) {
+    const refresh = tokenStore.getRefresh();
+    if (!refresh) return;
+
+    await http<void>("/auth/logout", {
+        method: "POST",
+        headers: {RefreshToken: refresh},
+        auth: false,
+        signal,
     });
 }
