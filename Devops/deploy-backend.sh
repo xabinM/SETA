@@ -50,6 +50,8 @@ done
 
 # nginx 업스트림 전환 (backend_upstream.conf 사용)
 sudo rm -f /etc/nginx/conf.d/backend_upstream.conf
+sudo nginx -s reload
+
 sudo tee /etc/nginx/conf.d/backend_upstream.conf > /dev/null <<EOF
 upstream backend_upstream {
     server 127.0.0.1:$NEXT_PORT;
