@@ -59,7 +59,7 @@ def _compute_dropped_tokens_by_diff(original_text: str, cleaned_text: str) -> Li
 
 def save_to_es(raw: RawFilteredMessage, decision: IntentDecision) -> None:
     """
-    ES에 '드롭된 부분'만 저장
+    ES에 filtered_words_details 기반으로 '드롭된 부분' 저장
     문서 구조:
     {
       "trace_id": "...",
@@ -73,47 +73,36 @@ def save_to_es(raw: RawFilteredMessage, decision: IntentDecision) -> None:
     docs: List[Dict[str, Any]] = []
     now = datetime.now(KST).isoformat()  # 한국시간 ISO8601
 
-    # 1) drop_logs 기반
-    logs = getattr(decision, "drop_logs", None)
-    if isinstance(logs, list) and len(logs) > 0:
-        for log in logs:
-            dropped_list = _as_list(log.get("필터된 내용") or log.get("dropped_text"))
-            if not dropped_list:
-                continue
-            reason = log.get("라벨") or getattr(decision, "reason_type", None)
-            for dropped in dropped_list:
-                docs.append({
-                    "trace_id": raw.trace_id,
-                    "user_id": raw.user_id,
-                    "dropped_text": dropped,
-                    "reason_type": reason,
-                    "created_at": now,
-                })
+    words = getattr(raw, "filtered_words_details", [[], []])[0]
+    labels = getattr(raw, "filtered_words_details", [[], []])[1]
 
-    # 2) drop_logs 없을 때
-    if not docs:
-        if decision.action == "PASS":
-            original_text = raw.final_text or raw.text
-            cleaned_text  = decision.cleaned_text or raw.final_text or raw.text
-            diff_drops = _compute_dropped_tokens_by_diff(original_text, cleaned_text)
-            for dropped in diff_drops:
-                docs.append({
-                    "trace_id": raw.trace_id,
-                    "user_id": raw.user_id,
-                    "dropped_text": dropped,
-                    "reason_type": getattr(decision, "reason_type", None),
-                    "created_at": now,
-                })
-
-        elif decision.action == "DROP":
+    if words and labels:
+        for w, l in zip(words, labels):
             docs.append({
                 "trace_id": raw.trace_id,
                 "user_id": raw.user_id,
-                "dropped_text": raw.text,
-                "reason_type": getattr(decision, "reason_type", None),
+                "dropped_text": w,
+                "reason_type": l,
                 "created_at": now,
             })
+    else:
+        logs = getattr(decision, "drop_logs", None)
+        if isinstance(logs, list) and len(logs) > 0:
+            for log in logs:
+                dropped_list = _as_list(log.get("필터된 내용") or log.get("dropped_text"))
+                if not dropped_list:
+                    continue
+                reason = log.get("라벨") or getattr(decision, "reason_type", None)
+                for dropped in dropped_list:
+                    docs.append({
+                        "trace_id": raw.trace_id,
+                        "user_id": raw.user_id,
+                        "dropped_text": dropped,
+                        "reason_type": reason,
+                        "created_at": now,
+                    })
 
-    # 3) ES 색인
+    # ES 색인
     for doc in docs:
         es.index(index="filter-logs", document=doc)
+

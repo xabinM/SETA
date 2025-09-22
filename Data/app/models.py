@@ -16,6 +16,7 @@ class PreferredToneEnum(enum.Enum):
     FRIENDLY = "FRIENDLY"
     POLITE = "POLITE"
     CHEERFUL = "CHEERFUL"
+    CYNICAL = "CYNICAL"
     CALM = "CALM"
 
 class User(Base):
