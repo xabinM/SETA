@@ -15,16 +15,16 @@ public class DropResponder {
     // intent → tone → 3가지 후보
     private static final Map<IntentType, Map<PreferredTone, List<String>>> RESP = build();
 
-    public String buildText(FilterResultV1 fr, Optional<UserSetting> tone) {
+    public String buildText(FilterResultV1 fr, Optional<UserSetting> userSettingOpt) {
         IntentType intent = mapReason(fr);
         Map<PreferredTone, List<String>> byTone = RESP.getOrDefault(intent, RESP.get(IntentType.UNKNOWN));
 
         // 톤이 비어있으면 폴백
-        List<String> candidates = byTone.getOrDefault(
-                tone != null ? tone : PreferredTone.POLITE,
-                byTone.get(PreferredTone.POLITE)
-        );
+        PreferredTone tone = userSettingOpt
+                .map(UserSetting::getPreferredTone)
+                .orElse(PreferredTone.POLITE);
 
+        List<String> candidates = byTone.getOrDefault(tone, byTone.get(PreferredTone.POLITE));
         return pickOne(candidates);
     }
 
@@ -35,15 +35,14 @@ public class DropResponder {
 
         // reason_type 표준화 매핑
         return switch (rt) {
-            case "thank", "thanks", "gratitude" -> IntentType.THANK;
-            case "apology", "sorry" -> IntentType.APOLOGY;
-            case "goodbye", "bye" -> IntentType.GOODBYE;
-            case "greeting", "hello", "hi" -> IntentType.GREETING;
-            case "call_only", "name_only", "address_only" -> IntentType.CALL_ONLY;
-            case "reaction_only", "interjection" -> IntentType.REACTION_ONLY;
-            case "no_meaning", "garbled", "typo" -> IntentType.NO_MEANING;
-            case "connector_filler", "filler" -> IntentType.CONNECTOR_FILLER;
-            case "acknowledgement", "ack", "ok" -> IntentType.ACKNOWLEDGEMENT;
+            case "thank" -> IntentType.THANK;
+            case "apology" -> IntentType.APOLOGY;
+            case "goodbye" -> IntentType.GOODBYE;
+            case "greeting" -> IntentType.GREETING;
+            case "call_only" -> IntentType.CALL_ONLY;
+            case "reaction_only" -> IntentType.REACTION_ONLY;
+            case "no_meaning" -> IntentType.NO_MEANING;
+            case "connector_filler" -> IntentType.CONNECTOR_FILLER;
             default -> IntentType.UNKNOWN;
         };
     }
@@ -65,7 +64,7 @@ public class DropResponder {
 
         Map<IntentType, Map<PreferredTone, List<String>>> m = new EnumMap<>(IntentType.class);
 
-        // 🙇 감사(THANK)
+        // 감사(THANK)
         m.put(IntentType.THANK, Map.ofEntries(
                 entry(P, List.of("별말씀을요. 도움이 되었다니 기쁩니다.", "천만에요, 언제든 말씀해주세요.", "도움이 되었다면 다행입니다.")),
                 entry(C, List.of("에이~ 뭐 이런 거 가지고 😆", "언제든지 불러줘! 🙌", "나도 고마워 💙")),
@@ -75,7 +74,7 @@ public class DropResponder {
                 entry(W, List.of("고맙단 말은 좋지만, 자주 듣다 보니 익숙하네 😏", "또 고맙다니, 이번엔 진심이지? 🙃", "그래, 뭐 나도 나쁘진 않았어."))
         ));
 
-        // 🙏 사과(APOLOGY)
+        // 사과(APOLOGY)
         m.put(IntentType.APOLOGY, Map.ofEntries(
                 entry(P, List.of("괜찮습니다. 너무 걱정하지 마세요.", "신경 쓰지 않으셔도 됩니다.", "이해합니다. 괜찮아요.")),
                 entry(C, List.of("에이~ 괜찮아, 신경 쓰지 마! 😊", "오히려 고마워, 사과해줘서!", "아무 일도 아니야~ 걱정 붙들어매! 🙌")),
@@ -85,7 +84,7 @@ public class DropResponder {
                 entry(W, List.of("이제 와서 사과해도 뭐 달라지진 않죠 😅", "괜찮아, 뭐 항상 그러더라…", "사과는 했으니 됐다고 치자."))
         ));
 
-        // 👋 작별/마무리(GOODBYE)
+        // 작별/마무리(GOODBYE)
         m.put(IntentType.GOODBYE, Map.ofEntries(
                 entry(P, List.of("네, 안녕히 계세요.", "다음에 또 뵙겠습니다.", "좋은 하루 보내세요.")),
                 entry(C, List.of("잘 가~ 또 보자! 👋", "바이바이 😄 즐거운 하루 보내!", "내일 또 얘기하자 ✨")),
@@ -95,7 +94,7 @@ public class DropResponder {
                 entry(W, List.of("또 가는 거야? 뭐, 그럴 줄 알았지 😏", "벌써 끝? 나만 아쉽네…", "그래, 잘 가. 잊지 마라~ 🙃"))
         ));
 
-        // 👋 인사(GREETING)
+        // 인사(GREETING)
         m.put(IntentType.GREETING, Map.ofEntries(
                 entry(P, List.of("안녕하세요. 오늘도 궁금한 게 있으신가요?", "반갑습니다. 무엇을 도와드릴까요?", "안녕하세요, 잘 지내셨나요?")),
                 entry(C, List.of("안녕~ 😄 오늘 기분 어때?", "오랜만이야! 잘 지냈어?", "하이하이 🙌 뭐 하고 있었어?")),
@@ -105,7 +104,7 @@ public class DropResponder {
                 entry(W, List.of("또 인사네… 할 말은 있지? 🤔", "안녕, 오늘도 그냥 인사만 하고 끝낼 거야?", "오랜만이라니, 내가 보고 싶었구나? 😏"))
         ));
 
-        // 🎯 이름만 호출(CALL_ONLY)
+        // 이름만 호출(CALL_ONLY)
         m.put(IntentType.CALL_ONLY, Map.ofEntries(
                 entry(P, List.of("네, 안녕하세요! 무엇을 도와드릴까요?", "부르셨나요? 말씀해주세요.", "네, 여기 있습니다.")),
                 entry(C, List.of("불렀어? 😊 뭐 도와줄까?", "오! 나 여기 있어 ✨", "응 나 불렀지? 😆")),
@@ -115,7 +114,7 @@ public class DropResponder {
                 entry(W, List.of("또 찾으셨군요… 뭐가 궁금하세요? 🙃", "네, 안 부르면 심심할 뻔했네요.", "이번엔 무슨 일이죠? 😏"))
         ));
 
-        // 😮 감탄사만(RESPONSE_ONLY)
+        // 감탄사만(RESPONSE_ONLY)
         m.put(IntentType.REACTION_ONLY, Map.ofEntries(
                 entry(P, List.of("네, 그렇게 느끼셨군요.", "그렇군요.", "흥미로운 반응이에요.")),
                 entry(C, List.of("오! 신기하지? 😆", "헉! 놀랐구나~", "와, 대박이지? 🤩")),
@@ -125,7 +124,7 @@ public class DropResponder {
                 entry(W, List.of("뭐 그렇게 놀랄 일도 아닌데… 🙃", "와, 매번 똑같은 반응이네 😏", "그래그래, 놀랄 만하지 뭐."))
         ));
 
-        // ❌ 의미 없음(NO_MEANING)
+        // 의미 없음(NO_MEANING)
         m.put(IntentType.NO_MEANING, Map.ofEntries(
                 entry(P, List.of("잘 못 알아들었어요.", "혹시 다시 말씀해 주시겠어요?", "이해하기 어려워요.")),
                 entry(C, List.of("엥? 뭐라고 한 거야? 😅", "오타 난 것 같아~ 다시 말해줄래? 🙃", "음… 무슨 뜻이지?")),
@@ -135,7 +134,7 @@ public class DropResponder {
                 entry(W, List.of("무슨 암호라도 쓰신 건가요? 😏", "나도 해독기는 없는데… 🙃", "이건… 글자 맞아?"))
         ));
 
-        // 🔗 연결어/머뭇거림(CONNECTOR_FILLER)
+        // 연결어/머뭇거림(CONNECTOR_FILLER)
         m.put(IntentType.CONNECTOR_FILLER, Map.ofEntries(
                 entry(P, List.of("이어서 말씀해 주세요.", "네, 듣고 있어요.", "계속 말씀해 주시면 됩니다.")),
                 entry(C, List.of("말 시작했네 😆 이어서 말해줘!", "오, 뭔가 말하려는 거구나 🙌", "음~ 듣고 있어 👂")),
@@ -143,16 +142,6 @@ public class DropResponder {
                 entry(H, List.of("오! 뭔가 흥미로운 얘기 시작인가요? 🎉", "자자~ 이어서 말해주세요 ✨", "음~ 기대돼요 😍")),
                 entry(M, List.of("네, 천천히 말씀 이어가셔도 괜찮습니다.", "이어서 차분히 얘기해 주셔도 됩니다.", "네, 듣고 있습니다. 계속 말씀해주세요.")),
                 entry(W, List.of("또 서론 길게 시작하는 거 아냐? 😏", "본론은 언제 나올까… 🙃", "알았어, 계속 들어볼게."))
-        ));
-
-        // ✅ 확인 응답(ACKNOWLEDGEMENT) — 표에 없어서 보강
-        m.put(IntentType.ACKNOWLEDGEMENT, Map.ofEntries(
-                entry(P, List.of("확인했습니다.", "알겠습니다.", "네, 확인 완료했습니다.")),
-                entry(C, List.of("오케이!", "응~ 알았어!", "ㅇㅋ 확인~")),
-                entry(F, List.of("확인했습니다. 다음 지시를 부탁드립니다.", "네, 이해했습니다.", "확인 완료했습니다.")),
-                entry(H, List.of("좋아요! 확인했어요 😊", "OK! 이어서 진행해볼까요? ✨", "확인 완료! 👍")),
-                entry(M, List.of("네, 확인했습니다.", "알겠습니다. 계속 진행하겠습니다.", "확인했어요.")),
-                entry(W, List.of("확인 완료. 이제 본론 갑시다 😏", "네네~ 알았어요 🙃", "확인! 다음 스텝?"))
         ));
 
         // 폴백(UNKNOWN)
