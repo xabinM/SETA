@@ -16,25 +16,25 @@ public class TokenStatsResponse {
     private UserSavedTokenDailyDto userDaily;
     private GlobalSavedTokenDailyDto globalDaily;
     private GlobalSavedTokenTotal globalTotal;
-//    private List<TopDroppedTextDto> topDroppedTexts;
-//    private List<TopReasonDto> topReasons;
+    private List<TopDroppedTextDto> topDroppedTexts;
+    private List<TopReasonDto> topReasons;
 
     // === 변환 메서드 ===
     public static TokenStatsResponse from(
             UserSavedTokenTotal userTotal,
             UserSavedTokenDaily userDaily,
             GlobalSavedTokenDaily globalDaily,
-            GlobalSavedTokenTotal globalTotal
-//            List<TopDroppedTextDto> topDroppedTexts,
-//            List<TopReasonDto> topReasons
+            GlobalSavedTokenTotal globalTotal,
+            List<TopDroppedTextDto> topDroppedTexts,
+            List<TopReasonDto> topReasons
     ) {
         return TokenStatsResponse.builder()
                 .userTotal(userTotal)
                 .userDaily(userDaily != null ? UserSavedTokenDailyDto.from(userDaily) : null)
                 .globalDaily(globalDaily != null ? GlobalSavedTokenDailyDto.from(globalDaily) : null)
                 .globalTotal(globalTotal)
-//                .topDroppedTexts(topDroppedTexts)
-//                .topReasons(topReasons)
+                .topDroppedTexts(topDroppedTexts)
+                .topReasons(topReasons)
                 .build();
     }
 }
