@@ -30,8 +30,10 @@ spring:
       host: ${SPRING_DATA_REDIS_HOST}          # Redis 호스트
       port: ${SPRING_DATA_REDIS_PORT}          # Redis 포트
     elasticsearch:
-      client:
-        endpoints: http://172.18.0.2:9200
+      repositories:
+        enabled: true
+  elasticsearch:
+    uris: http://172.26.8.129:9200
 
 jwt:
   secret: ${JWT_SECRET}                  # JWT 시크릿

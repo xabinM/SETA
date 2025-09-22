@@ -27,11 +27,6 @@ spring:
     template:
       observation-enabled: true
 
-  data:
-    elasticsearch:
-      client:
-        endpoints: http://172.26.8.129:9200
-
 management:
   tracing:
     enabled: true
