@@ -40,7 +40,7 @@ def save_filter_results(raw: RawFilteredMessage, decision: IntentDecision, rule_
 def save_to_es(raw: RawFilteredMessage, decision: IntentDecision):
     """
     Elasticsearch에 필터링 로그 저장
-    - PASS: drop_logs 중 'success-drop' 단계만 저장 (부분 드롭 기록)
+    - PASS: drop_logs 중 실제 드롭된 항목만 저장
     - DROP: drop_logs 전체 저장
     """
     es = get_es_client()
@@ -49,8 +49,8 @@ def save_to_es(raw: RawFilteredMessage, decision: IntentDecision):
         return
 
     for log in decision.drop_logs:
-        # PASS → success-drop 단계만 기록
-        if decision.action == "PASS" and "success-drop" not in log.get("단계", ""):
+        dropped = (log.get("필터된 내용") or "").strip()
+        if not dropped:
             continue
 
         doc = {
@@ -58,7 +58,7 @@ def save_to_es(raw: RawFilteredMessage, decision: IntentDecision):
             "room_id": raw.room_id,
             "message_id": raw.message_id,
             "original_text": log.get("원문"),
-            "dropped_text": log.get("필터된 내용"),
+            "dropped_text": dropped,
             "remaining_text": log.get("남은 내용"),
             "reason_type": log.get("라벨"),
             "stage": log.get("단계"),
