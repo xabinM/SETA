@@ -1,7 +1,7 @@
 import { useState } from "react";
 import LoginBg from "@/assets/loginBackground.png";
 import "./Login.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { login } from "@/features/auth/api";
 import { ApiError } from "@/shared/api/http";
 import CustomToast from "@/ui/components/Toast/CustomToast";
@@ -9,6 +9,7 @@ import { tokenStore } from "@/shared/auth/token";
 
 export default function Login() {
     const navigate = useNavigate();
+    const [sp] = useSearchParams();
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -31,7 +32,9 @@ export default function Login() {
             tokenStore.set({ access, refresh });
 
             setToast({ msg: "로그인 성공!", desc: "환영합니다 🎉" });
-            setTimeout(() => navigate("/chat"), 500);
+            const rawNext = sp.get("next");
+            const next = rawNext && rawNext.startsWith("/") ? rawNext : "/chat";
+            setTimeout(() => navigate(next, { replace: true }), 500);
         } catch (err) {
             const msg =
                 err instanceof ApiError

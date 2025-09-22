@@ -1,7 +1,7 @@
-import {tokenStore} from "@/shared/auth/token.ts";
+import { tokenStore, isJwtExpired } from "@/shared/auth/token";
 
 const RAW_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
-const BASE = RAW_BASE.replace(/\/+$/, ""); // 우측 슬래시 정리
+const BASE = RAW_BASE.replace(/\/+$/, "");
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -18,13 +18,18 @@ export type HttpOptions = {
 export class ApiError extends Error {
     status: number;
     data: unknown;
-
     constructor(message: string, status: number, data: unknown) {
         super(message);
         this.name = "ApiError";
         this.status = status;
         this.data = data;
     }
+}
+
+export type UnauthorizedHandler = () => void;
+let _onUnauthorized: UnauthorizedHandler | null = null;
+export function setUnauthorizedHandler(fn: UnauthorizedHandler | null) {
+    _onUnauthorized = fn;
 }
 
 function isAbsoluteUrl(str: string) {
@@ -34,8 +39,6 @@ function isAbsoluteUrl(str: string) {
 function buildUrl(path: string, query?: HttpOptions["query"]) {
     const cleanPath = path.startsWith("/") ? path : `/${path}`;
     const base = BASE || "";
-
-    // 절대(BASE가 http/https)와 상대(BASE가 /api 같은 경로) 모두 지원
     const url = isAbsoluteUrl(base)
         ? new URL(base + cleanPath)
         : new URL(base + cleanPath, window.location.origin);
@@ -55,18 +58,19 @@ function hasMessage(x: unknown): x is { message: unknown } {
 
 export async function http<T = unknown>(path: string, opts: HttpOptions = {}): Promise<T> {
     const url = buildUrl(path, opts.query);
-    const headers: Record<string, string> = {...(opts.headers ?? {})};
+    const headers: Record<string, string> = { ...(opts.headers ?? {}) };
 
     const useAuth = opts.auth !== false;
-    if (useAuth && !headers.Authorization) {
+    if (useAuth && !headers["Authorization"]) {
         const at = tokenStore.getAccess();
-        if (at) headers.Authorization = `Bearer ${at}`;
+        if (typeof at === "string" && at.length > 0 && !isJwtExpired(at)) {
+            headers["Authorization"] = `Bearer ${at}`;
+        }
     }
 
     let body: BodyInit | undefined;
     if (opts.body !== undefined) {
         const b = opts.body as unknown;
-
         if (
             b instanceof FormData ||
             typeof b === "string" ||
@@ -75,9 +79,9 @@ export async function http<T = unknown>(path: string, opts: HttpOptions = {}): P
             b instanceof ArrayBuffer ||
             ArrayBuffer.isView(b)
         ) {
-            body = b as BodyInit; // 그대로 전송
+            body = b as BodyInit;
         } else {
-            body = JSON.stringify(opts.body); // 객체 → JSON
+            body = JSON.stringify(opts.body);
             if (!headers["Content-Type"]) headers["Content-Type"] = "application/json";
         }
     }
@@ -92,13 +96,12 @@ export async function http<T = unknown>(path: string, opts: HttpOptions = {}): P
 
     const res = await fetch(url, init);
 
-    // 본문 안전 파싱 (비어있을 수도 있음)
     const text = await res.text();
     let data: unknown;
     try {
         data = text ? JSON.parse(text) : undefined;
     } catch {
-        data = text; // JSON이 아니면 원문 문자열
+        data = text;
     }
 
     if (!res.ok) {
@@ -108,6 +111,11 @@ export async function http<T = unknown>(path: string, opts: HttpOptions = {}): P
                 : undefined) ||
             (typeof data === "string" && data.trim() ? data : undefined) ||
             `HTTP ${res.status}`;
+
+        if (res.status === 401) {
+            _onUnauthorized?.();
+        }
+
         throw new ApiError(msg, res.status, data);
     }
 
