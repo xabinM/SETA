@@ -38,7 +38,7 @@ def debug_filter(msg: RawFilteredMessageSchema, db: Session = Depends(get_sessio
         "trace_id": msg.trace_id,
         "room_id": msg.room_id,
         "message_id": msg.message_id,
-        "action": decision["status"].upper(),  # dict 구조라 이렇게 접근
+        "action": decision["status"],
         "rule": "ml",
         "cleaned_text": (decision["content"] if decision["status"] == "pass" else None),
         "label": decision.get("label"),

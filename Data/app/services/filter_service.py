@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from difflib import ndiff
 from typing import List, Dict, Any
 from app.contracts.raw_filtered import RawFilteredMessage
-from app.pipelines.filter.filter_engine import IntentDecision
 from app.adapters.db import get_session
 from app.adapters.es import get_es_client
 from app.models import FilterResult
@@ -11,19 +10,20 @@ from app.models import FilterResult
 KST = timezone(timedelta(hours=9))
 
 
-def save_filter_results(raw: RawFilteredMessage, decision: IntentDecision, rule_name: str = "ml"):
+def save_filter_results(raw: RawFilteredMessage, decision: Dict[str, Any], rule_name: str = "ml"):
     """
     DB에 필터링 결과 저장
     - filter_result 테이블에만 기록
+    - decision은 filter_classifier의 dict 반환값을 사용
     """
     with get_session() as session:
         filter_entry = FilterResult(
             chat_room_id=raw.room_id,
             message_id=raw.message_id,
             stage="ml",
-            action=decision.action,
-            rule_name=decision.reason_type or rule_name,
-            score=decision.score,
+            action=decision["status"].upper(),   # "PASS" / "DROP"
+            rule_name=decision.get("label") or rule_name,
+            score=decision.get("score", 0.0),
             created_at=datetime.now(timezone.utc),  # DB는 UTC 기준
             trace_id=raw.trace_id,
         )
@@ -57,9 +57,9 @@ def _compute_dropped_tokens_by_diff(original_text: str, cleaned_text: str) -> Li
     return drops
 
 
-def save_to_es(raw: RawFilteredMessage, decision: IntentDecision) -> None:
+def save_to_es(raw: RawFilteredMessage, decision: Dict[str, Any]) -> None:
     """
-    ES에 filtered_words_details 기반으로 '드롭된 부분' 저장
+    ES에 filtered_words_details 또는 drop_logs 기반으로 '드롭된 부분' 저장
     문서 구조:
     {
       "trace_id": "...",
@@ -73,6 +73,7 @@ def save_to_es(raw: RawFilteredMessage, decision: IntentDecision) -> None:
     docs: List[Dict[str, Any]] = []
     now = datetime.now(KST).isoformat()  # 한국시간 ISO8601
 
+    # 1) auto 모드: filtered_words_details
     words = getattr(raw, "filtered_words_details", [[], []])[0]
     labels = getattr(raw, "filtered_words_details", [[], []])[1]
 
@@ -85,14 +86,16 @@ def save_to_es(raw: RawFilteredMessage, decision: IntentDecision) -> None:
                 "reason_type": l,
                 "created_at": now,
             })
+
+    # 2) pass 모드: decision.drop_logs
     else:
-        logs = getattr(decision, "drop_logs", None)
+        logs = decision.get("drop_logs", [])
         if isinstance(logs, list) and len(logs) > 0:
             for log in logs:
                 dropped_list = _as_list(log.get("필터된 내용") or log.get("dropped_text"))
                 if not dropped_list:
                     continue
-                reason = log.get("라벨") or getattr(decision, "reason_type", None)
+                reason = log.get("라벨") or decision.get("label")
                 for dropped in dropped_list:
                     docs.append({
                         "trace_id": raw.trace_id,
@@ -102,7 +105,6 @@ def save_to_es(raw: RawFilteredMessage, decision: IntentDecision) -> None:
                         "created_at": now,
                     })
 
-    # ES 색인
+    # 3) ES 색인
     for doc in docs:
         es.index(index="filter-logs", document=doc)
-
