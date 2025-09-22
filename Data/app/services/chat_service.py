@@ -84,7 +84,7 @@ def build_system_prompt(session: Session, user_id: str) -> str:
     if setting.role_description:
         parts.append(f"역할: {setting.role_description}")
     if setting.preferred_tone:
-        tone_desc = tone_map.get(setting.preferred_tone.upper(), "")
+        tone_desc = tone_map.get(setting.preferred_tone, "")
         parts.append(f"응답 톤: {setting.preferred_tone} ({tone_desc})")
     if setting.traits:
         parts.append(f"성격/특징: {setting.traits}")
