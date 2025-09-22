@@ -11,17 +11,25 @@ BLUE_PORT=8081
 GREEN_PORT=8082
 HEALTH_PATH="/actuator/health"
 
+# upstream 설정 파일 경로
+UPSTREAM_DIR="/home/${DEPLOY_USER}/nginx_upstreams"
+UPSTREAM_BLUE="${UPSTREAM_DIR}/backend_upstream_blue.conf"
+UPSTREAM_GREEN="${UPSTREAM_DIR}/backend_upstream_green.conf"
+NGINX_UPSTREAM_LINK="/etc/nginx/conf.d/backend_upstream.conf"
+
 echo "=== Blue/Green 배포 시작 ==="
 
 # 현재 활성화된 컨테이너 확인 (nginx가 바라보는 대상 파악)
-if grep -q "$BLUE_PORT" /etc/nginx/conf.d/backend_upstream.conf 2>/dev/null; then
+if grep -q "$BLUE_PORT" "$NGINX_UPSTREAM_LINK" 2>/dev/null; then
     CURRENT="blue"
     NEXT="green"
     NEXT_PORT=$GREEN_PORT
+    NEXT_CONF=$UPSTREAM_GREEN
 else
     CURRENT="green"
     NEXT="blue"
     NEXT_PORT=$BLUE_PORT
+    NEXT_CONF=$UPSTREAM_BLUE
 fi
 
 echo "현재 활성화: $CURRENT → 신규 배포 대상: $NEXT (port $NEXT_PORT)"
@@ -48,16 +56,9 @@ for i in {1..12}; do
     fi
 done
 
-# nginx 업스트림 전환 (backend_upstream.conf 사용)
-sudo rm -f /etc/nginx/conf.d/backend_upstream.conf
-sudo nginx -s reload
-
-sudo tee /etc/nginx/conf.d/backend_upstream.conf > /dev/null <<EOF
-upstream backend_upstream {
-    server 127.0.0.1:$NEXT_PORT;
-}
-EOF
-
+# nginx 업스트림 전환 (symlink 교체)
+echo "=== nginx upstream 전환 ==="
+sudo ln -sfn "$NEXT_CONF" "$NGINX_UPSTREAM_LINK"
 sudo nginx -s reload
 
 echo "=== 트래픽 전환 완료 → $NEXT 컨테이너 서비스 시작 ==="
