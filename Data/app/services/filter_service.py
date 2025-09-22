@@ -18,7 +18,7 @@ def save_filter_results(raw: RawFilteredMessage, decision: IntentDecision, rule_
                 ChatMessage.message_id == raw.message_id
             ).first()
             if msg:
-                msg.filtered_content = raw.final_text or raw.text
+                msg.filtered_content = decision.cleaned_text or raw.final_text or raw.text
                 session.add(msg)
 
         # (2) filter_result INSERT
@@ -38,17 +38,30 @@ def save_filter_results(raw: RawFilteredMessage, decision: IntentDecision, rule_
 def save_to_es(raw: RawFilteredMessage, decision: IntentDecision):
     """
     Elasticsearch에 필터링 로그 저장
+    - PASS: drop_logs 중 'success-drop' 단계만 저장
+    - DROP: drop_logs 전체 저장
     """
     es = get_es_client()
-    doc = {
-        "trace_id": raw.trace_id,
-        "room_id": raw.room_id,
-        "message_id": raw.message_id,
-        "original_text": raw.text,
-        "cleaned_text": decision.cleaned_text or raw.final_text or raw.text,
-        "reason_type": decision.reason_type,         
-        "action": decision.action,
-        "score": decision.score,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
-    es.index(index="filter-logs", document=doc)
+
+    if not decision.drop_logs:
+        return
+
+    for log in decision.drop_logs:
+        # PASS → success-drop 단계만 기록
+        if decision.action == "PASS" and "success-drop" not in log.get("단계", ""):
+            continue
+
+        doc = {
+            "trace_id": raw.trace_id,
+            "room_id": raw.room_id,
+            "message_id": raw.message_id,
+            "original_text": log.get("원문"),
+            "dropped_text": log.get("필터된 내용"),
+            "remaining_text": log.get("남은 내용"),
+            "reason_type": log.get("라벨"),
+            "stage": log.get("단계"),
+            "score": log.get("확률"),
+            "action": decision.action,  # 최종 PASS or DROP
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        es.index(index="filter-logs", document=doc)
