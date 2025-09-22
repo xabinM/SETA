@@ -3,6 +3,8 @@ import SignUpBg from "@/assets/loginBackground.png";
 import CustomToast from "@/ui/components/Toast/CustomToast";
 import "./SignUp.css";
 import {useNavigate} from "react-router-dom";
+import {signUp} from "@/features/auth/api";
+import { ApiError } from "@/shared/api/http";
 
 export default function SignUp() {
     const navigate = useNavigate();
@@ -10,6 +12,7 @@ export default function SignUp() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [matchStatus, setMatchStatus] = useState<"match" | "mismatch" | "">("");
     const [toast, setToast] = useState<{ msg: string; desc?: string } | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const checkMatch = (pass: string, confirm: string) => {
         if (!pass || !confirm) return setMatchStatus("");
@@ -25,7 +28,7 @@ export default function SignUp() {
         checkMatch(password, v);
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (matchStatus !== "match") {
@@ -38,17 +41,42 @@ export default function SignUp() {
 
         const formData = new FormData(e.currentTarget);
         const payload = {
-            username: formData.get("username"),
-            password: formData.get("password"),
-            name: formData.get("name"),
+            username: String(formData.get("username") ?? "").trim(),
+            password: String(formData.get("password") ?? ""),
+            name: String(formData.get("name") ?? "").trim(),
         };
 
-        // TODO: 실제 API 연결
-        setToast(null);
-        setTimeout(() => {
-            setToast({ msg: "회원가입 요청 전송!", desc: "환영합니다. SETA의 새로운 모험가님 🚀" });
-        }, 0);
-        console.log("회원가입 요청", payload);
+        if (!payload.username || !payload.password || !payload.name) {
+            setToast(null);
+            setTimeout(() => {
+                setToast({ msg: "입력값을 확인해주세요.", desc: "이름/아이디/비밀번호는 필수입니다." });
+            }, 0);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            await signUp(payload);
+            setToast(null);
+            setTimeout(() => {
+                setToast({ msg: "회원가입 요청 전송!", desc: "환영합니다. SETA의 새로운 모험가님 🚀" });
+            }, 0);
+
+            setTimeout(() => navigate("/login"), 1200);
+        } catch (err) {
+            const msg =
+                err instanceof ApiError
+                    ? `${err.status} ${err.message}`
+                    : err instanceof Error
+                        ? err.message
+                        : "알 수 없는 오류";
+            setToast(null);
+            setTimeout(() => {
+                setToast({ msg: "회원가입 실패", desc: msg });
+            }, 0);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -131,7 +159,13 @@ export default function SignUp() {
                             )}
                         </div>
 
-                        <button type="submit" className="btn">회원가입</button>
+                        <button type="submit"
+                                className="btn"
+                                disabled={loading}
+                                aria-busy={loading}
+                        >
+                            {loading ? "회원가입 중…" : "회원가입"}
+                        </button>
 
                         <div className="login-redirect">
                             <span className="login-text">이미 계정이 있으신가요?</span>

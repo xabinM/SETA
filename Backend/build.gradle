@@ -55,7 +55,7 @@ dependencies {
 
 	// DB
 	implementation 'org.postgresql:postgresql'
-	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+	implementation 'co.elastic.clients:elasticsearch-java:8.11.0'
 
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

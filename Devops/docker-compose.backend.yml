@@ -56,9 +56,11 @@ services:
       - "4318:4318"    # OTLP HTTP
     restart: unless-stopped
 
-  backend:
+  # --------------------
+  # Backend 공통 템플릿
+  # --------------------
+  backend_base: &backend-base
     image: ${BACKEND_IMAGE}
-    container_name: backend
     restart: unless-stopped
     depends_on:
       - db
@@ -85,8 +87,18 @@ services:
       GMS_OPENAI_COMPLETIONS_PATH: ${GMS_OPENAI_COMPLETIONS_PATH}
       GMS_OPENAI_MODEL: ${GMS_OPENAI_MODEL}
       GMS_OPENAI_TIMEOUT_MS: ${GMS_OPENAI_TIMEOUT_MS}
+
+  backend_blue:
+    <<: *backend-base
+    container_name: backend_blue
     ports:
-      - "8080:8080"
+      - "8081:8080"
+
+  backend_green:
+    <<: *backend-base
+    container_name: backend_green
+    ports:
+      - "8082:8080"
 
 # -----------------
 # 볼륨 정의

@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate                 # 운영 환경에서는 validate 또는 none
+      ddl-auto: create                 # 운영 환경에서는 validate 또는 none
     defer-datasource-initialization: false
     show-sql: true
     properties:
@@ -29,6 +29,11 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST}          # Redis 호스트
       port: ${SPRING_DATA_REDIS_PORT}          # Redis 포트
+    elasticsearch:
+      repositories:
+        enabled: true
+  elasticsearch:
+    uris: http://172.26.8.129:9200
 
 jwt:
   secret: ${JWT_SECRET}                  # JWT 시크릿
