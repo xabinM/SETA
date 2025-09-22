@@ -12,11 +12,11 @@ import enum
 Base = declarative_base()
 
 class PreferredToneEnum(enum.Enum):
-    neutral = "neutral"
-    friendly = "friendly"
-    polite = "polite"
-    cheerful = "cheerful"
-    calm = "calm"
+    NEUTRAL = "NEUTRAL"
+    FRIENDLY = "FRIENDLY"
+    POLITE = "POLITE"
+    CHEERFUL = "CHEERFUL"
+    CALM = "CALM"
 
 class User(Base):
     __tablename__ = "users"

@@ -36,21 +36,8 @@ def run_worker():
         latency_ms = int((time.time() - start) * 1000)
 
         with get_session() as session:
-            # 1) llm_response 저장
-            llm_res = LlmResponse(
-                trace_id=trace_id,
-                model_name=model_name,
-                temperature=temperature,
-                top_p=1.0,
-                response_text=response_text,
-                response_tokens=usage["completion_tokens"],
-                latency_ms=latency_ms,
-                total_cost_usd=usage["cost_usd"],
-                created_at=datetime.now(timezone.utc),
-            )
-            session.add(llm_res)
 
-            # 2) token_usage 저장
+            # token_usage 저장
             token_usage = TokenUsage(
                 message_id=message_id,
                 prompt_tokens=usage["prompt_tokens"],
@@ -68,18 +55,7 @@ def run_worker():
             )
             session.add(token_usage)
 
-            # 3) chat_message (assistant 응답) 저장
-            cm = ChatMessage(
-                message_id=os.urandom(16).hex(),
-                chat_room_id=room_id,
-                author_id=None,
-                role="assistant",
-                content=response_text,
-                filtered_content=response_text,
-                external_id=trace_id,
-                created_at=datetime.now(timezone.utc),
-            )
-            session.add(cm)
+        
 
             session.commit()
 

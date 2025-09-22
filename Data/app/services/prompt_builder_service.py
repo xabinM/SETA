@@ -72,11 +72,11 @@ def build_system_prompt(session: Session, user_id: str) -> str:
         return "You are a helpful assistant that replies in Korean."
 
     tone_map = {
-        "neutral": "일반적인 AI 스타일 🧠",
-        "friendly": "다정하고 따뜻한 느낌, 이모지도 사용 😊",
-        "polite": "공손하고 격식 있는 존댓말 위주 💼",
-        "cheerful": "활기차고 명랑한 말투, 가벼운 농담도 가능 😄",
-        "calm": "침착하고 담백한 표현, 감정 표현 최소 🌙",
+        "NEUTRAL": "일반적인 AI 스타일 🧠",
+        "FRIENDLY": "다정하고 따뜻한 느낌, 이모지도 사용 😊",
+        "POLITE": "공손하고 격식 있는 존댓말 위주 💼",
+        "CHEERFUL": "활기차고 명랑한 말투, 가벼운 농담도 가능 😄",
+        "CALM": "침착하고 담백한 표현, 감정 표현 최소 🌙",
     }
 
     parts = ["You are a Korean AI assistant."]
