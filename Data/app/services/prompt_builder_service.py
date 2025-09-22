@@ -98,30 +98,34 @@ def build_system_prompt(session: Session, user_id: str) -> str:
 # ===============================
 # ES 유사 맥락 검색
 # ===============================
-def search_similar_context_es(query: str, top_k: int = 3, threshold: float = 0.7):
+def search_similar_context_es(query: str, user_seq: str, top_k: int = 3, min_score: float = 0.7):
     """
-    ES room-summary 인덱스에서 유사 요약 검색
-    (임베딩은 서버의 Sentence-BERT 모델 사용)
-    - threshold 이상만 반환
+    ES user_memory_embedding 인덱스에서 유사한 맥락 검색
+    - query: 검색할 텍스트
+    - user_seq: 특정 사용자 구분
+    - top_k: 가져올 개수
+    - min_score: 유사도 임계값
     """
     es = get_es_client()
+
+    # 1. 임베딩 계산
     emb = embedder.encode(query).tolist()
 
+    # 2. knn 검색
     body = {
         "knn": {
-            "field": "embedding_vector",
+            "field": "embedding",
             "query_vector": emb,
-            "k": top_k * 3,   # 넉넉히 가져와서 threshold 필터
+            "k": top_k,
             "num_candidates": 100
-        }
+        },
+        "_source": ["content", "user_seq", "trace_id", "created_at"]
     }
-    resp = es.search(index="room-summary", body=body)
+    resp = es.search(index="user_memory_embedding", body=body)
 
+    # 3. 결과 필터링 (0.7 이상만)
     results = []
     for hit in resp["hits"]["hits"]:
-        score = hit["_score"]
-        if score >= threshold:
-            results.append(hit["_source"]["summary_text"])
-
-    # threshold 만족하는 상위 top_k만 반환
-    return results[:top_k]
+        if hit["_score"] >= min_score:
+            results.append(hit["_source"]["content"])
+    return results
