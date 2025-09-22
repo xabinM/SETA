@@ -35,7 +35,6 @@ def debug_filter(msg: RawFilteredMessageSchema, db: Session = Depends(get_sessio
     filter_service.save_to_es(msg, decision)
 
     # 4. 결과 반환 (운영과 동일한 구조)
-        # app/routers/debug_filter.py
     return {
         "trace_id": msg.trace_id,
         "room_id": msg.room_id,

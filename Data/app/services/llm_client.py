@@ -1,24 +1,32 @@
-import openai
+from openai import OpenAI
 import os
 
-def call_llm(model: str, prompt: str, temperature: float = 0.7):
-    """
-    LLM 호출 (OpenAI 예시)
-    """
-    resp = openai.ChatCompletion.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=temperature,
-    )
-    text = resp.choices[0].message["content"]
+client = OpenAI(
+    api_key=os.getenv("GMS_KEY"),
+    base_url=os.getenv("GMS_URL", "https://gms.ssafy.io/gmsapi/api.openai.com/v1")
+)
 
-    usage = {
-        "prompt_tokens": resp.usage.prompt_tokens,
-        "completion_tokens": resp.usage.completion_tokens,
-        "total_tokens": resp.usage.total_tokens,
-        "cost_usd": (resp.usage.total_tokens / 1000) * 0.002,  # 단가 예시
-        "energy_wh": resp.usage.total_tokens * 0.001,  # 예시 값
-        "co2_g": resp.usage.total_tokens * 0.0005,     # 예시 값
-    }
+def call_llm(prompt, stream=True, model="gpt-4o", temperature=0.7):
+    messages = [
+        {"role": "system", "content": "답변은 반드시 마크다운 형식으로 작성하세요."},
+        {"role": "user", "content": prompt}
+    ]
 
-    return text, usage
+    if stream:
+        # 스트리밍 제너레이터
+        stream_resp = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            stream=True,
+        )
+        for chunk in stream_resp:
+            if chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
+    else:
+        resp = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature
+        )
+        return resp.choices[0].message.content

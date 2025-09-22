@@ -1,55 +1,180 @@
 import os
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
-from app.adapters.kafka_io import make_consumer, make_producer, publish
+import json
+from datetime import datetime, timezone
+import tiktoken
+
+from app.adapters.kafka_io import make_consumer, make_producer, publish, read_headers
+from app.utils.tracing import extract_traceparent
+from app.pipelines.filter.filter_pipeline import filter_pipeline
 from app.adapters.db import get_session
-from app.services import filter_service
-from app.pipelines.filter.my_engine import MyFilterEngine
-from app.contracts.raw_filtered import RawFilteredMessage  # Spark에서 오는 이벤트 형식
+from app.models import FilterResult, TokenUsage
+from app.adapters.es import get_es_client
 
-KAFKA_IN = os.getenv("KAFKA_TOPIC_IN", "chat.raw.filtered.v1")
-KAFKA_OUT = os.getenv("KAFKA_TOPIC_OUT", "chat.filter.result.v1")
-MODEL_DIR = os.getenv("FILTER_MODEL_DIR", "/app/models/filter")
+KAFKA_IN = os.getenv("KAFKA_TOPIC_IN_RAW", "chat.raw.request.v1")
+KAFKA_OUT_FILTER = os.getenv("KAFKA_TOPIC_FILTER_RESULT", "chat.filter.result.v1")
 
-def run_worker():
-    consumer = make_consumer(KAFKA_IN, group_id="filter-worker")
+
+def estimate_tokens(text: str) -> int:
+    """
+    tiktoken 기반 토큰 추정치 계산
+    """
+    try:
+        enc = tiktoken.get_encoding("cl100k_base")
+        return len(enc.encode(text))
+    except Exception:
+        return 0
+
+
+def run_filter_worker():
+    consumer = make_consumer([KAFKA_IN], group_id="filter-worker")
     producer = make_producer()
+    es = get_es_client()
 
-    # 모델 로드 (한 번만)
-    model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
-    engine = MyFilterEngine(model, tokenizer)
+    while True:
+        msg = consumer.poll(1.0)
+        if msg is None or msg.error():
+            continue
 
-    for msg in consumer:
-        raw_dict = msg.value  # dict 형태
-        raw = RawFilteredMessage(**raw_dict)  # dataclass 변환
+        # === traceparent 추출 ===
+        headers_dict = read_headers(msg)
+        tp = extract_traceparent(headers_dict)
 
-        # Spark에서 전달된 mode 확인
-        if raw.mode == "auto":
-            # Spark에서 룰 기반으로 DROP 처리된 경우
-            decision = engine._make_auto_decision()  # 별도 util 함수로 "DROP" IntentDecision 생성
-            rule_name = "rule"
+        try:
+            ev = json.loads(msg.value().decode("utf-8"))
+        except Exception:
+            continue
+
+        trace_id = ev.get("trace_id")
+        room_id = ev.get("room_id") or (msg.key().decode() if msg.key() else None)
+        user_id = ev.get("user_id")
+        text = ev.get("text", "")
+        final_text = ev.get("final_text", "")
+        mode = ev.get("mode", "auto")
+        top_category = ev.get("top_category", "")
+
+        if mode == "auto":
+            # ===== AUTO 모드 =====
+            token_count = estimate_tokens(text)
+
+            try:
+                with get_session() as session:
+                    fr = FilterResult(
+                        trace_id=trace_id,
+                        room_id=room_id,
+                        user_id=user_id,
+                        rule_name="auto",
+                        created_at=datetime.now(timezone.utc),
+                    )
+                    session.add(fr)
+
+                    tu = TokenUsage(
+                        trace_id=trace_id,
+                        prompt_tokens=token_count,
+                        completion_tokens=0,
+                        total_tokens=token_count,
+                        created_at=datetime.now(timezone.utc),
+                    )
+                    session.add(tu)
+                    session.commit()
+            except Exception as e:
+                print("DB insert error (auto):", e)
+
+            # ES 기록
+            try:
+                es.index(
+                    index="filter-logs",
+                    body={
+                        "trace_id": trace_id,
+                        "user_id": user_id,
+                        "reason_type": top_category or "auto",
+                        "dropped_text": text,
+                        "created_at": datetime.utcnow(),
+                    },
+                )
+            except Exception as e:
+                print("ES index error (auto):", e)
+
+            # Kafka 발행
+            publish(
+                producer,
+                KAFKA_OUT_FILTER,
+                key=room_id,
+                value={
+                    "trace_id": trace_id,
+                    "room_id": room_id,
+                    "user_id": user_id,
+                    "rule": "auto",
+                    "text": text,
+                    "token_usage_estimate": {"input_tokens": token_count},
+                },
+                headers=[("traceparent", tp.encode())] if tp else None,
+            )
+
         else:
-            # mode=pass → 우리가 BERT 돌려서 분류
-            decision = engine.intent_classifier(raw.text, raw.final_text or raw.text)
-            rule_name = "ml"
+            # ===== PASS 모드 =====
+            decision = filter_pipeline(final_text or text)
 
-        # DB 저장
-        with get_session() as session:
-            filter_service.save_filter_results(raw, decision, rule_name=rule_name)
+            if decision["status"] == "drop":
+                dropped_logs = decision.get("drop_logs", [])
+                token_count = estimate_tokens(text)
 
-        # ES 저장
-        filter_service.save_to_es(raw, decision)
+                # DB 저장
+                try:
+                    with get_session() as session:
+                        fr = FilterResult(
+                            trace_id=trace_id,
+                            room_id=room_id,
+                            user_id=user_id,
+                            rule_name="ml",
+                            created_at=datetime.now(timezone.utc),
+                        )
+                        session.add(fr)
 
-        # Kafka 발행
-        event = {
-            "trace_id": raw.trace_id,
-            "room_id": raw.room_id,
-            "message_id": raw.message_id,
-            "action": decision.action,
-            "rule": rule_name,
-            "cleaned_text": raw.final_text if decision.action == "PASS" else None,
-            "label": decision.reason_type,
-            "score": decision.score,
-            "schema_version": "1.0.0"
-        }
-        publish(producer, KAFKA_OUT, key=raw.room_id, value=event)
+                        tu = TokenUsage(
+                            trace_id=trace_id,
+                            prompt_tokens=token_count,
+                            completion_tokens=0,
+                            total_tokens=token_count,
+                            created_at=datetime.now(timezone.utc),
+                        )
+                        session.add(tu)
+                        session.commit()
+                except Exception as e:
+                    print("DB insert error (pass/drop):", e)
+
+                # ES 기록 (드랍된 텍스트 각각 저장)
+                try:
+                    for dropped in dropped_logs:
+                        es.index(
+                            index="filter-logs",
+                            body={
+                                "trace_id": trace_id,
+                                "user_id": user_id,
+                                "reason_type": decision.get("label", "ml"),
+                                "dropped_text": dropped,
+                                "created_at": datetime.utcnow(),
+                            },
+                        )
+                except Exception as e:
+                    print("ES index error (pass/drop):", e)
+
+                # Kafka 발행
+                publish(
+                    producer,
+                    KAFKA_OUT_FILTER,
+                    key=room_id,
+                    value={
+                        "trace_id": trace_id,
+                        "room_id": room_id,
+                        "user_id": user_id,
+                        "rule": "ml",
+                        "text": text,
+                        "drop_logs": dropped_logs,
+                        "token_usage_estimate": {"input_tokens": token_count},
+                    },
+                    headers=[("traceparent", tp.encode())] if tp else None,
+                )
+
+            else:
+                # PASS → Kafka 발행하지 않음
+                continue
