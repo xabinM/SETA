@@ -68,6 +68,7 @@ public class ChatRoomService {
         if (title != null && !title.isBlank()) room.setTitle(title.trim());
     }
 
+    @Transactional
     public void deleteRoom(Long userId, UUID roomId) {
         ChatRoom room = chatRoomRepository.findByChatRoomIdAndUser(roomId, userRepository.findByUserId(userId))
                 .orElseThrow(() -> new NotFoundChatRoomException("ChatRoom not found"));
