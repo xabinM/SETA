@@ -10,6 +10,7 @@ import com.AIce.Backend.domain.user.repository.UserRepository;
 import com.AIce.Backend.domain.usersetting.entity.UserSetting;
 import com.AIce.Backend.domain.usersetting.repository.UserSettingRepository;
 import com.AIce.Backend.global.enums.ChatMessageRole;
+import com.AIce.Backend.global.sse.SseHub;
 import io.micrometer.observation.annotation.Observed;
 import io.micrometer.tracing.Tracer;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,6 +38,7 @@ public class ChatMessageService {
     private final ChatRoomTitleService chatRoomTitleService;
     private final DropResponder dropResponder;
     private final StringRedisTemplate redisTemplate;
+    private final SseHub hub;
 
     private static final String TURN_KEY_PREFIX = "chat:turn:";
 
@@ -87,19 +90,26 @@ public class ChatMessageService {
         ));
 
         producer.publishRaw(roomId, payload);
+
+        // skeleton 먼저 전송: 응답 처리 시작 신호
+        hub.push(roomId, "skeleton",
+                Map.of("role", "assistant",
+                        "content", "",
+                        "turnIndex", turnIdx));
     }
 
     @Transactional
     public void persistAssistantFromLlm(LlmResponseV1 out) {
         UUID roomId = UUID.fromString(out.getRoom_id());
         ChatRoom room = chatRoomrepo.findByChatRoomId(roomId);
-        String content = out.getResponse() != null ? out.getResponse().getText() : "";
 
         // user 메시지의 messageId 기반으로 turnIndex 찾아오기
         UUID userMsgId = UUID.fromString(out.getMessage_id());
         ChatMessage userMessage = chatMessagerepo.findById(userMsgId)
                 .orElseThrow(() -> new IllegalArgumentException("user message not found: " + userMsgId));
         int turnIndex = userMessage.getTurnIndex();
+
+        String content = out.getResponse() != null ? out.getResponse().getText() : "";
 
         chatMessagerepo.save(ChatMessage.builder()
             .chatRoom(room)
@@ -135,6 +145,7 @@ public class ChatMessageService {
                 .externalId(out.getTrace_id())
                 .turnIndex(turnIndex)
                 .build());
+
         return content;
     }
 
