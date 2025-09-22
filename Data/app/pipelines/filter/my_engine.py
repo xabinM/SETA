@@ -16,7 +16,8 @@ class MyFilterEngine:
             reason_type=result["label"],
             reason_text=f"{result['label']} 사유로 필터링됨" if result["label"] else None,
             explanations=["BERT margin 분류기 결과"],
-            cleaned_text=(result["content"] if result["status"] == "pass" else None)
+            cleaned_text=(result["content"] if result["status"] == "pass" else None),
+            drop_logs=result.get("drop_logs")
         )
 
     def _make_auto_decision(self) -> IntentDecision:

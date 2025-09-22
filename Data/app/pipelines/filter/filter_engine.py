@@ -1,6 +1,6 @@
 # app/pipeline/filter_engine.py
 from dataclasses import dataclass
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Dict, Any
 
 Reason = Literal[
     "thank","apology","goodbye","greeting",
@@ -21,6 +21,7 @@ class IntentDecision:
     reason_text: Optional[str] = None
     explanations: Optional[List[str]] = None
     cleaned_text: Optional[str] = None
+    drop_logs: Optional[List[Dict[str, Any]]] = None
 
 class FilterEngine:
     def filler_removal(self, text: str) -> FillerRemovalResult: ...

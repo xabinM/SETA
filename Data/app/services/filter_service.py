@@ -5,10 +5,11 @@ from app.adapters.db import get_session
 from app.adapters.es import get_es_client
 from app.models import FilterResult, ChatMessage
 
+
 def save_filter_results(raw: RawFilteredMessage, decision: IntentDecision, rule_name: str = "ml"):
     """
     DB에 필터링 결과 저장
-    1) PASS → chat_message.filtered_content 업데이트 (Spark 1차 정제 결과 반영: raw.final_text)
+    1) PASS → chat_message.filtered_content 업데이트 (Spark 1차 정제 결과 반영: decision.cleaned_text)
     2) filter_result INSERT (rule_name = decision.reason_type)
     """
     with get_session() as session:
@@ -28,17 +29,18 @@ def save_filter_results(raw: RawFilteredMessage, decision: IntentDecision, rule_
             message_id=raw.message_id,
             stage="ml",                              # stage는 rule/ml 구분
             action=decision.action,                  # PASS or DROP
-            rule_name=(decision.reason_type or "None"),  # ← 여기 수정
-            score=float(decision.score),
+            rule_name=(decision.reason_type or "None"),
+            score=float(decision.score) if decision.score is not None else 0.0,
             created_at=datetime.now(timezone.utc),
         )
         session.add(fr)
         session.commit()
 
+
 def save_to_es(raw: RawFilteredMessage, decision: IntentDecision):
     """
     Elasticsearch에 필터링 로그 저장
-    - PASS: drop_logs 중 'success-drop' 단계만 저장
+    - PASS: drop_logs 중 'success-drop' 단계만 저장 (부분 드롭 기록)
     - DROP: drop_logs 전체 저장
     """
     es = get_es_client()
