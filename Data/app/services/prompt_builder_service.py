@@ -1,31 +1,68 @@
+import os
+import json
+import redis
+from datetime import timedelta
 from sqlalchemy.orm import Session
-from app.models import ChatMessage, UserSetting
+from app.models import UserSetting
 from app.adapters.es import get_es_client
 from sentence_transformers import SentenceTransformer
-import os
 
-# 서버 임베딩 모델 로딩 (한 번만)
+# ===============================
+# Redis 설정
+# ===============================
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
+REDIS_DB = int(os.getenv("REDIS_DB", "0"))
+REDIS_TTL_SEC = int(os.getenv("REDIS_TTL_SEC", "3600"))  # 1시간 기본
+
+r = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+
+# ===============================
+# 임베딩 모델 (서버에서 로컬 로드)
+# ===============================
 EMBED_MODEL_PATH = os.getenv("EMBED_MODEL_DIR", "/app/models/embedding")
 embedder = SentenceTransformer(EMBED_MODEL_PATH)
 
-def get_context(session: Session, room_id: str, limit: int = 5):
+
+# ===============================
+# Redis 대화 기록 관리
+# ===============================
+def append_conversation(room_id: str, user_input: str, assistant_output: str, max_turns: int = 5):
     """
-    최근 대화 맥락 가져오기 (chat_message 기반)
+    Redis에 대화 저장 (최근 max_turns 쌍만 유지)
     """
-    msgs = (
-        session.query(ChatMessage)
-        .filter(ChatMessage.chat_room_id == room_id)
-        .order_by(ChatMessage.created_at.desc())
-        .limit(limit)
-        .all()
-    )
-    snippets = []
-    for m in reversed(msgs):
-        role = "유저" if m.role == "user" else "어시스턴트"
-        snippets.append(f"{role}: {m.content}")
-    return snippets
+    key = f"chat:{room_id}:messages"
+    history_json = r.get(key)
+    history = json.loads(history_json) if history_json else []
+
+    # 새로운 대화 추가
+    if user_input:
+        history.append({"role": "user", "content": user_input})
+    if assistant_output:
+        history.append({"role": "assistant", "content": assistant_output})
+
+    # 최근 max_turns * 2개 메시지만 유지 (user+assistant 쌍)
+    if len(history) > max_turns * 2:
+        history = history[-max_turns * 2 :]
+
+    r.setex(key, REDIS_TTL_SEC, json.dumps(history, ensure_ascii=False))
 
 
+def get_recent_conversation(room_id: str, limit: int = 5):
+    """
+    Redis에서 최근 대화 불러오기
+    """
+    key = f"chat:{room_id}:messages"
+    history_json = r.get(key)
+    if not history_json:
+        return []
+    history = json.loads(history_json)
+    return history[-limit * 2 :]  # 최근 limit턴만 반환
+
+
+# ===============================
+# System Prompt 생성
+# ===============================
 def build_system_prompt(session: Session, user_id: str) -> str:
     """
     user_setting 기반으로 system_prompt 구성
@@ -58,25 +95,33 @@ def build_system_prompt(session: Session, user_id: str) -> str:
     return "\n- ".join(parts)
 
 
-def search_similar_context_es(query: str, top_k: int = 3):
+# ===============================
+# ES 유사 맥락 검색
+# ===============================
+def search_similar_context_es(query: str, top_k: int = 3, threshold: float = 0.7):
     """
     ES room-summary 인덱스에서 유사 요약 검색
     (임베딩은 서버의 Sentence-BERT 모델 사용)
+    - threshold 이상만 반환
     """
     es = get_es_client()
-
-    # 1. 쿼리 → 벡터 임베딩
     emb = embedder.encode(query).tolist()
 
-    # 2. ES 벡터 검색
     body = {
         "knn": {
             "field": "embedding_vector",
             "query_vector": emb,
-            "k": top_k,
+            "k": top_k * 3,   # 넉넉히 가져와서 threshold 필터
             "num_candidates": 100
         }
     }
     resp = es.search(index="room-summary", body=body)
-    hits = resp["hits"]["hits"]
-    return [hit["_source"]["summary_text"] for hit in hits]
+
+    results = []
+    for hit in resp["hits"]["hits"]:
+        score = hit["_score"]
+        if score >= threshold:
+            results.append(hit["_source"]["summary_text"])
+
+    # threshold 만족하는 상위 top_k만 반환
+    return results[:top_k]

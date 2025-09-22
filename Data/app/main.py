@@ -7,7 +7,7 @@ from app.routers.embed import router as embed_router
 from app.routers.summarize_router import router as summarize_router
 from app.services.embed_service import store_text
 from app.routers import debug_filter 
-
+from app.routers import chat_router
 
 load_dotenv()
 
@@ -18,7 +18,7 @@ app = FastAPI(
 )
 
 app.include_router(debug_filter.router, prefix="/api", tags=["debug"])
-
+app.include_router(chat_router.router)
 
 @app.on_event("startup")
 def on_startup():
