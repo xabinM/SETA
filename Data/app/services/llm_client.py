@@ -13,7 +13,6 @@ def call_llm(prompt, stream=True, model="gpt-4o", temperature=0.7):
     ]
 
     if stream:
-        # 스트리밍 제너레이터
         stream_resp = client.chat.completions.create(
             model=model,
             messages=messages,
