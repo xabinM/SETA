@@ -4,6 +4,7 @@ import com.AIce.Backend.auth.dto.login.LoginDto;
 import com.AIce.Backend.auth.dto.login.LoginRequest;
 import com.AIce.Backend.auth.dto.login.LoginResponse;
 import com.AIce.Backend.auth.dto.logout.LogoutResponse;
+import com.AIce.Backend.auth.dto.me.UserResponseDto;
 import com.AIce.Backend.auth.dto.reissue.ReissueResponse;
 import com.AIce.Backend.auth.dto.signup.SignupRequest;
 import com.AIce.Backend.auth.dto.signup.SignupResponse;
@@ -13,6 +14,7 @@ import com.AIce.Backend.global.enums.ResponseMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -53,4 +55,10 @@ public class AuthController {
     }
 
     // maybe 회원 정보 수정, 회원 탈퇴
+    
+    // 회원 정보 조회
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> me(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(authService.getUser(userId));
+    }
 }
