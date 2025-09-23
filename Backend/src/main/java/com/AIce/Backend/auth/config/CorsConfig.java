@@ -16,7 +16,10 @@ public class CorsConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
                 "https://www.seta.ai.kr",
-                "http://www.seta.ai.kr"
+                "http://www.seta.ai.kr",
+                "https://seta.ai.kr",
+                "http://seta.ai.kr",
+                "http://j13a403.p.ssafy.io:8080"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
