@@ -1,47 +1,72 @@
-import { Link } from 'react-router-dom'
-import logoSrc from '@/assets/seta.png'
+import {Link, useNavigate} from "react-router-dom";
+import logoSrc from "@/assets/seta.png";
+import {logout} from "@/features/auth/api";
+import {tokenStore} from "@/shared/auth/token";
+import {useState} from "react";
+import { ApiError } from "@/shared/api/http";
 
 export default function Header() {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
+    const handleLogout = async () => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            await logout();
+        } catch (err) {
+            if (err instanceof ApiError) {
+                console.warn(`logout API failed: ${err.status} ${err.message}`);
+            } else {
+                console.warn("logout error:", err);
+            }
+        } finally {
+            tokenStore.clear();
+            setLoading(false);
+            navigate("/home", {replace: true});
+        }
+    };
+
     return (
         <nav
             role="navigation"
             aria-label="Main navigation"
             className="
-                        fixed left-1/2 -translate-x-1/2 z-[64]
-                        flex items-end justify-between gap-8
-                        text-white
-                        [&_a]:!text-white [&_a:visited]:!text-white
-                        [&_a]:!no-underline [&_a:hover]:!no-underline
-                        [&_a]:opacity-90 [&_a:hover]:opacity-100
-                    "
+        fixed left-1/2 -translate-x-1/2 z-[64]
+        flex items-end justify-between gap-8
+        text-white
+        [&_a]:!text-white [&_a:visited]:!text-white
+        [&_a]:!no-underline [&_a:hover]:!no-underline
+        [&_a]:opacity-90 [&_a:hover]:opacity-100
+      "
             style={{
-                top: '20px',
-                width: '457px',
-                height: '66px',
-                padding: '0 33px 17px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '9999px',
-                backdropFilter: 'blur(6px)',
-                boxShadow: '0px 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                top: "20px",
+                width: "457px",
+                height: "66px",
+                padding: "0 33px 17px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderRadius: "9999px",
+                backdropFilter: "blur(6px)",
+                boxShadow: "0px 25px 50px -12px rgba(0, 0, 0, 0.25)",
             }}
         >
-
             <Link
                 to="/"
                 aria-label="SETA Home"
                 className="flex items-center gap-6 !text-white !no-underline"
-                style={{ width: '100px', height: '33px', textDecoration: 'none', color: '#fff' }}
+                style={{width: "100px", height: "33px", textDecoration: "none", color: "#fff"}}
             >
         <span
             aria-hidden="true"
             className="flex items-center justify-center"
             style={{
-                width: '33px',
-                height: '33px',
-                background: 'linear-gradient(45deg, rgba(168, 85, 247, 0.2) 0%, rgba(34, 211, 238, 0.2) 100%)',
-                borderRadius: '9999px',
-                boxShadow: '0px 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                width: "33px",
+                height: "33px",
+                background:
+                    "linear-gradient(45deg, rgba(168, 85, 247, 0.2) 0%, rgba(34, 211, 238, 0.2) 100%)",
+                borderRadius: "9999px",
+                boxShadow: "0px 10px 15px -3px rgba(0, 0, 0, 0.1)",
             }}
         >
           <img
@@ -49,45 +74,57 @@ export default function Header() {
               alt=""
               className="select-none"
               draggable={false}
-              style={{ width: '22px', height: '23px', objectFit: 'contain' }}
+              style={{width: "22px", height: "23px", objectFit: "contain"}}
           />
         </span>
                 <span
                     className="font-bold"
                     style={{
                         fontFamily: "'Space Grotesk', sans-serif",
-                        fontSize: '24px',
-                        lineHeight: '32px',
-                        marginLeft: '10px'
+                        fontSize: "24px",
+                        lineHeight: "32px",
+                        marginLeft: "10px",
                     }}
                 >
           SETA
         </span>
             </Link>
 
-            <div className="flex items-center justify-between" style={{ width: '266px', height: '24px' }}>
+            <div className="flex items-center justify-between" style={{width: "266px", height: "24px"}}>
                 <Link
                     to="/chat"
                     className="!text-white visited:!text-white !no-underline hover:!no-underline transition-opacity opacity-90 hover:opacity-100"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '16px', lineHeight: '24px', textDecoration: 'none', color: '#fff' }}
+                    style={{fontFamily: "'Space Grotesk', sans-serif", fontSize: "16px", lineHeight: "24px"}}
                 >
                     Chat
                 </Link>
                 <Link
                     to="/dashboard"
                     className="!text-white visited:!text-white !no-underline hover:!no-underline transition-opacity opacity-90 hover:opacity-100"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '16px', lineHeight: '24px', textDecoration: 'none', color: '#fff' }}
+                    style={{fontFamily: "'Space Grotesk', sans-serif", fontSize: "16px", lineHeight: "24px"}}
                 >
                     Dashboard
                 </Link>
-                <Link
-                    to="/home"
-                    className="!text-white visited:!text-white !no-underline hover:!no-underline transition-opacity opacity-90 hover:opacity-100"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '16px', lineHeight: '24px', textDecoration: 'none', color: '#fff' }}
+
+                <button
+                    type="button"
+                    onClick={handleLogout}
+                    disabled={loading}
+                    aria-busy={loading}
+                    className="transition-opacity opacity-90 hover:opacity-100"
+                    style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontSize: "16px",
+                        lineHeight: "24px",
+                        background: "transparent",
+                        border: 0,
+                        color: "#fff",
+                        cursor: loading ? "not-allowed" : "pointer",
+                    }}
                 >
-                    Logout
-                </Link>
+                    {loading ? "로그아웃…" : "Logout"}
+                </button>
             </div>
         </nav>
-    )
+    );
 }
