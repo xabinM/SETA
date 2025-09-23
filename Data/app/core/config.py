@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     EMBED_INDEX_NAME: str = Field("user_memory_embedding", env="EMBED_INDEX_NAME")
 
     # Embedding
-    EMBEDDING_MODEL_PATH: str = Field("/app/models/embedding", env="EMBEDDING_MODEL_PATH")
+    EMBED_MODEL_PATH: str = Field("/app/models/embedding", env="EMBED_MODEL_PATH")
     EMBED_DIMS: int = Field(768, env="EMBED_DIMS")
 
     # GPT(GMS)

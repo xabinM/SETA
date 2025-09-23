@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sentence_transformers import SentenceTransformer
 
 from app.models import UserSetting
-from app.adapters.es import get_es_client
+from app.utils.es import get_es
 from app.adapters.redis_io import append_conversation  # 표준: (room_id, role, content)
 
 # ===============================
@@ -80,7 +80,7 @@ def _safe_join_lines(lines: List) -> str:
     return "\n".join(out)
 
 def search_similar_context_es(query: str, user_id: str, top_k: int = KNN_TOP_K, min_score: float = KNN_MIN_SCORE):
-    es = get_es_client()
+    es = get_es()
     emb = get_embedder().encode(query).tolist()
 
     # ES 8.x/OpenSearch의 KNN 검색은 filter를 함께 줄 수 있음

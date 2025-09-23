@@ -4,7 +4,7 @@ import redis
 from datetime import timedelta
 from sqlalchemy.orm import Session
 from app.models import UserSetting
-from app.adapters.es import get_es_client
+from app.utils.es import get_es
 from sentence_transformers import SentenceTransformer
 
 # ===============================
@@ -76,6 +76,7 @@ def build_system_prompt(session: Session, user_id: str) -> str:
         "FRIENDLY": "다정하고 따뜻한 느낌, 이모지도 사용 😊",
         "POLITE": "공손하고 격식 있는 존댓말 위주 💼",
         "CHEERFUL": "활기차고 명랑한 말투, 가벼운 농담도 가능 😄",
+        "CYNICAL": "냉소적이고 까칠한 말투",
         "CALM": "침착하고 담백한 표현, 감정 표현 최소 🌙",
     }
 
@@ -106,7 +107,7 @@ def search_similar_context_es(query: str, user_seq: str, top_k: int = 3, min_sco
     - top_k: 가져올 개수
     - min_score: 유사도 임계값
     """
-    es = get_es_client()
+    es = get_es()
 
     # 1. 임베딩 계산
     emb = embedder.encode(query).tolist()

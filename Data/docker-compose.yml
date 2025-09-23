@@ -8,7 +8,7 @@ services:
     env_file:
       - .env
     environment:
-      - USER_MEMORY_EMBED_INDEX=${USER_MEMORY_EMBED_INDEX:-user_memory_embedding}
+      - EMBED_INDEX_NAME=${EMBED_INDEX_NAME:-user_memory_embedding}
     depends_on:
       - elasticsearch
     volumes:

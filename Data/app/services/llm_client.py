@@ -2,8 +2,8 @@ from openai import OpenAI
 import os
 
 client = OpenAI(
-    api_key=os.getenv("GMS_KEY"),
-    base_url=os.getenv("GMS_URL", "https://gms.ssafy.io/gmsapi/api.openai.com/v1")
+    api_key=os.getenv("GMS_API_KEY"),
+    base_url=os.getenv("GMS_API_URL", "https://gms.ssafy.io/gmsapi/api.openai.com/v1")
 )
 
 def call_llm(prompt, stream=True, model="gpt-4o", temperature=0.7):

@@ -28,8 +28,8 @@ def get_model() -> Optional[SentenceTransformer]:
     global _model
     if _model is None:
         try:
-            _model = SentenceTransformer(_settings.EMBEDDING_MODEL_PATH)
-            print(f"[embedding.model] Loaded model from {_settings.EMBEDDING_MODEL_PATH}")
+            _model = SentenceTransformer(_settings.EMBED_MODEL_PATH)
+            print(f"[embedding.model] Loaded model from {_settings.EMBED_MODEL_PATH}")
         except Exception as e:
             print(f"[embedding.model] fallback (reason: {e})")
             _model = None

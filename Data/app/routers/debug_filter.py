@@ -15,7 +15,7 @@ tokenizer = AutoTokenizer.from_pretrained("/app/models/filter")
 
 
 @router.post("/debug/filter")
-def debug_filter(msg: RawFilteredMessageSchema, db: Session = Depends(get_session)):
+def debug_filter(msg: RawFilteredMessageSchema, db: Session = Depends(get_db)):
     """
     개발/테스트용 엔드포인트:
     - RawFilteredMessageSchema 입력

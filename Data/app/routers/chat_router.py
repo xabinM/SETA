@@ -7,7 +7,7 @@ from app.adapters.db import get_db
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 @router.post("/send")
-def send_message(payload: RawFilteredMessage, session: Session = Depends(get_session)):
+def send_message(payload: RawFilteredMessage, session: Session = Depends(get_db)):
     """
     사용자 메시지를 받아 GPT 응답 생성 후 반환
     - system prompt + redis 최근 대화 + ES 유사 맥락 → GPT 호출

@@ -4,9 +4,8 @@ from typing import List
 
 import torch
 from transformers import AutoTokenizer, AutoModel
-from app.adapters.db import get_session
-from app.models import UserMemoryEmbedding
-from app.adapters.es import get_es_client
+from app.pipelines.embedding.store import save_embedding
+from app.pipelines.embedding.search import search_similar
 
 
 # ===== 모델 로드 =====
@@ -15,6 +14,40 @@ EMBED_MODEL_PATH = os.getenv("EMBED_MODEL_PATH", "/app/models/embedding")
 tokenizer = AutoTokenizer.from_pretrained(EMBED_MODEL_PATH)
 model = AutoModel.from_pretrained(EMBED_MODEL_PATH)
 model.eval()
+
+
+from app.pipelines.embedding.store import save_embedding
+from app.pipelines.embedding.search import search_similar
+
+# === 라우터에서 기대하는 Thin Wrapper 추가 ===s
+
+def store_text(user_id: str, source_id: str, text: str) -> str:
+    """
+    사용자 전체 대화 기준 memory embedding 저장
+    - user_id: 사용자 ID
+    - source_id: 메시지/출처 ID
+    - text: 원본 텍스트
+    """
+    return save_embedding(
+        user_id=user_id,
+        source_id=source_id,
+        content=text
+    )
+
+def search_texts(user_id: str, q: str, k: int = 5, min_score: float = 0.7):
+    """
+    특정 user_id의 전체 대화에서 semantic search 실행
+    - user_id: 사용자 ID
+    - q: 검색할 쿼리 텍스트
+    - k: 반환할 개수
+    - min_score: 최소 유사도 점수
+    """
+    return search_similar(
+        user_id=user_id,
+        query=q,
+        k=k,
+        min_score=min_score
+    )
 
 
 def embed_text(text: str) -> List[float]:
@@ -42,7 +75,7 @@ def store_user_memory_embedding(user_id, room_id, content: str, embedding: List[
 
     # === ES 저장 ===
     try:
-        es = get_es_client()
+        es = get_es()
         es.index(
             index=os.getenv("USER_MEMORY_EMBED_INDEX", "user_memory_embedding"),
             document={

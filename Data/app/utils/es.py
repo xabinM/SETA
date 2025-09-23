@@ -3,11 +3,28 @@ from elasticsearch import Elasticsearch
 from app.core.config import get_settings
 from typing import Optional
 import time
+from functools import lru_cache
+from elasticsearch import Elasticsearch
+import os
 
 
 _settings = get_settings()
 _es: Optional[Elasticsearch] = None
 
+@lru_cache(maxsize=1)
+def get_es() -> Elasticsearch:
+    """
+    싱글톤 ES 클라이언트 (연결 재사용)
+    """
+    hosts = os.getenv("ELASTICSEARCH_HOSTS", "http://elasticsearch:9200").split(",")
+    return Elasticsearch(hosts)
+
+def es_health_ok() -> bool:
+    try:
+        get_es().cluster.health()
+        return True
+    except Exception:
+        return False
 
 def get_es() -> Elasticsearch:
 

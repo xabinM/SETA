@@ -18,7 +18,7 @@ pipeline {
         GMS_API_URL = credentials('gms-api-url')
         ENVIRONMENT = credentials('environment')
         EMBED_INDEX_NAME = credentials('embed-index-name')
-        EMBEDDING_MODEL_PATH = credentials('embedding-model-path')
+        EMBED_MODEL_PATH = credentials('embedding-model-path')
         EMBED_DIMS = credentials('embed-dims')
         FILTER_MODEL_PATH = credentials('filter-model-path')
     }
@@ -52,7 +52,7 @@ pipeline {
                             echo 'GMS_API_URL=${GMS_API_URL}' >> .env &&
                             echo 'ENVIRONMENT=${ENVIRONMENT}' >> .env &&
                             echo 'EMBED_INDEX_NAME=${EMBED_INDEX_NAME}' >> .env &&
-                            echo 'EMBEDDING_MODEL_PATH=${EMBEDDING_MODEL_PATH}' >> .env &&
+                            echo 'EMBED_MODEL_PATH=${EMBED_MODEL_PATH}' >> .env &&
                             echo 'EMBED_DIMS=${EMBED_DIMS}' >> .env &&
                             echo 'FILTER_MODEL_PATH=${FILTER_MODEL_PATH}' >> .env &&
                             echo 'LOG_LEVEL=INFO' >> .env &&

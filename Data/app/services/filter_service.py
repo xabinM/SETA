@@ -3,7 +3,7 @@ from difflib import ndiff
 from typing import List, Dict, Any
 from app.contracts.raw_filtered import RawFilteredMessage
 from app.adapters.db import get_session
-from app.adapters.es import get_es_client
+from app.utils.es import get_es
 from app.models import FilterResult
 
 # 한국시간 타임존 정의
@@ -69,7 +69,7 @@ def save_to_es(raw: RawFilteredMessage, decision: Dict[str, Any]) -> None:
       "created_at": "..."   # 한국시간
     }
     """
-    es = get_es_client()
+    es = get_es()
     docs: List[Dict[str, Any]] = []
     now = datetime.now(KST).isoformat()  # 한국시간 ISO8601
 
