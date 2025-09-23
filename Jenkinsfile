@@ -23,7 +23,6 @@ pipeline {
         EMBED_DIMS        = credentials('embed-dims')
         FILTER_MODEL_PATH = credentials('filter-model-path')
 
-        # Kafka Credentials
         KAFKA_BOOTSTRAP_SERVERS   = credentials('kafka-bootstrap-servers')
         KAFKA_TOPIC_IN_RAW        = credentials('kafka-topic-in-raw')
         KAFKA_TOPIC_FILTER_RESULT = credentials('kafka-topic-filter-result')
