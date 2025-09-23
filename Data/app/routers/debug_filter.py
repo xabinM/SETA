@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from app.contracts.raw_filtered_schema import RawFilteredMessageSchema
-from app.adapters.db import get_session
+from app.adapters.db import get_db
 from app.services import filter_service
 from app.pipelines.filter.filter_classifier import filter_classifier
 
