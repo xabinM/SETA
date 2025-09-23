@@ -80,7 +80,7 @@ def build_system_prompt(session: Session, user_id: str) -> str:
         "CALM": "침착하고 담백한 표현, 감정 표현 최소 🌙",
     }
 
-    parts = ["You are a Korean AI assistant."]
+    parts = ["당신은 한국 AI 어시스턴트 입니다."]
     if setting.call_me:
         parts.append(f'사용자를 "{setting.call_me}"이라고 부르세요.')
     if setting.role_description:

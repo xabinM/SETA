@@ -1,32 +1,32 @@
 import uuid
-import datetime
-from app.utils.es import get_es
-from app.core.config import get_settings
-from .model import get_embedding
+from datetime import datetime, timezone
+import os
 
-_settings = get_settings()
+from app.utils.es import get_es
+from app.services.embed_service import embed_text
+
 es = get_es()
-INDEX_NAME = _settings.EMBED_INDEX_NAME
+INDEX_NAME = os.getenv("EMBED_INDEX_NAME", "user_memory_embedding")
 
 
 def save_embedding(user_id: str, source_id: str, content: str) -> str:
     """
-    user_id 전체 대화 기준으로 embedding 저장
+    사용자 전체 대화 기준 memory embedding 저장
     - user_id: 사용자 ID
     - source_id: 메시지/출처 ID
-    - content: 원문 텍스트
+    - content: 원문
     """
-    emb = get_embedding(content)
+    embedding = embed_text(content)
     embedding_id = str(uuid.uuid4())
 
     doc = {
-        "embedding_id": embedding_id,             # PK 역할
-        "user_id": user_id,                       # 사용자 구분
-        "source_id": source_id,                   # 메시지/출처 ID
-        "content": content,                       # 원문
-        "embedding": emb,                         # 벡터
-        "created_at": datetime.datetime.utcnow()  # 저장 시각 (UTC)
+        "embedding_id": embedding_id,
+        "user_id": str(user_id),
+        "source_id": str(source_id),
+        "content": content,
+        "embedding": embedding,
+        "created_at": datetime.now(timezone.utc),
     }
 
-    es.index(index=INDEX_NAME, id=embedding_id, document=doc)
+    es.index(index=INDEX_NAME, document=doc)
     return embedding_id
