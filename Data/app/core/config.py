@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     API_PORT: int = Field(8000, env="API_PORT")
     LOG_LEVEL: str = Field("INFO", env="LOG_LEVEL")
     ENVIRONMENT: str = Field("development", env="ENVIRONMENT")
+    KAFKA_BOOTSTRAP_SERVERS: str = "localhost:9092"
+    KAFKA_TOPIC_IN_RAW: str = "chat.raw.request.v1"
+    KAFKA_TOPIC_FILTER_RESULT: str = "chat.filter.result.v1"
+    KAFKA_TOPIC_IN_LLM: str = "chat.filter.result.v1"
+    KAFKA_TOPIC_OUT_LLM_DELTA: str = "chat.llm.answer.delta.v1"
+    KAFKA_TOPIC_OUT_LLM_DONE: str = "chat.llm.answer.done.v1"
 
     FILTER_MODEL_PATH: str = Field("/app/models/filter", env="FILTER_MODEL_PATH")
     
