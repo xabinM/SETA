@@ -45,11 +45,11 @@ public class FilterResultConsumer {
             final FilterResultV1 msg = objectMapper.readValue(payload, FilterResultV1.class);
             final String roomId = msg.getRoom_id();
 
-            // DB 저장
-            String text = chatMessageService.persistAssistantFromLlm(msg);
-
             // DROP이면
             if (msg.getDecision() != null && "DROP".equalsIgnoreCase(msg.getDecision().getAction())) {
+                // DB 저장
+                String text = chatMessageService.persistAssistantFromLlm(msg);
+
                 final long now = System.currentTimeMillis();
                 final long startTs = msg.getTimestamp() != null ? msg.getTimestamp() : now;
                 final long latency = Math.max(0, now - startTs);
@@ -74,6 +74,9 @@ public class FilterResultConsumer {
                 hub.push(roomId, "llm_answer", out);
                 log.info("DROP→synthetic llm_answer saved & streamed; traceId={} room={}",
                         msg.getTrace_id(), roomId);
+
+                // done event 전송: 응답 처리 끝 신호
+                hub.push(msg.getRoom_id(), "done", "[DONE]");
             }
 
             log.info("consume filter_result traceId={} topic={} room={}", msg.getTrace_id(), topic, msg.getRoom_id());

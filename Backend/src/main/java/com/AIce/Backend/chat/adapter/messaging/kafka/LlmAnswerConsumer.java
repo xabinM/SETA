@@ -61,6 +61,9 @@ public class LlmAnswerConsumer {
             // SSE 브로드캐스트
             hub.push(msg.getRoom_id(), "llm_answer", msg);
 
+            // done event 전송: 응답 처리 끝 신호
+            hub.push(msg.getRoom_id(), "done", "[DONE]");
+
         } catch (Exception e) {
             log.warn("llm_answer consume failed; payload={} cause={}", safeCut(payload), e.toString());
         }
