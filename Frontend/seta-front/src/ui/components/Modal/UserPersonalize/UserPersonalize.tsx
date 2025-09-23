@@ -1,33 +1,24 @@
-// UserPersonalize.tsx
 import type React from "react";
-import {
-    useEffect,
-    useRef,
-    useState,
-    Children,
-    isValidElement,
-    cloneElement,
-} from "react";
+import {useEffect, useRef, useState, Children, isValidElement} from "react";
 import { createPortal } from "react-dom";
 import "./UserPersonalize.css";
 
 export type PersonalizeValues = {
     callMe: string;
     roleDescription: string;
-    preferredTone: "neutral" | "friendly" | "polite" | "cheerful" | "calm";
+    preferredTone: ToneValue;
     traits: string[];
     additionalContext: string;
 };
 
 type Props = {
-    open: boolean; // 부모에서 조건부 렌더링으로 true만 들어옴
+    open: boolean;
     initialValues?: Partial<PersonalizeValues>;
     onClose: () => void;
     onSave: (values: PersonalizeValues) => void;
 };
 
-/* --- 슬롯형 톤 선택 컴포넌트(타입 안전) --- */
-type ToneValue = PersonalizeValues["preferredTone"];
+type ToneValue = "기본" | "친근한" | "정중한" | "유쾌한" | "차분한";
 type ToneProps = React.PropsWithChildren<{ value: ToneValue }>;
 
 function hasValueProp(
@@ -36,15 +27,7 @@ function hasValueProp(
     return typeof p === "object" && p !== null && "value" in (p as Record<string, unknown>);
 }
 
-/** className 병합 유틸 */
-const cx = (...v: Array<string | undefined | null | false>) =>
-    v.filter(Boolean).join(" ");
-
-function ToneChoices({
-                         value,
-                         onChange,
-                         children,
-                     }: {
+function ToneChoices({value, onChange, children}: {
     value: ToneValue;
     onChange: (v: ToneValue) => void;
     children: React.ReactNode;
@@ -54,19 +37,15 @@ function ToneChoices({
     return (
         <div className="tone-seg" role="group" aria-label="응답 톤 선택">
             {items.map((node, idx) => {
-                // 1) React 엘리먼트인지
                 if (!isValidElement(node)) return null;
 
-                // 2) value prop이 있는지 (타입가드)
                 const propsUnknown: unknown = node.props;
                 if (!hasValueProp(propsUnknown)) return null;
 
                 const val = propsUnknown.value as ToneValue;
 
-                // 3) 첫 번째 자식 = 아이콘, 두 번째 자식 = 라벨
                 const kids = Children.toArray(propsUnknown.children as React.ReactNode);
                 const iconNode = kids[0] ?? null;
-                const labelNode = kids[1] ?? val;
 
                 const iconWrapped = iconNode ? (
                     <span className="tone-emoji-wrap" aria-hidden>
@@ -74,22 +53,9 @@ function ToneChoices({
           </span>
                 ) : null;
 
-                const labelWrapped = isValidElement(labelNode)
-                    ? cloneElement(
-                        labelNode as React.ReactElement<{ className?: string }>,
-                        {
-                            className: cx(
-                                "tone-label",
-                                (labelNode as React.ReactElement<{ className?: string }>)
-                                    .props.className
-                            ),
-                        }
-                    )
-                    : ( <span className="tone-label">{labelNode as React.ReactNode}</span> );
-
+                const labelText = val;
+                const labelWrapped = <span className="tone-label">{labelText}</span>;
                 const active = value === val;
-                const labelStr =
-                    typeof labelNode === "string" ? labelNode : (val as string);
 
                 return (
                     <button
@@ -98,7 +64,7 @@ function ToneChoices({
                         className={`tone-pill ${active ? "active" : ""}`}
                         onClick={() => onChange(val)}
                         aria-pressed={active}
-                        aria-label={`응답 톤 ${labelStr}`}
+                        aria-label={`응답 톤 ${labelText}`}
                     >
                         {iconWrapped}
                         {labelWrapped}
@@ -109,11 +75,9 @@ function ToneChoices({
     );
 }
 
-// 자식 마크업만 전달하는 래퍼
 function Tone(_props: ToneProps) {
     return <>{_props.children}</>;
 }
-/* --- /슬롯형 컴포넌트 --- */
 
 const LIMITS = {
     callMe: 24,
@@ -133,22 +97,14 @@ export default function UserPersonalize({
     const firstFieldRef = useRef<HTMLInputElement>(null);
     const traitInputRef = useRef<HTMLInputElement>(null);
 
-    // 마운트 시 초기값 세팅 (닫히면 언마운트되어 리셋됨)
     const [callMe, setCallMe] = useState(initialValues?.callMe ?? "");
-    const [roleDescription, setRoleDescription] = useState(
-        initialValues?.roleDescription ?? ""
-    );
-    const [preferredTone, setPreferredTone] = useState<
-        PersonalizeValues["preferredTone"]
-    >(initialValues?.preferredTone ?? "neutral");
+    const [roleDescription, setRoleDescription] = useState(initialValues?.roleDescription ?? "");
+    const [preferredTone, setPreferredTone] = useState<ToneValue>(initialValues?.preferredTone ?? "기본");
     const [traits, setTraits] = useState<string[]>(initialValues?.traits ?? []);
     const [traitDraft, setTraitDraft] = useState("");
-    const [additionalContext, setAdditionalContext] = useState(
-        initialValues?.additionalContext ?? ""
-    );
+    const [additionalContext, setAdditionalContext] = useState(initialValues?.additionalContext ?? "");
     const [saving, setSaving] = useState(false);
 
-    // 오픈 시 포커스 + 페이지 스크롤 잠금
     useEffect(() => {
         if (!open) return;
         const prev = document.body.style.overflow;
@@ -160,7 +116,6 @@ export default function UserPersonalize({
         };
     }, [open]);
 
-    // ESC/바깥 클릭 닫기
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose();
@@ -177,7 +132,6 @@ export default function UserPersonalize({
         };
     }, [onClose]);
 
-    // traits
     const addTrait = () => {
         const v = traitDraft.trim();
         if (!v) return;
@@ -212,7 +166,7 @@ export default function UserPersonalize({
             const values: PersonalizeValues = {
                 callMe: callMe.trim(),
                 roleDescription: roleDescription.trim(),
-                preferredTone,
+                preferredTone, // 한글 그대로 서버로 전달
                 traits,
                 additionalContext: additionalContext.trim(),
             };
@@ -230,7 +184,6 @@ export default function UserPersonalize({
             aria-labelledby="pmodal-title"
         >
             <div className="pmodal-shell" ref={shellRef}>
-                {/* 헤더 */}
                 <div className="pmodal-header">
                     <div className="pmodal-titlewrap">
             <span className="material-icons" aria-hidden>
@@ -252,32 +205,25 @@ export default function UserPersonalize({
 
                 <div className="pmodal-divider" />
 
-                {/* 바디 */}
                 <div className="pmodal-body">
-                    {/* Call me */}
                     <label className="pfield">
                         <div className="pfield-top">
                             <span className="pfield-label">호칭</span>
-                            <span className="pfield-hint">
-                내 이름을 뭐라고 불러줄까? (최대 {LIMITS.callMe}자)
-              </span>
+                            <span className="pfield-hint">내 이름을 뭐라고 불러줄까? (최대 {LIMITS.callMe}자)</span>
                         </div>
                         <input
                             ref={firstFieldRef}
                             className="pinput"
-                            placeholder="예: 시연님 / 팀장님 / Alex"
+                            placeholder="예: 00님 / 팀장님 / Alex"
                             value={callMe}
                             onChange={(e) => setCallMe(e.target.value.slice(0, LIMITS.callMe))}
                         />
                     </label>
 
-                    {/* Role description */}
                     <label className="pfield">
                         <div className="pfield-top">
                             <span className="pfield-label">역할/직무 설명</span>
-                            <span className="pfield-hint">
-                예: 프론트엔드 개발자 · PM · 데이터 엔지니어 (최대 {LIMITS.roleDescription}자)
-              </span>
+                            <span className="pfield-hint">예: 프론트엔드 개발자 · PM · 데이터 엔지니어 (최대 {LIMITS.roleDescription}자)</span>
                         </div>
                         <input
                             className="pinput"
@@ -289,7 +235,6 @@ export default function UserPersonalize({
                         />
                     </label>
 
-                    {/* ✅ Preferred tone — 자유 슬롯형 사용 */}
                     <div className="pfield">
                         <div className="pfield-top">
                             <span className="pfield-label">응답 톤/말투</span>
@@ -297,41 +242,57 @@ export default function UserPersonalize({
                         </div>
 
                         <ToneChoices value={preferredTone} onChange={setPreferredTone}>
-                            <Tone value="neutral">
-                                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Balance%20Scale.png" alt="Balance Scale" width="25" height="25" />
-                                <span>neutral</span>
+                            <Tone value="기본">
+                                <img
+                                    src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Balance%20Scale.png"
+                                    alt="Balance Scale"
+                                    width="25"
+                                    height="25"
+                                />
                             </Tone>
 
-                            <Tone value="friendly">
-                                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Beaming%20Face%20with%20Smiling%20Eyes.png" alt="Beaming Face with Smiling Eyes" width="25" height="25" />
-                                <div>friendly</div>
+                            <Tone value="친근한">
+                                <img
+                                    src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Beaming%20Face%20with%20Smiling%20Eyes.png"
+                                    alt="Beaming Face with Smiling Eyes"
+                                    width="25"
+                                    height="25"
+                                />
                             </Tone>
 
-                            <Tone value="polite">
-                                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Person%20Bowing.png" alt="Person Bowing" width="25" height="25" />
-                                <div>polite</div>
+                            <Tone value="정중한">
+                                <img
+                                    src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Person%20Bowing.png"
+                                    alt="Person Bowing"
+                                    width="25"
+                                    height="25"
+                                />
                             </Tone>
 
-                            <Tone value="cheerful">
-                                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Party%20Popper.png" alt="Party Popper" width="25" height="25" />
-                                <div>cheerful</div>
+                            <Tone value="유쾌한">
+                                <img
+                                    src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Party%20Popper.png"
+                                    alt="Party Popper"
+                                    width="25"
+                                    height="25"
+                                />
                             </Tone>
 
-                            {/* 🔥 외부 PNG 그대로 복붙 */}
-                            <Tone value="calm">
-                                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Dove.png" alt="Dove" width="25" height="25" />
-                                <div>calm</div>
+                            <Tone value="차분한">
+                                <img
+                                    src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Dove.png"
+                                    alt="Dove"
+                                    width="25"
+                                    height="25"
+                                />
                             </Tone>
                         </ToneChoices>
                     </div>
 
-                    {/* Traits */}
                     <div className="pfield">
                         <div className="pfield-top">
                             <span className="pfield-label">성격/특성</span>
-                            <span className="pfield-hint">
-                최대 {LIMITS.traitsMax}개, 칩당 {LIMITS.trait}자
-              </span>
+                            <span className="pfield-hint">최대 {LIMITS.traitsMax}개, 칩당 {LIMITS.trait}자</span>
                         </div>
                         <div className="traits-row">
                             {traits.map((t) => (
@@ -356,9 +317,7 @@ export default function UserPersonalize({
                                 className="trait-input"
                                 placeholder="예: 간결함"
                                 value={traitDraft}
-                                onChange={(e) =>
-                                    setTraitDraft(e.target.value.slice(0, LIMITS.trait))
-                                }
+                                onChange={(e) => setTraitDraft(e.target.value.slice(0, LIMITS.trait))}
                                 onKeyDown={onTraitKeyDown}
                             />
                             <button type="button" className="addchip-btn" onClick={addTrait}>
@@ -370,7 +329,6 @@ export default function UserPersonalize({
                         </div>
                     </div>
 
-                    {/* Additional context */}
                     <label className="pfield">
                         <div className="pfield-top">
                             <span className="pfield-label">추가 상황/배경</span>
@@ -384,9 +342,7 @@ export default function UserPersonalize({
                             placeholder="현재 프로젝트 맥락, 팀 구성, 피해야 할 표현 등…"
                             value={additionalContext}
                             onChange={(e) =>
-                                setAdditionalContext(
-                                    e.target.value.slice(0, LIMITS.additionalContext)
-                                )
+                                setAdditionalContext(e.target.value.slice(0, LIMITS.additionalContext))
                             }
                         />
                     </label>
@@ -394,13 +350,12 @@ export default function UserPersonalize({
 
                 <div className="pmodal-divider" />
 
-                {/* 푸터 */}
                 <div className="pmodal-footer">
                     <div className="preview">
                         <span className="preview-label">미리보기:</span>
                         <span className="preview-text">
               {callMe
-                  ? `${callMe}에게 ${toneKorean(preferredTone)} 톤으로 응답합니다.`
+                  ? `${callMe}에게 ${preferredTone} 톤으로 응답합니다.`
                   : `호칭을 입력하면 미리보기가 표시됩니다.`}
             </span>
                     </div>
@@ -421,19 +376,4 @@ export default function UserPersonalize({
         </div>,
         document.body
     );
-}
-
-function toneKorean(t: PersonalizeValues["preferredTone"]) {
-    switch (t) {
-        case "neutral":
-            return "기본";
-        case "friendly":
-            return "친근한";
-        case "polite":
-            return "정중한";
-        case "cheerful":
-            return "유쾌한";
-        case "calm":
-            return "차분한";
-    }
 }
