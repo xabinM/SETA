@@ -2,6 +2,7 @@ package com.AIce.Backend.auth.service;
 
 import com.AIce.Backend.auth.dto.login.LoginDto;
 import com.AIce.Backend.auth.dto.login.LoginRequest;
+import com.AIce.Backend.auth.dto.me.UserResponseDto;
 import com.AIce.Backend.auth.dto.signup.SignupRequest;
 import com.AIce.Backend.auth.dto.signup.Tokens;
 import com.AIce.Backend.auth.exception.DuplicateUsernameException;
@@ -80,4 +81,17 @@ public class AuthService {
 
         return jwtTokenProvider.generateTokens(userId);
     }
+
+    public UserResponseDto getUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return UserResponseDto.builder()
+                .username(user.getUsername())
+                .name(user.getName())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
+    }
+
 }

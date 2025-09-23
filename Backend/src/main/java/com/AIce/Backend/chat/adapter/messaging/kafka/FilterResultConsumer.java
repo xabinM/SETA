@@ -54,30 +54,38 @@ public class FilterResultConsumer {
                 final long startTs = msg.getTimestamp() != null ? msg.getTimestamp() : now;
                 final long latency = Math.max(0, now - startTs);
 
-                // to do: 교체
-                LlmResponseV1 out = LlmResponseV1.builder()
-                        .headers(null)
-                        .trace_id(msg.getTrace_id())
-                        .room_id(roomId)
-                        .timestamp(now)
-                        .llm(LlmResponseV1.Llm.builder()
-                                .model("synthetic/drop-policy")
-                                .temperature(0.0)
-                                .build())
-                        .latency_ms(latency)
-                        .response(LlmResponseV1.Response.builder().text(text).build())
-                        .token_usage(LlmResponseV1.TokenUsage.builder().input(0).output(0).total(0).build())
-                        .cost_estimate(LlmResponseV1.CostEstimate.builder().currency("USD").value(0.0).build())
-                        .schema_version("1.0.0")
-                        .build();
+                for (int i = 0; i < text.length(); i++) {
+                    String delta = String.valueOf(text.charAt(i));
+                    hub.push(roomId, "delta", Map.of(
+                            "trace_id", msg.getTrace_id(),
+                            "message_id", msg.getMessage_id(),
+                            "content", Map.of(
+                                    "delta", delta,
+                                    "index", i
+                            ),
+                            "status", "streaming"
+                    ));
+                }
 
                 // SSE로 브로드캐스트
-                hub.push(roomId, "llm_answer", out);
                 log.info("DROP→synthetic llm_answer saved & streamed; traceId={} room={}",
                         msg.getTrace_id(), roomId);
 
                 // done event 전송: 응답 처리 끝 신호
-                hub.push(msg.getRoom_id(), "done", msg);
+                hub.push(roomId, "done", Map.of(
+                        "trace_id", msg.getTrace_id(),
+                        "message_id", msg.getMessage_id(),
+                        "content", Map.of(
+                                "final_text", text,
+                                "finish_reason", "stop"
+                        ),
+                        "usage", Map.of(
+                                "prompt_tokens", 0,
+                                "completion_tokens", 0,
+                                "total_tokens", 0
+                        ),
+                        "status", "done"
+                ));
             }
 
             log.info("consume filter_result traceId={} topic={} room={}", msg.getTrace_id(), topic, msg.getRoom_id());
