@@ -200,5 +200,10 @@ deploy-frontend:
     - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy-frontend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
     - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.frontend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
 
+    - |
+      ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env.front <<EOF
+      VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      EOF"
+
       # 파일 실행
     - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-frontend.sh && ./deploy-frontend.sh '${FRONTEND_IMAGE}' '${DEPLOY_USER}'"
