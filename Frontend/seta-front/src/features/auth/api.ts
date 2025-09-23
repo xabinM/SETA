@@ -7,7 +7,6 @@ export type SignUpPayload = {
     name: string;
 };
 
-// 백엔드 응답 스키마에 맞춰서 필요 시 수정
 export type SignUpResponse = {
     id?: string;
     message?: string;
