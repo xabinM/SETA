@@ -54,7 +54,7 @@ frontend-build:
     - npm run build
     - echo "=== dist 확인 ==="
     - ls -l dist
-    - ls -l dist/js
+    - ls -l dist/assets
   artifacts:
     paths:
       - Frontend/seta-front/dist
