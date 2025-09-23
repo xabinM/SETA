@@ -3,47 +3,12 @@ import Header from "@/ui/components/Header/Header";
 import Logo from "@/assets/seta.png";
 import ChatBg from "@/assets/ChatBackground.png";
 import UserMenu from "@/ui/components/UserMenu/UserMenu";
-import UserPersonalizeContainer from "@/ui/containers/UserPersonalize/UserPersonalizeContainer"; // <-- .tsx 확장자 제거 권장
+import UserPersonalizeContainer from "@/ui/containers/UserPersonalize/UserPersonalizeContainer";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getChatRooms, type ChatRoom } from "@/features/chat/api";
 
 type Msg = { id: string; role: "user" | "assistant"; content: string };
-type ThreadMeta = { id: string; title: string; last: string; updatedAt: number };
-
-const KEY_THREADS = "seta:threads";
-const KEY_MSGS = (id: string) => `seta:msgs:${id}`;
-
-function loadThreads(): ThreadMeta[] {
-    try {
-        return JSON.parse(localStorage.getItem(KEY_THREADS) || "[]");
-    } catch {
-        return [];
-    }
-}
-
-function saveThreads(arr: ThreadMeta[]) {
-    localStorage.setItem(KEY_THREADS, JSON.stringify(arr));
-}
-
-function loadMsgs(id: string): Msg[] {
-    if (!id) return [];
-    try {
-        return JSON.parse(localStorage.getItem(KEY_MSGS(id)) || "[]");
-    } catch {
-        return [];
-    }
-}
-
-function saveMsgs(id: string, msgs: Msg[]) {
-    localStorage.setItem(KEY_MSGS(id), JSON.stringify(msgs));
-}
-
-function clearAllSeta() {
-    const keys = Object.keys(localStorage);
-    for (const k of keys) {
-        if (k === KEY_THREADS || k.startsWith("seta:msgs:")) localStorage.removeItem(k);
-    }
-}
 
 function AddIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -68,15 +33,17 @@ function AddIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function Chat() {
     const navigate = useNavigate();
-    const { threadId } = useParams(); // URL 파라미터
-    const [threads, setThreads] = useState<ThreadMeta[]>(() => loadThreads());
+    const { threadId } = useParams();
+    const [rooms, setRooms] = useState<ChatRoom[]>([]);
+    const [loadingRooms, setLoadingRooms] = useState(false);
+    const [roomsError, setRoomsError] = useState<string | null>(null);
     const [messages, setMessages] = useState<Msg[]>([]);
     const [input, setInput] = useState("");
     const [activeId, setActiveId] = useState<string | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const footerRef = useRef<HTMLDivElement>(null);
-    const [menuOpen, setMenuOpen] = useState(false); // <-- 중복 선언 제거 (아래에 또 있던 줄 삭제)
+    const [menuOpen, setMenuOpen] = useState(false);
     const [ime, setIme] = useState(false);
     const [personalizeOpen, setPersonalizeOpen] = useState(false);
 
@@ -86,10 +53,10 @@ export default function Chat() {
     };
 
     const onLogout = () => {
-        clearAllSeta();
         navigate("/home", { replace: true });
     };
 
+    // 스크롤 잠금
     useEffect(() => {
         document.body.classList.add("no-scroll");
         document.documentElement.classList.add("no-scroll-html");
@@ -99,66 +66,36 @@ export default function Chat() {
         };
     }, []);
 
-    useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "x") {
-                clearAllSeta();
-                setThreads([]); setMessages([]); setActiveId(null);
-                navigate("/chat", { replace: true });
-            }
-        };
-        window.addEventListener("keydown", onKeyDown);
-        return () => window.removeEventListener("keydown", onKeyDown);
-    }, [navigate]);
-
-    useEffect(() => {
-        const nav = performance.getEntriesByType?.("navigation")?.[0] as PerformanceNavigationTiming | undefined;
-        if (threadId && nav?.type === "reload") navigate("/chat", { replace: true });
-    }, [threadId, navigate]);
-
+    // URL 파라미터로 activeId 설정
     useEffect(() => {
         if (threadId) setActiveId(threadId);
     }, [threadId]);
 
-    useEffect(() => {
-        if (activeId) setMessages(loadMsgs(activeId));
-        else setMessages([]);
-    }, [activeId]);
-
+    // 메시지 리스트 스크롤 항상 맨 아래
     useEffect(() => {
         const el = listRef.current;
         if (el) el.scrollTop = el.scrollHeight;
     }, [messages]);
 
-    const genId = () => `t-${Date.now()}`;
-
-    const upsertThread = (meta: ThreadMeta) => {
-        setThreads(prev => {
-            const idx = prev.findIndex(t => t.id === meta.id);
-            const next = idx >= 0
-                ? [...prev.slice(0, idx), { ...prev[idx], ...meta }, ...prev.slice(idx + 1)]
-                : [{ ...meta }, ...prev];
-            saveThreads(next);
-            return next;
-        });
-    };
-
-    const startNewChat = (seed?: string) => {
-        const id = genId();
-        setActiveId(id);
-
-        if (seed) {
-            const first: Msg = { id: `u-${Date.now()}`, role: "user", content: seed };
-            saveMsgs(id, [first]);
-            setMessages([first]);
-            upsertThread({ id, title: seed.slice(0, 30), last: seed, updatedAt: Date.now() });
-        } else {
-            saveMsgs(id, []);
-            setMessages([]);
-            upsertThread({ id, title: "새 채팅", last: "", updatedAt: Date.now() });
-        }
-        navigate(`/chat/${id}`);
-    };
+    // 서버에서 채팅방 목록 불러오기
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                setLoadingRooms(true);
+                const data = await getChatRooms();
+                if (mounted) setRooms(data);
+            } catch (e: unknown) {
+                if (mounted) {
+                    setRoomsError(e instanceof Error ? e.message : "채팅방 목록 불러오기 실패");
+                }
+                console.error(e);
+            } finally {
+                if (mounted) setLoadingRooms(false);
+            }
+        })();
+        return () => { mounted = false; };
+    }, []);
 
     const openThread = (id: string) => {
         if (activeId === id) return;
@@ -171,23 +108,14 @@ export default function Chat() {
         if (e.key === "Enter") send();
     };
 
+    // 임시 send (API 붙이기 전)
     const send = () => {
         const text = input.trim();
         if (!text) return;
 
-        if (!activeId) {
-            startNewChat(text);
-            setInput("");
-            return;
-        }
-
         const msg: Msg = { id: `u-${Date.now()}`, role: "user", content: text };
         const next = [...messages, msg];
         setMessages(next);
-        saveMsgs(activeId, next);
-
-        const title = threads.find(t => t.id === activeId)?.title || text.slice(0, 30);
-        upsertThread({ id: activeId, title, last: text, updatedAt: Date.now() });
         setInput("");
     };
 
@@ -223,21 +151,27 @@ export default function Chat() {
 
                             <div className="sidebar-main">
                                 <div className="main-card">
-                                    <button className="new-chat-btn" type="button" onClick={() => startNewChat()}>
+                                    <button className="new-chat-btn" type="button" onClick={() => { /* TODO: 새 방 생성 API */ }}>
                                         <AddIcon />새로운 채팅 시작하기
                                     </button>
 
-                                    {/* 스레드 목록 */}
+                                    {/* 서버 채팅방 목록 */}
                                     <div className="thread-list">
-                                        {threads.map(t => (
+                                        {loadingRooms && (
+                                            <div className="thread-item" style={{ opacity: 0.7 }}>불러오는 중…</div>
+                                        )}
+                                        {roomsError && (
+                                            <div className="thread-item" style={{ color: "#f66" }}>{roomsError}</div>
+                                        )}
+                                        {rooms.map(r => (
                                             <div
-                                                key={t.id}
+                                                key={r.chatRoomId}
                                                 className="thread-item"
-                                                onClick={() => openThread(t.id)}
-                                                aria-current={t.id === activeId ? "page" : undefined}
-                                                title={t.title || "(제목 없음)"}
+                                                onClick={() => openThread(r.chatRoomId)}
+                                                aria-current={r.chatRoomId === activeId ? "page" : undefined}
+                                                title={r.title || "(제목 없음)"}
                                             >
-                                                <div className="thread-title">{t.title || "(제목 없음)"}</div>
+                                                <div className="thread-title">{r.title || "(제목 없음)"}</div>
                                             </div>
                                         ))}
                                     </div>
@@ -287,19 +221,19 @@ export default function Chat() {
                                         <div className="welcome-title">안녕하세요!</div>
                                         <div className="welcome-subtitle">SETA Assistant입니다. 무엇을 도와드릴까요?</div>
                                         <div className="feature-cards">
-                                            <div className="feature-card" onClick={() => startNewChat("새로운 프로젝트 아이디어를 제안해줘")}>
+                                            <div className="feature-card" onClick={() => { /* TODO: seed와 함께 새 방 생성 */ }}>
                                                 <div className="feature-title">💡 프로젝트 아이디어</div>
                                                 <div className="feature-description">새로운 프로젝트 아이디어를 제안해드릴까요?</div>
                                             </div>
-                                            <div className="feature-card" onClick={() => startNewChat("React 성능 최적화 상담")}>
+                                            <div className="feature-card" onClick={() => { /* TODO */ }}>
                                                 <div className="feature-title">💻 기술 상담</div>
                                                 <div className="feature-description">기술적인 질문이나 문제해결을 도와드릴게요</div>
                                             </div>
-                                            <div className="feature-card" onClick={() => startNewChat("새로운 기술 학습 로드맵을 만들어줘")}>
+                                            <div className="feature-card" onClick={() => { /* TODO */ }}>
                                                 <div className="feature-title">📚 학습 가이드</div>
                                                 <div className="feature-description">새로운 기술을 배우고 싶으신가요?</div>
                                             </div>
-                                            <div className="feature-card" onClick={() => startNewChat("한 문장으로 빠르게 질문")}>
+                                            <div className="feature-card" onClick={() => { /* TODO */ }}>
                                                 <div className="feature-title">⚡ 빠른 질문</div>
                                                 <div className="feature-description">궁금한 것이 있으시면 언제든지 물어보세요</div>
                                             </div>
