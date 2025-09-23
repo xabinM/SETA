@@ -71,13 +71,9 @@ export default function UserMenu({
 
     const handleLogoutClick = async () => {
         if (loggingOut) return;
-        if (onLogout) {
-            onClose();
-            return onLogout();
-        }
         setLoggingOut(true);
         try {
-            await logout();
+            await (onLogout ? onLogout() : logout());
         } catch (err) {
             if (err instanceof ApiError) {
                 console.warn(`logout API failed: ${err.status} ${err.message}`);
