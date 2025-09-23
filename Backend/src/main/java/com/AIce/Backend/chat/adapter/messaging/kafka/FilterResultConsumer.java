@@ -41,7 +41,7 @@ public class FilterResultConsumer {
     // filter result SSE 중계
     @Observed(name = "chat.filter_result.consume",
             contextualName = "kafka.consume.filter_result")
-    @KafkaListener(topics = "chat.filter.result.v1", groupId = "backend-msk", containerFactory = "stringKafkaListenerFactory")
+    @KafkaListener(topics = "chat.filter.result.v1", groupId = "backend-local", containerFactory = "stringKafkaListenerFactory")
     public void onFilter(@Payload String payload,
                          @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                          @Headers Map<String, Object> headers) throws JsonProcessingException {
