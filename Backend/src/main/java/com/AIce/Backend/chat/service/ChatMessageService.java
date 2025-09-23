@@ -99,7 +99,7 @@ public class ChatMessageService {
     }
 
     @Transactional
-    public void persistAssistantFromLlm(LlmResponseV1 out) {
+    public void persistAssistantFromLlm(LlmAnswerDoneV1 out) {
         UUID roomId = UUID.fromString(out.getRoom_id());
         ChatRoom room = chatRoomrepo.findByChatRoomId(roomId);
 
@@ -109,7 +109,7 @@ public class ChatMessageService {
                 .orElseThrow(() -> new IllegalArgumentException("user message not found: " + userMsgId));
         int turnIndex = userMessage.getTurnIndex();
 
-        String content = out.getResponse() != null ? out.getResponse().getText() : "";
+        String content = out.getContent() != null ? out.getContent().getFinal_text() : "";
 
         chatMessagerepo.save(ChatMessage.builder()
             .chatRoom(room)
