@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        DEPLOY_DIR = "/home/ubuntu/seta-ml-api"
+        DEPLOY_DIR = "/home/ubuntu/S13P21A403"
 
         ELASTICSEARCH_URL = credentials('elasticsearch-url')
         API_HOST          = credentials('api-host')
