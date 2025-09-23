@@ -54,6 +54,7 @@ public class FilterResultConsumer {
                 final long startTs = msg.getTimestamp() != null ? msg.getTimestamp() : now;
                 final long latency = Math.max(0, now - startTs);
 
+                // to do: 교체
                 LlmResponseV1 out = LlmResponseV1.builder()
                         .headers(null)
                         .trace_id(msg.getTrace_id())
@@ -76,7 +77,7 @@ public class FilterResultConsumer {
                         msg.getTrace_id(), roomId);
 
                 // done event 전송: 응답 처리 끝 신호
-                hub.push(msg.getRoom_id(), "done", "[DONE]");
+                hub.push(msg.getRoom_id(), "done", msg);
             }
 
             log.info("consume filter_result traceId={} topic={} room={}", msg.getTrace_id(), topic, msg.getRoom_id());
