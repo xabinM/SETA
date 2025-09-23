@@ -18,7 +18,7 @@ USER_MEMORY_EMBED_INDEX = os.getenv("USER_MEMORY_EMBED_INDEX", "user_memory_embe
 
 GMS_API_KEY = os.getenv("GMS_API_KEY")
 GMS_API_URL = os.getenv("GMS_API_URL")
-GMS_MODEL_NAME = os.getenv("GMS_MODEL_NAME", "gpt-4o")
+GMS_MODEL_NAME = os.getenv("GMS_MODEL_NAME", "gpt-4o-mini")
 GMS_TIMEOUT = float(os.getenv("GMS_TIMEOUT_SEC", "30"))
 
 KNN_TOP_K = int(os.getenv("KNN_TOP_K", "3"))

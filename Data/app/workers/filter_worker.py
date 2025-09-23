@@ -2,7 +2,7 @@ import os
 import json
 from datetime import datetime, timezone, timedelta
 import tiktoken
-
+from app.services import error_service
 from app.adapters.kafka_io import make_consumer, make_producer, publish, read_headers
 from app.utils.trace import extract_traceparent
 from app.pipelines.filter.filter_classifier import filter_classifier
@@ -86,14 +86,23 @@ def run_filter_worker():
                     session.add(tu)
                     session.commit()
             except Exception as e:
-                print("DB insert error (auto):", e)
+                 error_service.save_error(
+                    trace_id=trace_id,
+                    error_type="DB_INSERT_ERROR",
+                    error=e,
+                    )
 
             try:
                 raw = type("RawObj", (), ev)()   # dict → 임시 객체
                 decision = type("Decision", (), {})()  # auto는 decision 없음
                 filter_service.save_to_es(raw, decision)
             except Exception as e:
-                print("ES save error (auto):", e)
+                 error_service.save_error(
+                    trace_id=trace_id,
+                    error_type="ES_SAVE_ERROR",
+                    error=e,
+                    )    
+            
 
             publish(
                 producer,
@@ -142,13 +151,21 @@ def run_filter_worker():
                         session.add(tu)
                         session.commit()
                 except Exception as e:
-                    print("DB insert error (pass/drop):", e)
+                    error_service.save_error(
+                    trace_id=trace_id,
+                    error_type="DB_INSERT_ERROR",
+                    error=e,
+                    )
 
                 try:
                     raw = type("RawObj", (), ev)()
                     filter_service.save_to_es(raw, decision)
                 except Exception as e:
-                    print("ES save error (pass/drop):", e)
+                    error_service.save_error(
+                    trace_id=trace_id,
+                    error_type="ES_SAVE_ERROR",
+                    error=e,
+                    )
 
                 publish(
                     producer,

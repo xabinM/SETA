@@ -1,81 +1,100 @@
 import os
+import time
 from datetime import datetime, timezone, timedelta
-from sqlalchemy.orm import Session
+
 from app.adapters.db import get_session
-from app.models import ChatMessage, RoomSummaryState, PromptBuilt
-from app.adapters.es import get_es_client
-from sentence_transformers import SentenceTransformer
-from app.services.llm_client import call_llm
+from app.models import ChatMessage, RoomSummaryState
+from app.services import summary_service, embed_service, error_service
+from sqlalchemy import and_
 
-EMBED_MODEL_PATH = os.getenv("EMBED_MODEL_PATH", "/app/models/embedding")
-embedder = SentenceTransformer(EMBED_MODEL_PATH)
+# 트리거 조건
+UNSUM_THRESHOLD = int(os.getenv("SUMMARY_TRIGGER_COUNT", "10"))  # 10턴 단위
+IDLE_SECONDS = int(os.getenv("SUMMARY_TRIGGER_IDLE_SEC", str(3600)))  # 1시간
+POLL_INTERVAL = int(os.getenv("SUMMARY_TRIGGER_POLL_SEC", "30"))  # 30초마다 체크
 
-TURN_LIMIT = 20
-IDLE_MINUTES = 60
 
-def run_worker():
-    with get_session() as session:
-        rooms = session.query(RoomSummaryState).all()
-        for rs in rooms:
-            room_id = rs.chat_room_id
-            last_summary_at = rs.last_summary_at or datetime(1970,1,1,tzinfo=timezone.utc)
-            last_turn = rs.last_turn_end or 0
+def run_summary_trigger_loop():
+    """주기적으로 room_summary_state 확인 → 요약 실행"""
+    while True:
+        try:
+            with get_session() as session:
+                now = datetime.now(timezone.utc)
 
-            # 1) 최근 메시지 확인
-            msgs = (
+                rooms = session.query(RoomSummaryState).filter(
+                    (RoomSummaryState.unsummarized_count >= UNSUM_THRESHOLD)
+                    | (RoomSummaryState.last_summary_at == None)
+                    | (RoomSummaryState.last_summary_at < (now - timedelta(seconds=IDLE_SECONDS)))
+                ).all()
+
+            for state in rooms:
+                summarize_room(state.chat_room_id)
+
+        except Exception as e:
+            error_service.save_error(
+                trace_id="SUMMARY_TRIGGER",
+                error_type="SUMMARY_LOOP_ERROR",
+                error=e,
+            )
+
+        time.sleep(POLL_INTERVAL)
+
+
+def summarize_room(room_id: str):
+    """특정 방 요약 실행"""
+    try:
+        with get_session() as session:
+            state = session.query(RoomSummaryState).filter_by(chat_room_id=room_id).first()
+            if not state:
+                return
+
+            last_turn_end = state.last_turn_end or 0
+
+            messages = (
                 session.query(ChatMessage)
-                .filter(ChatMessage.chat_room_id == room_id)
-                .order_by(ChatMessage.turn_index)
+                .filter(
+                    and_(
+                        ChatMessage.chat_room_id == room_id,
+                        ChatMessage.turn_index > last_turn_end,
+                    )
+                )
+                .order_by(ChatMessage.turn_index.asc())
+                .limit(UNSUM_THRESHOLD * 2)
                 .all()
             )
-            if not msgs:
-                continue
 
-            latest_turn = msgs[-1].turn_index
-            latest_time = msgs[-1].created_at
+            if not messages:
+                return
 
-            need_summary = False
-            if latest_turn - last_turn >= TURN_LIMIT:
-                need_summary = True
-            elif (datetime.now(timezone.utc) - latest_time) > timedelta(minutes=IDLE_MINUTES):
-                need_summary = True
-
-            if not need_summary:
-                continue
-
-            # 2) 요약 생성 (LLM)
-            text_to_summarize = "\n".join([f"{m.role}: {m.content}" for m in msgs[last_turn:]])
-            summary, _ = call_llm(
-                model="gpt-4o-mini",
-                prompt=f"다음을 간결히 요약해 주세요:\n\n{text_to_summarize}",
-                temperature=0.3
+            # 요약 텍스트 블록
+            text_block = "\n".join(
+                [f"{m.role.upper()}: {m.filtered_content or m.content}" for m in messages]
             )
 
-            # 3) 임베딩 생성
-            emb = embedder.encode(summary).tolist()
+            # 요약 생성
+            summary_text = summary_service.summarize(text_block)
+            embedding = embed_service.embed_text(summary_text)
 
-            # 4) DB 저장
-            pb = PromptBuilt(
-                trace_id=f"summary-{room_id}-{datetime.now().timestamp()}",
-                built_prompt=f"요약: {summary}",
-                context_messages=[],
-                created_at=datetime.now(timezone.utc),
+            # 임베딩 저장
+            embed_service.store_user_memory_embedding(
+                user_id=messages[-1].author_id,
+                room_id=room_id,
+                content=summary_text,
+                embedding=embedding,
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
-            session.add(pb)
 
-            rs.last_turn_end = latest_turn
-            rs.last_summary_at = datetime.now(timezone.utc)
-            session.add(rs)
+            # 상태 업데이트
+            state.last_turn_end = messages[-1].turn_index
+            state.last_summary_at = datetime.now(timezone.utc)
+            state.unsummarized_count = 0
+            session.add(state)
             session.commit()
 
-            # 5) ES 저장
-            es = get_es_client()
-            doc = {
-                "room_id": room_id,
-                "summary_text": summary,
-                "embedding_vector": emb,
-                "created_at": int(datetime.now(timezone.utc).timestamp() * 1000),
-            }
-            es.index(index="room-summary", document=doc)
+            print(f"[summary_trigger] room {room_id} summarized up to turn {state.last_turn_end}")
 
-            print(f"[SummaryWorker] Room {room_id} 요약 저장 완료")
+    except Exception as e:
+        error_service.save_error(
+            trace_id=room_id,
+            error_type="SUMMARY_ROOM_ERROR",
+            error=e,
+        )

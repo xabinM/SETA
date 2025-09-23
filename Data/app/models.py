@@ -4,6 +4,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
 from datetime import datetime
 import uuid
@@ -121,3 +122,22 @@ class FilterResult(Base):
     score = Column(Numeric(5, 3))
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
     trace_id = Column(String(64), index=True)  # 연동/조회 자주 하므로 index
+
+class RoomSummaryState(Base):
+    __tablename__ = "room_summary_state"
+
+    chat_room_id = Column(UUID(as_uuid=True), ForeignKey("chat_room.chat_room_id"), primary_key=True)
+    last_turn_end = Column(Integer, nullable=False, default=0)
+    last_summary_at = Column(TIMESTAMP, nullable=True, default=datetime.utcnow)
+    unsummarized_count = Column(Integer, nullable=False, default=0)
+
+    chat_room = relationship("ChatRoom", backref="summary_state")
+
+class ErrorLog(Base):
+    __tablename__ = "error_log"
+
+    trace_id = Column(String(64), primary_key=True)
+    error_type = Column(String(32))
+    error_message = Column(Text)
+    stack_trace = Column(Text)
+    created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
