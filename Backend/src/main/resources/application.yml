@@ -42,7 +42,7 @@ jwt:
 
 springdoc:
   swagger-ui:
-    path: /docs
+    path: /swagger-ui/index.html
 
 logging:
   pattern:
