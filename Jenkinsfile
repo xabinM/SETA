@@ -23,10 +23,11 @@ pipeline {
         EMBED_DIMS        = credentials('embed-dims')
         FILTER_MODEL_PATH = credentials('filter-model-path')
 
-        KAFKA_BOOTSTRAP_SERVERS = credentials('kafka-bootstrap-servers')
-        KAFKA_TOPIC_IN_RAW      = credentials('kafka-topic-in-raw')
+        # Kafka Credentials
+        KAFKA_BOOTSTRAP_SERVERS   = credentials('kafka-bootstrap-servers')
+        KAFKA_TOPIC_IN_RAW        = credentials('kafka-topic-in-raw')
         KAFKA_TOPIC_FILTER_RESULT = credentials('kafka-topic-filter-result')
-        KAFKA_TOPIC_IN_LLM      = credentials('kafka-topic-in-llm')
+        KAFKA_TOPIC_IN_LLM        = credentials('kafka-topic-in-llm')
         KAFKA_TOPIC_OUT_LLM_DELTA = credentials('kafka-topic-out-llm-delta')
         KAFKA_TOPIC_OUT_LLM_DONE  = credentials('kafka-topic-out-llm-done')
     }
@@ -44,34 +45,34 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no ubuntu@172.26.8.129 "
                             cd ${DEPLOY_DIR}/Data &&
                             echo 'Creating .env file from Jenkins credentials...' &&
-                            echo 'ELASTICSEARCH_URL=${ELASTICSEARCH_URL}' > .env &&
-                            echo 'API_HOST=${API_HOST}' >> .env &&
-                            echo 'API_PORT=${API_PORT}' >> .env &&
-                            echo 'API_TITLE=${API_TITLE}' >> .env &&
-                            echo 'API_VERSION=${API_VERSION}' >> .env &&
-                            echo 'POSTGRES_HOST=${POSTGRES_HOST}' >> .env &&
-                            echo 'POSTGRES_PORT=${POSTGRES_PORT}' >> .env &&
-                            echo 'POSTGRES_USER=${POSTGRES_USER}' >> .env &&
-                            echo 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}' >> .env &&
-                            echo 'POSTGRES_DB=${POSTGRES_DB}' >> .env &&
-                            echo 'REDIS_HOST=${REDIS_HOST}' >> .env &&
-                            echo 'REDIS_PORT=6379' >> .env &&
-                            echo 'GMS_API_KEY=${GMS_API_KEY}' >> .env &&
-                            echo 'GMS_API_URL=${GMS_API_URL}' >> .env &&
-                            echo 'ENVIRONMENT=${ENVIRONMENT}' >> .env &&
-                            echo 'EMBED_INDEX_NAME=${EMBED_INDEX_NAME}' >> .env &&
-                            echo 'EMBED_MODEL_PATH=${EMBED_MODEL_PATH}' >> .env &&
-                            echo 'EMBED_DIMS=${EMBED_DIMS}' >> .env &&
-                            echo 'FILTER_MODEL_PATH=${FILTER_MODEL_PATH}' >> .env &&
-                            echo 'LOG_LEVEL=INFO' >> .env &&
+                            echo \"ELASTICSEARCH_URL=${ELASTICSEARCH_URL}\" > .env &&
+                            echo \"API_HOST=${API_HOST}\" >> .env &&
+                            echo \"API_PORT=${API_PORT}\" >> .env &&
+                            echo \"API_TITLE=${API_TITLE}\" >> .env &&
+                            echo \"API_VERSION=${API_VERSION}\" >> .env &&
+                            echo \"POSTGRES_HOST=${POSTGRES_HOST}\" >> .env &&
+                            echo \"POSTGRES_PORT=${POSTGRES_PORT}\" >> .env &&
+                            echo \"POSTGRES_USER=${POSTGRES_USER}\" >> .env &&
+                            echo \"POSTGRES_PASSWORD=${POSTGRES_PASSWORD}\" >> .env &&
+                            echo \"POSTGRES_DB=${POSTGRES_DB}\" >> .env &&
+                            echo \"REDIS_HOST=${REDIS_HOST}\" >> .env &&
+                            echo \"REDIS_PORT=6379\" >> .env &&
+                            echo \"GMS_API_KEY=${GMS_API_KEY}\" >> .env &&
+                            echo \"GMS_API_URL=${GMS_API_URL}\" >> .env &&
+                            echo \"ENVIRONMENT=${ENVIRONMENT}\" >> .env &&
+                            echo \"EMBED_INDEX_NAME=${EMBED_INDEX_NAME}\" >> .env &&
+                            echo \"EMBED_MODEL_PATH=${EMBED_MODEL_PATH}\" >> .env &&
+                            echo \"EMBED_DIMS=${EMBED_DIMS}\" >> .env &&
+                            echo \"FILTER_MODEL_PATH=${FILTER_MODEL_PATH}\" >> .env &&
+                            echo \"LOG_LEVEL=INFO\" >> .env &&
 
                             # === Kafka 관련 변수 추가 ===
-                            echo 'KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}' >> .env &&
-                            echo 'KAFKA_TOPIC_IN_RAW=${KAFKA_TOPIC_IN_RAW}' >> .env &&
-                            echo 'KAFKA_TOPIC_FILTER_RESULT=${KAFKA_TOPIC_FILTER_RESULT}' >> .env &&
-                            echo 'KAFKA_TOPIC_IN_LLM=${KAFKA_TOPIC_IN_LLM}' >> .env &&
-                            echo 'KAFKA_TOPIC_OUT_LLM_DELTA=${KAFKA_TOPIC_OUT_LLM_DELTA}' >> .env &&
-                            echo 'KAFKA_TOPIC_OUT_LLM_DONE=${KAFKA_TOPIC_OUT_LLM_DONE}' >> .env &&
+                            echo \"KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}\" >> .env &&
+                            echo \"KAFKA_TOPIC_IN_RAW=${KAFKA_TOPIC_IN_RAW}\" >> .env &&
+                            echo \"KAFKA_TOPIC_FILTER_RESULT=${KAFKA_TOPIC_FILTER_RESULT}\" >> .env &&
+                            echo \"KAFKA_TOPIC_IN_LLM=${KAFKA_TOPIC_IN_LLM}\" >> .env &&
+                            echo \"KAFKA_TOPIC_OUT_LLM_DELTA=${KAFKA_TOPIC_OUT_LLM_DELTA}\" >> .env &&
+                            echo \"KAFKA_TOPIC_OUT_LLM_DONE=${KAFKA_TOPIC_OUT_LLM_DONE}\" >> .env &&
 
                             echo 'Forcefully stopping and cleaning up ML API containers...' &&
                             docker-compose down --remove-orphans || true &&
@@ -102,11 +103,11 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no ubuntu@172.26.8.129 "
                             cd ${DEPLOY_DIR}/Spark &&
                             echo 'Creating .env file for Spark services...' &&
-                            echo 'POSTGRES_HOST=${POSTGRES_HOST}' > .env &&
-                            echo 'POSTGRES_PORT=${POSTGRES_PORT}' >> .env &&
-                            echo 'POSTGRES_USER=${POSTGRES_USER}' >> .env &&
-                            echo 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}' >> .env &&
-                            echo 'POSTGRES_DB=${POSTGRES_DB}' >> .env &&
+                            echo \"POSTGRES_HOST=${POSTGRES_HOST}\" > .env &&
+                            echo \"POSTGRES_PORT=${POSTGRES_PORT}\" >> .env &&
+                            echo \"POSTGRES_USER=${POSTGRES_USER}\" >> .env &&
+                            echo \"POSTGRES_PASSWORD=${POSTGRES_PASSWORD}\" >> .env &&
+                            echo \"POSTGRES_DB=${POSTGRES_DB}\" >> .env &&
                             docker-compose down --remove-orphans || true &&
                             docker container prune -f || true &&
                             docker network prune -f || true &&
