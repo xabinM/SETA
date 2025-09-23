@@ -62,7 +62,7 @@ export default function SignUp() {
                 setToast({ msg: "회원가입 요청 전송!", desc: "환영합니다. SETA의 새로운 모험가님 🚀" });
             }, 0);
 
-            setTimeout(() => navigate("/login"), 1200);
+            setTimeout(() => navigate("/login"),500);
         } catch (err) {
             const msg =
                 err instanceof ApiError
