@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timezone
 
 from app.adapters.kafka_io import make_consumer, make_producer, publish, read_headers
-from app.utils.tracing import extract_traceparent
+from app.utils.trace import extract_traceparent
 from app.adapters.db import get_session
 from app.models import PromptBuilt, TokenUsage
 from app.services import prompt_builder_service, llm_client

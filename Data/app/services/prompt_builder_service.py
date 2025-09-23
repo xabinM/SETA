@@ -20,7 +20,7 @@ r = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 # ===============================
 # 임베딩 모델 (서버에서 로컬 로드)
 # ===============================
-EMBED_MODEL_PATH = os.getenv("EMBED_MODEL_DIR", "/app/models/embedding")
+EMBED_MODEL_PATH = os.getenv("EMBED_MODEL_PATH", "/app/models/embedding")
 embedder = SentenceTransformer(EMBED_MODEL_PATH)
 
 

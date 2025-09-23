@@ -24,24 +24,17 @@ def debug_filter(msg: RawFilteredMessageSchema, db: Session = Depends(get_sessio
     - 결과 JSON 반환
     """
 
-    # 1. 모델 분류 실행
     decision = filter_classifier(msg.final_text or msg.text, model, tokenizer)
 
-    # 2. DB 저장
+    # DB 저장
     filter_service.save_filter_results(msg, decision, rule_name="ml")
-
-    # 3. ES 저장
+    # ES 저장
     filter_service.save_to_es(msg, decision)
 
-    # 4. 결과 반환
     return {
-        "trace_id": msg.trace_id,
-        "room_id": msg.room_id,
-        "message_id": msg.message_id,
-        "action": decision["status"],
-        "rule": "ml",
-        "cleaned_text": (decision["content"] if decision["status"] == "pass" else None),
-        "label": decision.get("label"),
-        "score": decision.get("score"),
-        "schema_version": msg.schema_version,
+    "trace_id": msg.trace_id, "room_id": msg.room_id, "message_id": msg.message_id,
+    "action": decision["status"], "rule": "ml",
+    "cleaned_text": decision["content"] if decision["status"]=="pass" else None,
+    "label": decision.get("label"), "score": decision.get("score"),
+    "schema_version": msg.schema_version,
     }

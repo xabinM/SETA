@@ -7,7 +7,7 @@ from app.adapters.es import get_es_client
 from sentence_transformers import SentenceTransformer
 from app.services.llm_client import call_llm
 
-EMBED_MODEL_PATH = os.getenv("EMBED_MODEL_DIR", "/app/models/embedding")
+EMBED_MODEL_PATH = os.getenv("EMBED_MODEL_PATH", "/app/models/embedding")
 embedder = SentenceTransformer(EMBED_MODEL_PATH)
 
 TURN_LIMIT = 20

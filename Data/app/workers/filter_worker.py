@@ -11,10 +11,10 @@ from app.models import FilterResult, TokenUsage
 from app.services import filter_service
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-MODEL_DIR = os.getenv("FILTER_MODEL_DIR", "/app/models/filter_model")
+FILTER_MODEL_PATH = os.getenv("FILTER_MODEL_PATH", "/app/models/filter")
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
-model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
+tokenizer = AutoTokenizer.from_pretrained(FILTER_MODEL_PATH)
+model = AutoModelForSequenceClassification.from_pretrained(FILTER_MODEL_PATH)
 
 
 KAFKA_IN = os.getenv("KAFKA_TOPIC_IN_RAW", "chat.raw.request.v1")

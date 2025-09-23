@@ -18,7 +18,11 @@ engine = create_engine(get_db_url(), echo=False, future=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_session():
-    """
-    DB 세션 생성기. with문과 함께 사용.
-    """
     return SessionLocal()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
