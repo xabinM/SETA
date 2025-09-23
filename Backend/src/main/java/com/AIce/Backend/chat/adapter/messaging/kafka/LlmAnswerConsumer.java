@@ -35,7 +35,7 @@ public class LlmAnswerConsumer {
 
     // --- Delta 이벤트 수신 ---
     @Observed(name = "chat.llm_answer.delta.consume", contextualName = "kafka.consume.llm_answer.delta")
-    @KafkaListener(topics = "chat.llm.answer.delta.v1", groupId = "backend-msk", containerFactory = "stringKafkaListenerFactory")
+    @KafkaListener(topics = "chat.llm.answer.delta.v1", groupId = "backend-local", containerFactory = "stringKafkaListenerFactory")
     public void onDelta(
             @Payload String payload,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
@@ -68,7 +68,7 @@ public class LlmAnswerConsumer {
 
     // --- Done 이벤트 수신 ---
     @Observed(name = "chat.llm_answer.done.consume", contextualName = "kafka.consume.llm_answer.done")
-    @KafkaListener(topics = "chat.llm.answer.done.v1", groupId = "backend-msk", containerFactory = "stringKafkaListenerFactory")
+    @KafkaListener(topics = "chat.llm.answer.done.v1", groupId = "backend-local", containerFactory = "stringKafkaListenerFactory")
     public void onDone(
             @Payload String payload,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
