@@ -44,8 +44,8 @@ public class AuthService {
         // === UserSetting 기본값 생성 ===
         UserSetting setting = UserSetting.builder()
                 .user(user)
-                .callMe("사용자")
-                .roleDescription("일반 사용자")
+                .callMe("")
+                .roleDescription("")
                 .preferredTone(PreferredTone.NEUTRAL)
                 .traits("")
                 .additionalContext("")
