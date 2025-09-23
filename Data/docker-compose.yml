@@ -37,7 +37,6 @@ services:
     environment:
       - EMBED_INDEX_NAME=${EMBED_INDEX_NAME:-user_memory_embedding}
     depends_on:
-      - kafka
       - elasticsearch
     volumes:
       - .:/app
