@@ -7,13 +7,10 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    environment:
-      - EMBED_INDEX_NAME=${EMBED_INDEX_NAME:-user_memory_embedding}
     depends_on:
       - elasticsearch
     volumes:
       - .:/app
-      - /home/ubuntu/models:/app/models
       - ./logs:/app/logs
     restart: unless-stopped
 
@@ -50,7 +47,6 @@ services:
       - elasticsearch
     volumes:
       - .:/app
-      - /home/ubuntu/models:/app/models
       - ./logs:/app/logs
     restart: unless-stopped
 
