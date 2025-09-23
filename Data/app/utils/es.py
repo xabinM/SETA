@@ -4,7 +4,6 @@ from app.core.config import get_settings
 from typing import Optional
 import time
 from functools import lru_cache
-from elasticsearch import Elasticsearch
 import os
 
 

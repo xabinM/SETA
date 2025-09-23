@@ -16,7 +16,6 @@ sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 
 # Kafka
-kafka-python==2.0.2
 confluent-kafka==2.4.0
 
 # Embedding / NLP
