@@ -8,12 +8,14 @@ DEPLOY_USER=$2
 DEPLOY_DIR="/home/${DEPLOY_USER}"
 DOCKER_COMPOSE_FILE="${DEPLOY_DIR}/docker-compose.frontend.yml"
 
+ENV_FILE="${DEPLOY_DIR}/.env.front"
+
 echo "=== Frontend Deploy 시작 ==="
 
-docker-compose -f "$DOCKER_COMPOSE_FILE" stop frontend || true
-docker-compose -f "$DOCKER_COMPOSE_FILE" rm -f frontend || true
+docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_FILE" stop frontend || true
+docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_FILE" rm -f frontend || true
 
-docker-compose -f "$DOCKER_COMPOSE_FILE" up -d frontend
+docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_FILE" up -d frontend
 
 PORT=80
 echo "=== 헬스 체크 시작 (http://localhost:$PORT) ==="

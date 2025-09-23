@@ -41,8 +41,14 @@ jwt:
   refreshTokenExpirationMs: ${JWT_REFRESHTOKENEXPIRATIONMS}
 
 springdoc:
+  api-docs:
+    path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui/index.html
+    path: /swagger-ui.html
+    # https
+    urls:
+      - url: /v3/api-docs
+        name: default
 
 logging:
   pattern:
