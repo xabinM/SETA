@@ -10,6 +10,7 @@ import com.AIce.Backend.domain.user.repository.UserRepository;
 import com.AIce.Backend.domain.usersetting.entity.UserSetting;
 import com.AIce.Backend.domain.usersetting.repository.UserSettingRepository;
 import com.AIce.Backend.global.enums.ChatMessageRole;
+import com.AIce.Backend.global.sse.SseHub;
 import io.micrometer.observation.annotation.Observed;
 import io.micrometer.tracing.Tracer;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,6 +38,7 @@ public class ChatMessageService {
     private final ChatRoomTitleService chatRoomTitleService;
     private final DropResponder dropResponder;
     private final StringRedisTemplate redisTemplate;
+    private final SseHub hub;
 
     private static final String TURN_KEY_PREFIX = "chat:turn:";
 
@@ -87,18 +90,28 @@ public class ChatMessageService {
         ));
 
         producer.publishRaw(roomId, payload);
+
+        // skeleton 먼저 전송: 응답 처리 시작 신호
+        hub.push(roomId, "skeleton",
+                Map.of("role", "assistant",
+                        "content", "",
+                        "turnIndex", turnIdx));
     }
 
     @Transactional
     public void persistAssistantFromLlm(LlmResponseV1 out) {
         UUID roomId = UUID.fromString(out.getRoom_id());
         ChatRoom room = chatRoomrepo.findByChatRoomId(roomId);
+
+        // user 메시지의 messageId 기반으로 turnIndex 찾아오기
+        UUID userMsgId = UUID.fromString(out.getMessage_id());
+        ChatMessage userMessage = chatMessagerepo.findById(userMsgId)
+                .orElseThrow(() -> new IllegalArgumentException("user message not found: " + userMsgId));
+        int turnIndex = userMessage.getTurnIndex();
+
         String content = out.getResponse() != null ? out.getResponse().getText() : "";
 
-        // turn 계산
-        int turnIndex = getCurrentTurnIndex(room.getChatRoomId());
-
-        ChatMessage saved = chatMessagerepo.save(ChatMessage.builder()
+        chatMessagerepo.save(ChatMessage.builder()
             .chatRoom(room)
             .user(room.getUser())
             .role(ChatMessageRole.valueOf("assistant"))
@@ -117,10 +130,13 @@ public class ChatMessageService {
         String text = dropResponder.buildText(out, us);
         String content = text != null ? text : "";
 
-        // turn 계산
-        int turnIndex = getCurrentTurnIndex(room.getChatRoomId());
+        // user 메시지의 messageId 기반으로 turnIndex 찾아오기
+        UUID userMsgId = UUID.fromString(out.getMessage_id());
+        ChatMessage userMessage = chatMessagerepo.findById(userMsgId)
+                .orElseThrow(() -> new IllegalArgumentException("user message not found: " + userMsgId));
+        int turnIndex = userMessage.getTurnIndex();
 
-        ChatMessage saved = chatMessagerepo.save(ChatMessage.builder()
+        chatMessagerepo.save(ChatMessage.builder()
                 .chatRoom(room)
                 .user(room.getUser())
                 .role(ChatMessageRole.valueOf("assistant"))
@@ -129,6 +145,7 @@ public class ChatMessageService {
                 .externalId(out.getTrace_id())
                 .turnIndex(turnIndex)
                 .build());
+
         return content;
     }
 
@@ -136,8 +153,8 @@ public class ChatMessageService {
     private int getNextTurnIndexForUser(UUID roomId) {
         String key = TURN_KEY_PREFIX + roomId;
 
-        // Redis에 값 없으면 DB에서 조회 (최초 1회)
-        if (!Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+        // Redis에 값 없으면 DB에서 조회
+        if (!redisTemplate.hasKey(key)) {
             int maxTurn = chatMessagerepo.findMaxTurnIndex(roomId);
             // DB 값이 0이면 아직 메시지 없음 → 0 저장
             redisTemplate.opsForValue().set(key, String.valueOf(maxTurn));
@@ -146,18 +163,5 @@ public class ChatMessageService {
         // User 메시지는 새로운 턴 시작 → INCR
         Long next = redisTemplate.opsForValue().increment(key);
         return next != null ? next.intValue() : 1;
-    }
-
-    private int getCurrentTurnIndex(UUID roomId) {
-        String key = TURN_KEY_PREFIX + roomId;
-
-        String cached = redisTemplate.opsForValue().get(key);
-        if (cached != null) {
-            return Integer.parseInt(cached);
-        }
-
-        // 안전장치: Redis에 없으면 DB fallback
-        int maxTurn = chatMessagerepo.findMaxTurnIndex(roomId);
-        return maxTurn > 0 ? maxTurn : 1;
     }
 }
