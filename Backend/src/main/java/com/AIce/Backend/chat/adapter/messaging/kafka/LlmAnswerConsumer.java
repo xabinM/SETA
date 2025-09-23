@@ -43,7 +43,17 @@ public class LlmAnswerConsumer {
         try {
             LlmAnswerDeltaV1 msg = objectMapper.readValue(payload, LlmAnswerDeltaV1.class);
 
-            String traceId = resolveTraceId(msg.getTrace_id(), headers);
+            // traceId 우선순위: 본문(trace_id) -> Kafka 헤더(trace_id) -> 현재 Span -> 빈 문자열
+            String traceId =
+                    coalesce(
+                            msg.getTrace_id(),
+                            headerAsString(headers, "trace_id"),
+                            Optional.ofNullable(tracer)
+                                    .map(Tracer::currentSpan)
+                                    .map(span -> span.context().traceId())
+                                    .orElse(null),
+                            ""
+                    );
 
             log.info("consume llm_answer.delta traceId={} topic={} roomId={} messageId={}",
                     traceId, topic, msg.getRoom_id(), msg.getMessage_id());
@@ -66,7 +76,17 @@ public class LlmAnswerConsumer {
         try {
             LlmAnswerDoneV1 msg = objectMapper.readValue(payload, LlmAnswerDoneV1.class);
 
-            String traceId = resolveTraceId(msg.getTrace_id(), headers);
+            // traceId 우선순위: 본문(trace_id) -> Kafka 헤더(trace_id) -> 현재 Span -> 빈 문자열
+            String traceId =
+                    coalesce(
+                            msg.getTrace_id(),
+                            headerAsString(headers, "trace_id"),
+                            Optional.ofNullable(tracer)
+                                    .map(Tracer::currentSpan)
+                                    .map(span -> span.context().traceId())
+                                    .orElse(null),
+                            ""
+                    );
 
             log.info("consume llm_answer.done traceId={} topic={} roomId={} messageId={}",
                     traceId, topic, msg.getRoom_id(), msg.getMessage_id());
@@ -83,18 +103,6 @@ public class LlmAnswerConsumer {
     }
 
     // === 유틸 ===
-    private String resolveTraceId(String fromBody, Map<String, Object> headers) {
-        return coalesce(
-                fromBody,
-                headerAsString(headers, "trace_id"),
-                Optional.ofNullable(tracer)
-                        .map(Tracer::currentSpan)
-                        .map(span -> span.context().traceId())
-                        .orElse(null),
-                ""
-        );
-    }
-
     private static String headerAsString(Map<String, Object> headers, String key) {
         Object v = headers.get(key);
         if (v instanceof byte[] b) return new String(b, StandardCharsets.UTF_8);
