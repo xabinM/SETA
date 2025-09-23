@@ -3,24 +3,32 @@ pipeline {
     
     environment {
         DEPLOY_DIR = "/home/ubuntu/seta-ml-api"
+
         ELASTICSEARCH_URL = credentials('elasticsearch-url')
-        API_HOST = credentials('api-host')
-        API_PORT = credentials('api-port')
-        API_TITLE = credentials('api-title')
-        API_VERSION = credentials('api-version')
-        POSTGRES_HOST = credentials('postgres-host')
-        POSTGRES_PORT = credentials('postgres-port')
-        POSTGRES_USER = credentials('postgres-user')
+        API_HOST          = credentials('api-host')
+        API_PORT          = credentials('api-port')
+        API_TITLE         = credentials('api-title')
+        API_VERSION       = credentials('api-version')
+        POSTGRES_HOST     = credentials('postgres-host')
+        POSTGRES_PORT     = credentials('postgres-port')
+        POSTGRES_USER     = credentials('postgres-user')
         POSTGRES_PASSWORD = credentials('postgres-password')
-        POSTGRES_DB = credentials('postgres-db')
-        REDIS_HOST = credentials('redis-host')
-        GMS_API_KEY = credentials('gms-api-key')
-        GMS_API_URL = credentials('gms-api-url')
-        ENVIRONMENT = credentials('environment')
-        EMBED_INDEX_NAME = credentials('embed-index-name')
-        EMBED_MODEL_PATH = credentials('embedding-model-path')
-        EMBED_DIMS = credentials('embed-dims')
+        POSTGRES_DB       = credentials('postgres-db')
+        REDIS_HOST        = credentials('redis-host')
+        GMS_API_KEY       = credentials('gms-api-key')
+        GMS_API_URL       = credentials('gms-api-url')
+        ENVIRONMENT       = credentials('environment')
+        EMBED_INDEX_NAME  = credentials('embed-index-name')
+        EMBED_MODEL_PATH  = credentials('embedding-model-path')
+        EMBED_DIMS        = credentials('embed-dims')
         FILTER_MODEL_PATH = credentials('filter-model-path')
+
+        KAFKA_BOOTSTRAP_SERVERS = credentials('kafka-bootstrap-servers')
+        KAFKA_TOPIC_IN_RAW      = credentials('kafka-topic-in-raw')
+        KAFKA_TOPIC_FILTER_RESULT = credentials('kafka-topic-filter-result')
+        KAFKA_TOPIC_IN_LLM      = credentials('kafka-topic-in-llm')
+        KAFKA_TOPIC_OUT_LLM_DELTA = credentials('kafka-topic-out-llm-delta')
+        KAFKA_TOPIC_OUT_LLM_DONE  = credentials('kafka-topic-out-llm-done')
     }
     
     stages {
@@ -56,6 +64,15 @@ pipeline {
                             echo 'EMBED_DIMS=${EMBED_DIMS}' >> .env &&
                             echo 'FILTER_MODEL_PATH=${FILTER_MODEL_PATH}' >> .env &&
                             echo 'LOG_LEVEL=INFO' >> .env &&
+
+                            # === Kafka 관련 변수 추가 ===
+                            echo 'KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}' >> .env &&
+                            echo 'KAFKA_TOPIC_IN_RAW=${KAFKA_TOPIC_IN_RAW}' >> .env &&
+                            echo 'KAFKA_TOPIC_FILTER_RESULT=${KAFKA_TOPIC_FILTER_RESULT}' >> .env &&
+                            echo 'KAFKA_TOPIC_IN_LLM=${KAFKA_TOPIC_IN_LLM}' >> .env &&
+                            echo 'KAFKA_TOPIC_OUT_LLM_DELTA=${KAFKA_TOPIC_OUT_LLM_DELTA}' >> .env &&
+                            echo 'KAFKA_TOPIC_OUT_LLM_DONE=${KAFKA_TOPIC_OUT_LLM_DONE}' >> .env &&
+
                             echo 'Forcefully stopping and cleaning up ML API containers...' &&
                             docker-compose down --remove-orphans || true &&
                             docker container prune -f || true &&
@@ -90,23 +107,12 @@ pipeline {
                             echo 'POSTGRES_USER=${POSTGRES_USER}' >> .env &&
                             echo 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}' >> .env &&
                             echo 'POSTGRES_DB=${POSTGRES_DB}' >> .env &&
-                            echo 'Current directory:' && pwd &&
-                            echo 'Files in Spark directory:' &&
-                            ls -la &&
-                            echo 'Forcefully stopping existing Spark services...' &&
                             docker-compose down --remove-orphans || true &&
                             docker container prune -f || true &&
                             docker network prune -f || true &&
-                            echo 'Checking for Spark port conflicts...' &&
-                            ss -tlnp | grep ':8888' || echo 'Port 8888 is free' &&
-                            ss -tlnp | grep ':4040' || echo 'Port 4040 is free' &&
-                            ss -tlnp | grep ':9092' || echo 'Port 9092 is free' &&
-                            ss -tlnp | grep ':29092' || echo 'Port 29092 is free' &&
                             echo 'Starting Spark services...' &&
                             docker-compose up --build -d &&
-                            echo 'Waiting for Spark services to start...' &&
                             sleep 20 &&
-                            echo 'Spark deployment completed' &&
                             docker-compose ps
                         "
                     '''
@@ -128,10 +134,8 @@ pipeline {
                             echo '=== All Running Containers ===' &&
                             docker ps &&
                             echo '=== Port Usage Check ===' &&
-                            echo 'Checking ML API ports:' &&
                             ss -tlnp | grep ':8000' || echo 'Port 8000 not in use' &&
                             ss -tlnp | grep ':9200' || echo 'Port 9200 not in use' &&
-                            echo 'Checking Spark ports:' &&
                             ss -tlnp | grep ':8888' || echo 'Port 8888 not in use' &&
                             ss -tlnp | grep ':4040' || echo 'Port 4040 not in use' &&
                             ss -tlnp | grep ':9092' || echo 'Port 9092 not in use' &&
@@ -165,13 +169,6 @@ pipeline {
                     ssh -o StrictHostKeyChecking=no ubuntu@172.26.8.129 "
                         echo '=== Debug Information ===' &&
                         docker ps -a &&
-                        echo '=== Port Usage ===' &&
-                        ss -tlnp | grep ':8000' || echo 'Port 8000 not in use' &&
-                        ss -tlnp | grep ':9200' || echo 'Port 9200 not in use' &&
-                        ss -tlnp | grep ':8888' || echo 'Port 8888 not in use' &&
-                        ss -tlnp | grep ':4040' || echo 'Port 4040 not in use' &&
-                        ss -tlnp | grep ':9092' || echo 'Port 9092 not in use' &&
-                        echo '=== Docker Networks ===' &&
                         docker network ls &&
                         echo '=== .env file contents ===' &&
                         cat ${DEPLOY_DIR}/Data/.env || echo '.env file not found'

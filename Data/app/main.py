@@ -49,7 +49,3 @@ def health_check():
         "api_version": "1.0.0",
         "error": es.get("error"),
     }
-
-from app.core.config import get_settings
-
-print(get_settings().dict())
