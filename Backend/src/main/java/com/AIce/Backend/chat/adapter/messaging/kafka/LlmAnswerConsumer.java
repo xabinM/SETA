@@ -43,11 +43,10 @@ public class LlmAnswerConsumer {
         try {
             LlmAnswerDeltaV1 msg = objectMapper.readValue(payload, LlmAnswerDeltaV1.class);
 
-            // traceId 우선순위: 본문(trace_id) -> Kafka 헤더(trace_id) -> 현재 Span -> 빈 문자열
             String traceId =
                     coalesce(
-                            msg.getTrace_id(),
                             headerAsString(headers, "trace_id"),
+                            msg.getTrace_id(),
                             Optional.ofNullable(tracer)
                                     .map(Tracer::currentSpan)
                                     .map(span -> span.context().traceId())
@@ -68,7 +67,7 @@ public class LlmAnswerConsumer {
 
     // --- Done 이벤트 수신 ---
     @Observed(name = "chat.llm_answer.done.consume", contextualName = "kafka.consume.llm_answer.done")
-    @KafkaListener(topics = "chat.llm.answer.done.v1", groupId = "backend-local", containerFactory = "stringKafkaListenerFactory")
+    @KafkaListener(topics = "chat.llm.answer.done.v1", containerFactory = "stringKafkaListenerFactory")
     public void onDone(
             @Payload String payload,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
@@ -76,11 +75,10 @@ public class LlmAnswerConsumer {
         try {
             LlmAnswerDoneV1 msg = objectMapper.readValue(payload, LlmAnswerDoneV1.class);
 
-            // traceId 우선순위: 본문(trace_id) -> Kafka 헤더(trace_id) -> 현재 Span -> 빈 문자열
             String traceId =
                     coalesce(
-                            msg.getTrace_id(),
                             headerAsString(headers, "trace_id"),
+                            msg.getTrace_id(),
                             Optional.ofNullable(tracer)
                                     .map(Tracer::currentSpan)
                                     .map(span -> span.context().traceId())

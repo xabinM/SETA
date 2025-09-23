@@ -37,33 +37,52 @@ public class KafkaAdminConfig {
                 .build();
     }
 
+//    @Bean
+//    public NewTopic chatPromptBuilt() {
+//        return TopicBuilder.name("chat.prompt.built.v1")
+//                .partitions(2)
+//                .replicas(1)
+//                .config("retention.ms", RETENTION_1D)
+//                .config("cleanup.policy", "delete")
+//                .build();
+//    }
+
+//    @Bean
+//    public NewTopic chatLlmAnswer() {
+//        return TopicBuilder.name("chat.llm.answer.v1")
+//                .partitions(2)
+//                .replicas(1)
+//                .config("retention.ms", RETENTION_1D)
+//                .config("cleanup.policy", "delete")
+//                .build();
+//    }
+
+//    @Bean
+//    public NewTopic chatError() {
+//        return TopicBuilder.name("chat.error.v1")
+//                .partitions(2)
+//                .replicas(1)
+//                .config("retention.ms", RETENTION_1D)
+//                .config("cleanup.policy", "delete")
+//                .build();
+//    }
+
     @Bean
-    public NewTopic chatPromptBuilt() {
-        return TopicBuilder.name("chat.prompt.built.v1")
+    public NewTopic chatLlmAnswerDelta() {
+        return TopicBuilder.name("chat.llm.answer.delta.v1")
                 .partitions(2)
                 .replicas(1)
                 .config("retention.ms", RETENTION_1D)
-                .config("cleanup.policy", "delete")
                 .build();
     }
 
     @Bean
-    public NewTopic chatLlmAnswer() {
-        return TopicBuilder.name("chat.llm.answer.v1")
+    public NewTopic chatLlmAnswerDone() {
+        return TopicBuilder.name("chat.llm.answer.done.v1")
                 .partitions(2)
                 .replicas(1)
                 .config("retention.ms", RETENTION_1D)
-                .config("cleanup.policy", "delete")
                 .build();
     }
 
-    @Bean
-    public NewTopic chatError() {
-        return TopicBuilder.name("chat.error.v1")
-                .partitions(2)
-                .replicas(1)
-                .config("retention.ms", RETENTION_1D)
-                .config("cleanup.policy", "delete")
-                .build();
-    }
 }

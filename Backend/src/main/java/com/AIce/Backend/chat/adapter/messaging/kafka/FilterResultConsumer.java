@@ -41,7 +41,7 @@ public class FilterResultConsumer {
     // filter result SSE 중계
     @Observed(name = "chat.filter_result.consume",
             contextualName = "kafka.consume.filter_result")
-    @KafkaListener(topics = "chat.filter.result.v1", groupId = "backend-local", containerFactory = "stringKafkaListenerFactory")
+    @KafkaListener(topics = "chat.filter.result.v1", containerFactory = "stringKafkaListenerFactory")
     public void onFilter(@Payload String payload,
                          @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                          @Headers Map<String, Object> headers) throws JsonProcessingException {
@@ -49,11 +49,10 @@ public class FilterResultConsumer {
             final FilterResultV1 msg = objectMapper.readValue(payload, FilterResultV1.class);
             final String roomId = msg.getRoom_id();
 
-            // traceId 우선순위: 본문(trace_id) -> Kafka 헤더(trace_id) -> 현재 Span -> 빈 문자열
             String traceId =
                     coalesce(
-                            msg.getTrace_id(),
                             headerAsString(headers, "trace_id"),
+                            msg.getTrace_id(),
                             Optional.ofNullable(tracer)
                                     .map(Tracer::currentSpan)
                                     .map(span -> span.context().traceId())
