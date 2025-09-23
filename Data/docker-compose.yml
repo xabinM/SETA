@@ -29,13 +29,23 @@ services:
       - esdata:/usr/share/elasticsearch/data
     restart: unless-stopped
 
+  filter-worker:
+    build: .
+    command: python -m app.workers.filter_worker
+    env_file:
+      - .env
+    depends_on:
+      - elasticsearch
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    restart: unless-stopped
+
   llm-worker:
     build: .
     command: python -m app.workers.llm_worker
     env_file:
       - .env
-    environment:
-      - EMBED_INDEX_NAME=${EMBED_INDEX_NAME:-user_memory_embedding}
     depends_on:
       - elasticsearch
     volumes:
