@@ -11,8 +11,8 @@ from app.pipelines.embedding.search import search_similar
 # ===== 모델 로드 =====
 EMBED_MODEL_PATH = os.getenv("EMBED_MODEL_PATH", "/app/models/embedding")
 
-tokenizer = AutoTokenizer.from_pretrained(EMBED_MODEL_PATH)
-model = AutoModel.from_pretrained(EMBED_MODEL_PATH)
+tokenizer = AutoTokenizer.from_pretrained(EMBED_MODEL_PATH, local_files_only=True)
+model = AutoModel.from_pretrained(EMBED_MODEL_PATH, local_files_only=True)
 model.eval()
 
 

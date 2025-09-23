@@ -10,8 +10,8 @@ from app.pipelines.filter.filter_classifier import filter_classifier
 router = APIRouter()
 
 # 모델/토크나이저 미리 로드 (서버 시작 시 1회)
-model = AutoModelForSequenceClassification.from_pretrained("/app/models/filter")
-tokenizer = AutoTokenizer.from_pretrained("/app/models/filter")
+model = AutoModelForSequenceClassification.from_pretrained("/app/models/filter", local_files_only=True)
+tokenizer = AutoTokenizer.from_pretrained("/app/models/filter", local_files_only=True)
 
 
 @router.post("/debug/filter")

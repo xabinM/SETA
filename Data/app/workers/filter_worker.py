@@ -13,8 +13,8 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 FILTER_MODEL_PATH = os.getenv("FILTER_MODEL_PATH", "/app/models/filter")
 
-tokenizer = AutoTokenizer.from_pretrained(FILTER_MODEL_PATH)
-model = AutoModelForSequenceClassification.from_pretrained(FILTER_MODEL_PATH)
+tokenizer = AutoTokenizer.from_pretrained(FILTER_MODEL_PATH, local_files_only=True)
+model = AutoModelForSequenceClassification.from_pretrained(FILTER_MODEL_PATH, local_files_only=True)
 
 
 KAFKA_IN = os.getenv("KAFKA_TOPIC_IN_RAW", "chat.raw.request.v1")
