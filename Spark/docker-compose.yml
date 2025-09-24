@@ -76,7 +76,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=3.35.206.91:29092
       - INPUT_TOPIC=chat.raw.request.v1
       - OUTPUT_TO_KAFKA=true
-      - OUTPUT_TOPIC=chat.filter.result.v1
+      - OUTPUT_TOPIC=chat.raw.filtered.v1
       - SPARK_DRIVER_HOST=spark-streaming-app-new
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
