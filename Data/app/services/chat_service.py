@@ -141,13 +141,7 @@ def process_user_message(session: Session, payload):
     # 3. ES 유사 맥락 (동일 사용자 필터)
     similar_contexts = []
     try:
-        similar_contexts = prompt_builder_service.search_similar_context_es(
-            query=user_input,
-            user_seq=user_id,
-            top_k=3,
-            min_score=0.7,
-        )
-
+        similar_contexts = search_similar_context_es(payload.text, user_id=payload.user_id, top_k=KNN_TOP_K)
     except Exception:
         # ES 장애 시에도 본 로직은 진행
         similar_contexts = []

@@ -3,7 +3,7 @@ services:
   spark:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.jupyter
     image: pyspark-tiktoken-app
     container_name: spark-streaming-dev
     ports:
@@ -17,7 +17,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=3.35.206.91:29092
       - INPUT_TOPIC=chat.raw.request.v1
       - OUTPUT_TO_KAFKA=true
-      - OUTPUT_TOPIC=chat.filter.result.v1
+      - OUTPUT_TOPIC=chat.raw.filtered.v1
       - FILTER_JSON_PATH=filter_word.json
       # 서버1 메인 PostgreSQL 연결
       - POSTGRES_HOST=${POSTGRES_HOST}
@@ -43,7 +43,10 @@ services:
 
   # Spark Worker
   spark-worker:
-    image: bitnami/spark:3.5
+    # image: bitnami/spark:3.5
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
     container_name: spark-worker
     mem_limit: 4g
     environment:
@@ -58,7 +61,10 @@ services:
 
   # Spark Streaming Application (새로운 필터링 로직)
   spark-streaming-app:
-    image: bitnami/spark:3.5
+    # image: bitnami/spark:3.5
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
     container_name: spark-streaming-app-new
     mem_limit: 4g
     ports:
@@ -74,7 +80,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=3.35.206.91:29092
       - INPUT_TOPIC=chat.raw.request.v1
       - OUTPUT_TO_KAFKA=true
-      - OUTPUT_TOPIC=chat.filter.result.v1
+      - OUTPUT_TOPIC=chat.raw.filtered.v1
       - SPARK_DRIVER_HOST=spark-streaming-app-new
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
@@ -88,7 +94,10 @@ services:
 
   # 배치 처리용 Spark (토큰 사용량 집계) 
   spark-batch:
-    image: bitnami/spark:3.5
+    # image: bitnami/spark:3.5
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
     container_name: spark-batch-processor
     volumes:
       - ./spark_batch_aggregation.py:/opt/bitnami/spark/app/spark_batch_aggregation.py

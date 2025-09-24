@@ -99,11 +99,11 @@ def build_system_prompt(session: Session, user_id: str) -> str:
 # ===============================
 # ES 유사 맥락 검색
 # ===============================
-def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_score: float = 0.7):
+def search_similar_context_es(query: str, user_seq: str, top_k: int = 3, min_score: float = 0.7):
     """
     ES user_memory_embedding 인덱스에서 유사한 맥락 검색
     - query: 검색할 텍스트
-    - user_id: 특정 사용자 구분
+    - user_seq: 특정 사용자 구분
     - top_k: 가져올 개수
     - min_score: 유사도 임계값
     """
@@ -112,24 +112,21 @@ def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_scor
     # 1. 임베딩 계산
     emb = embedder.encode(query).tolist()
 
-    # 2. knn 검색 (user_id 필터 추가)
+    # 2. knn 검색
     body = {
-            "knn": {
-                "field": "embedding",
-                "query_vector": emb,
-                "k": top_k,
-                "num_candidates": 100
-            },
-            "query": {
-                "term": {"user_id": user_id}
-            },
-            "_source": ["content", "user_id", "created_at"]
-        }
+        "knn": {
+            "field": "embedding",
+            "query_vector": emb,
+            "k": top_k,
+            "num_candidates": 100
+        },
+        "_source": ["content", "user_seq", "trace_id", "created_at"]
+    }
     resp = es.search(index="user_memory_embedding", body=body)
 
-    # 3. 결과 필터링
+    # 3. 결과 필터링 (0.7 이상만)
     results = []
     for hit in resp["hits"]["hits"]:
-        if hit.get("_score", 0.0) >= min_score:
+        if hit["_score"] >= min_score:
             results.append(hit["_source"]["content"])
     return results
