@@ -50,16 +50,21 @@ def run_worker():
         headers_dict = read_headers(msg)
         tp = extract_traceparent(headers_dict)
 
-        rule = ev.get("rule")
-        if rule not in ("ml-pass", "auto"):
-            logger.info("⏩ Skipping message (rule=%s)", rule)
+        # --- PASS만 처리 ---
+        # action은 기본적으로 ev["decision"]["action"]에 실린다.
+        decision = ev.get("decision") or {}
+        action = decision.get("action") or ev.get("action")  # 폴백: 혹시 탑레벨에 있을 때
+        if action != "PASS":
+            logger.info("⏩ Skipping message (action=%s)", action)
             continue
 
-        trace_id = ev["trace_id"]
+        trace_id = ev.get("trace_id")
         chat_room_id = ev.get("room_id")
         message_id = ev.get("message_id")
         user_id = ev.get("user_id")
-        user_input = ev.get("text") or ""
+
+        # 입력 텍스트 확보: text → cleaned_text → original_text
+        user_input = ev.get("text") or ev.get("cleaned_text") or ev.get("original_text") or ""
 
         logger.info("➡️ Processing trace_id=%s room_id=%s", trace_id, chat_room_id)
 
@@ -151,16 +156,16 @@ def run_worker():
                         with get_session() as session:
                             token_usage = TokenUsage(
                                 message_id=message_id,
-                                prompt_tokens=usage["prompt_tokens"],
-                                completion_tokens=usage["completion_tokens"],
-                                total_tokens=usage["total_tokens"],
-                                cost_usd=usage["cost_usd"],
-                                energy_wh=usage["energy_wh"],
-                                co2_g=usage["co2_g"],
+                                prompt_tokens=usage.get("prompt_tokens", 0),
+                                completion_tokens=usage.get("completion_tokens", 0),
+                                total_tokens=usage.get("total_tokens", 0),
+                                cost_usd=usage.get("cost_usd"),
+                                energy_wh=usage.get("energy_wh"),
+                                co2_g=usage.get("co2_g"),
                                 saved_tokens=usage.get("saved_tokens", 0),
-                                saved_cost_usd=usage.get("saved_cost_usd", 0),
-                                saved_energy_wh=usage.get("saved_energy_wh", 0),
-                                saved_co2_g=usage.get("saved_co2_g", 0),
+                                saved_cost_usd=usage.get("saved_cost_usd"),
+                                saved_energy_wh=usage.get("saved_energy_wh"),
+                                saved_co2_g=usage.get("saved_co2_g"),
                                 created_at=datetime.now(timezone.utc),
                             )
                             session.add(token_usage)

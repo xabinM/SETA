@@ -3,14 +3,13 @@ import json
 import logging
 from datetime import datetime, timezone, timedelta
 import tiktoken
-from app.services import error_service
-from app.adapters.kafka_io import make_consumer, make_producer, publish, read_headers
-from app.utils.trace import extract_traceparent
+from app.services import error_service, filter_service
+from app.adapters.kafka_io import make_consumer, make_producer, publish
 from app.pipelines.filter.filter_classifier import filter_classifier
 from app.adapters.db import get_session
 from app.models import FilterResult, TokenUsage
-from app.services import filter_service
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from app.contracts.raw_filtered import RawFilteredMessage
 
 # ------------------
 # Logging 설정
@@ -68,6 +67,7 @@ def run_filter_worker():
         trace_id = ev.get("trace_id")
         room_id = ev.get("room_id") or (msg.key().decode() if msg.key() else None)
         message_id = ev.get("message_id")
+        user_id = ev.get("user_id")
         text = ev.get("text", "")
         final_text = ev.get("final_text", "")
         mode = ev.get("mode", "auto")
@@ -87,7 +87,7 @@ def run_filter_worker():
                         chat_room_id=room_id,
                         message_id=message_id,
                         stage="rule",
-                        action="DROP",       # AUTO는 필터링 처리라 DROP 기록
+                        action="DROP",       # AUTO는 무조건 DROP
                         rule_name="rule",
                         created_at=now_utc,
                     )
@@ -107,7 +107,6 @@ def run_filter_worker():
                         saved_co2_g=None,
                         created_at=now_utc,
                     )
-
                     session.add(tu)
                     session.commit()
                 logger.info("💾 Saved FilterResult & TokenUsage (AUTO)")
@@ -115,19 +114,19 @@ def run_filter_worker():
                 logger.exception("❌ Failed DB insert (AUTO)")
                 error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
+            # ES 저장
             try:
                 raw = type("RawObj", (), ev)()
                 auto_logs = ev.get("filtered_words_details", [[], []])[0]
-                decision = {
-                    "status": "auto",
-                    "action": "AUTO",
+                es_decision = {
+                    "action": "DROP",
                     "cleaned_text": final_text or text,
                     "original_text": text,
                     "drop_logs": auto_logs,
                     "reason_type": "filler_removal",
                     "explanations": [],
                 }
-                filter_service.save_to_es(raw, decision)
+                filter_service.save_to_es(raw, es_decision)
                 logger.info("📤 Saved to Elasticsearch (AUTO)")
             except Exception as e:
                 logger.exception("❌ Failed ES save (AUTO)")
@@ -147,6 +146,7 @@ def run_filter_worker():
                     "original_text": text,
                     "cleaned_text": final_text or text,
                     "detected_phrases": ev.get("filtered_words_details", [[], []])[0],
+                    "decision": {"action": "DROP"},
                     "schema_version": "1.0.0",
                 },
                 headers=[("traceparent", trace_id.encode())] if trace_id else None,
@@ -160,49 +160,24 @@ def run_filter_worker():
             logger.info("🤖 Classifier decision: %s", decision)
             token_count = estimate_tokens(text)
 
-            if decision["status"] == "drop":
-                try:
-                    with get_session() as session:
-                        fr = FilterResult(
-                            trace_id=trace_id,
-                            chat_room_id=room_id,
-                            message_id=message_id,
-                            stage="ml",
-                            action="DROP",   # drop이므로 DROP 저장
-                            rule_name="ml",
-                            score=decision.get("score"),
-                            created_at=now_utc,
-                        )
-                        session.add(fr)
+            status = decision["status"] if isinstance(decision, dict) else getattr(decision, "action", None)
 
-                        tu = TokenUsage(
-                            message_id=message_id,
-                            prompt_tokens=token_count,
-                            completion_tokens=0,
-                            total_tokens=token_count,
-                            cost_usd=None,
-                            energy_wh=None,
-                            co2_g=None,
-                            saved_tokens=0,
-                            saved_cost_usd=None,
-                            saved_energy_wh=None,
-                            saved_co2_g=None,
-                            created_at=now_utc,
-                        )
-
-                        session.add(tu)
-                        session.commit()
-                    logger.info("💾 Saved FilterResult & TokenUsage (PASS)")
-                except Exception as e:
-                    logger.exception("❌ Failed DB insert (PASS)")
-                    error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
+            if status == "drop":
+                # ML DROP → 무조건 DB 기록
+                raw = RawFilteredMessage(
+                    trace_id=trace_id,
+                    room_id=room_id,
+                    message_id=message_id,
+                    user_id=user_id,
+                    text=text,
+                    final_text=final_text,
+                )
+                filter_service.save_filter_results(raw, decision, rule_name="ml")
 
                 try:
-                    raw = type("RawObj", (), ev)()
                     filter_service.save_to_es(raw, decision)
-                    logger.info("📤 Saved to Elasticsearch (PASS)")
                 except Exception as e:
-                    logger.exception("❌ Failed ES save (PASS)")
+                    logger.exception("❌ Failed ES save (ML DROP)")
                     error_service.save_error(trace_id, "ES_SAVE_ERROR", e)
 
                 publish(
@@ -219,7 +194,7 @@ def run_filter_worker():
                         "original_text": text,
                         "cleaned_text": final_text or text,
                         "decision": {
-                            "action": decision["status"].upper(),
+                            "action": "DROP",
                             "score": decision.get("score"),
                             "threshold": decision.get("threshold"),
                             "reason_type": decision.get("label"),
@@ -228,11 +203,55 @@ def run_filter_worker():
                         "explanations": decision.get("explanations", []),
                         "schema_version": "1.0.0",
                     },
-                    headers=[("traceparent", trace_id.encode())] if trace_id else None,
                 )
-                logger.info("📡 Published intent_classifier → %s", KAFKA_OUT_FILTER)
+                logger.info("📡 Published intent_classifier DROP → %s", KAFKA_OUT_FILTER)
+
             else:
-                logger.info("⏩ Decision=PASS, skipping insert/publish")
+                # ML PASS
+                raw = RawFilteredMessage(
+                    trace_id=trace_id,
+                    room_id=room_id,
+                    message_id=message_id,
+                    user_id=user_id,
+                    text=text,
+                    final_text=final_text,
+                )
+
+                # ✅ drop_logs가 있으면 DB에 PASS도 기록
+                if getattr(decision, "drop_logs", None) or decision.get("drop_logs"):
+                    filter_service.save_filter_results(raw, decision, rule_name="ml")
+
+                try:
+                    filter_service.save_to_es(raw, decision)
+                except Exception as e:
+                    logger.exception("❌ Failed ES save (ML PASS)")
+                    error_service.save_error(trace_id, "ES_SAVE_ERROR", e)
+
+                publish(
+                    producer,
+                    KAFKA_OUT_FILTER,
+                    key=room_id,
+                    value={
+                        "trace_id": trace_id,
+                        "room_id": room_id,
+                        "message_id": message_id,
+                        "stage": "intent_classifier",
+                        "stage_order": 2,
+                        "timestamp": int(datetime.now().timestamp() * 1000),
+                        "original_text": text,
+                        "cleaned_text": final_text or text,
+                        "decision": {
+                            "action": "PASS",
+                            "score": decision.get("score"),
+                            "threshold": decision.get("threshold"),
+                            "reason_type": decision.get("label"),
+                            "reason_text": decision.get("reason_text"),
+                        },
+                        "explanations": decision.get("explanations", []),
+                        "schema_version": "1.0.0",
+                    },
+                )
+                logger.info("📡 Published intent_classifier PASS → %s", KAFKA_OUT_FILTER)
 
 
 if __name__ == "__main__":
