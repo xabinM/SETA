@@ -78,8 +78,7 @@ backend-build-docker:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
   before_script:
-    - apk add --no-cache openjdk17 bash curl
-    - docker info
+    - apk add --no-cache openjdk17
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
     # 1. JAR 빌드
