@@ -106,12 +106,9 @@ frontend-build-docker:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
   before_script:
-    - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
-    - echo "=== Docker 컨텍스트 확인 ==="
-    - ls -l ./Frontend/seta-front/dist
-    - docker build -t $FRONTEND_IMAGE ./Frontend/seta-front
+    - docker build --build-arg VITE_API_BASE_URL="$VITE_API_BASE_URL" -t $FRONTEND_IMAGE ./Frontend/seta-front
     - docker push $FRONTEND_IMAGE
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
