@@ -1,7 +1,7 @@
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { setUnauthorizedHandler } from "@/shared/api/http";
-import { tokenStore, isJwtExpired } from "@/shared/auth/token";
+import {useEffect} from "react";
+import {useLocation, useNavigate} from "react-router-dom";
+import {setUnauthorizedHandler} from "@/shared/api/http";
+import {tokenStore, isJwtExpired} from "@/shared/auth/token";
 
 const PUBLIC_PATHS = new Set<string>(["/", "/home", "/login", "/signup"]);
 const isPublicPath = (path: string) => PUBLIC_PATHS.has(path);
@@ -20,9 +20,9 @@ export default function AppBootstrap() {
 
             // 공개 경로면 next 없이 로그인으로만
             if (isPublicPath(path)) {
-                navigate("/login", { replace: true });
+                navigate("/login", {replace: true});
             } else {
-                navigate(`/login?next=${next}`, { replace: true });
+                navigate(`/login?next=${next}`, {replace: true});
             }
         });
         return () => setUnauthorizedHandler(null);
@@ -46,7 +46,7 @@ export default function AppBootstrap() {
             }
 
             const next = encodeURIComponent(path + search);
-            navigate(`/login?next=${next}`, { replace: true });
+            navigate(`/login?next=${next}`, {replace: true});
         }
     }, [navigate, location.pathname, location.search]);
 

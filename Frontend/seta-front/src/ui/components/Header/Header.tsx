@@ -3,7 +3,7 @@ import logoSrc from "@/assets/seta.png";
 import {logout} from "@/features/auth/api";
 import {tokenStore} from "@/shared/auth/token";
 import {useState} from "react";
-import { ApiError } from "@/shared/api/http";
+import {ApiError} from "@/shared/api/http";
 
 export default function Header() {
     const navigate = useNavigate();
@@ -52,7 +52,7 @@ export default function Header() {
             }}
         >
             <Link
-                to="/"
+                to="/home"
                 aria-label="SETA Home"
                 className="flex items-center gap-6 !text-white !no-underline"
                 style={{width: "100px", height: "33px", textDecoration: "none", color: "#fff"}}

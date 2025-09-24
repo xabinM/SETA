@@ -1,11 +1,11 @@
-import { useState } from "react";
+import {useState} from "react";
 import LoginBg from "@/assets/loginBackground.png";
 import "./Login.css";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { login } from "@/features/auth/api";
-import { ApiError } from "@/shared/api/http";
+import {useNavigate, useSearchParams} from "react-router-dom";
+import {login} from "@/features/auth/api";
+import {ApiError} from "@/shared/api/http";
 import CustomToast from "@/ui/components/Toast/CustomToast";
-import { tokenStore } from "@/shared/auth/token";
+import {tokenStore} from "@/shared/auth/token";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -20,21 +20,21 @@ export default function Login() {
         e.preventDefault();
 
         if (!username.trim() || !password) {
-            setToast({ msg: "입력값을 확인해주세요.", desc: "아이디/비밀번호는 필수입니다." });
+            setToast({msg: "입력값을 확인해주세요.", desc: "아이디/비밀번호는 필수입니다."});
             return;
         }
 
         try {
             setLoading(true);
-            const res = await login({ username: username.trim(), password });
+            const res = await login({username: username.trim(), password});
             const access = res?.tokens?.accessToken ?? null;
             const refresh = res?.tokens?.refreshToken ?? null;
-            tokenStore.set({ access, refresh });
+            tokenStore.set({access, refresh});
 
-            setToast({ msg: "로그인 성공!", desc: "환영합니다 🎉" });
+            setToast({msg: "로그인 성공!", desc: "환영합니다 🎉"});
             const rawNext = sp.get("next");
             const next = rawNext && rawNext.startsWith("/") ? rawNext : "/chat";
-            setTimeout(() => navigate(next, { replace: true }), 500);
+            setTimeout(() => navigate(next, {replace: true}), 500);
         } catch (err) {
             const msg =
                 err instanceof ApiError
@@ -42,7 +42,7 @@ export default function Login() {
                     : err instanceof Error
                         ? err.message
                         : "알 수 없는 오류";
-            setToast({ msg: "로그인 실패", desc: msg });
+            setToast({msg: "로그인 실패", desc: msg});
         } finally {
             setLoading(false);
         }
@@ -58,7 +58,7 @@ export default function Login() {
                 backgroundRepeat: "no-repeat",
             }}
         >
-            <div className="absolute inset-0 bg-black/40 z-10" />
+            <div className="absolute inset-0 bg-black/40 z-10"/>
 
             <main className="relative z-20 min-h-screen flex items-center justify-center px-4">
                 <section className="login-card" role="dialog" aria-labelledby="login-title">
