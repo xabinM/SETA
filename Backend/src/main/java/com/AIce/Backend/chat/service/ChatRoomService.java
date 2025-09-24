@@ -13,6 +13,7 @@ import com.AIce.Backend.domain.user.entity.User;
 import com.AIce.Backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
@@ -87,6 +88,7 @@ public class ChatRoomService {
     }
 
     // 사용자가 해당 채팅방에 접근할 수 있는지 확인
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public boolean hasAccessToRoom(Long userId, String roomId) {
         return chatRoomRepository.existsByChatRoomIdAndUser_UserId(UUID.fromString(roomId), userId);
     }
