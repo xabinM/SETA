@@ -109,7 +109,16 @@ def run_filter_worker():
 
             try:
                 raw = type("RawObj", (), ev)()
-                decision = type("Decision", (), {})()
+                auto_logs = ev.get("filtered_words_details", [[], []])[0]  # (감지된 문구 리스트 추출)
+                decision = {
+                    "status": "auto",             # AUTO 모드 마킹
+                    "action": "AUTO",             # 대문자 형태도 함께 넣어줌
+                    "cleaned_text": final_text or text,
+                    "original_text": text,
+                    "drop_logs": auto_logs,       # ES 저장 시 사용할 로그
+                    "reason_type": "filler_removal",
+                    "explanations": [],
+                }
                 filter_service.save_to_es(raw, decision)
                 logger.info("📤 Saved to Elasticsearch (AUTO)")
             except Exception as e:
