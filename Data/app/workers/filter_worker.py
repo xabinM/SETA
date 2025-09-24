@@ -171,6 +171,8 @@ def run_filter_worker():
                     user_id=user_id,
                     text=text,
                     final_text=final_text,
+                    timestamp=ev.get("timestamp"), 
+                    schema_version=ev.get("schema_version", "1.0.0")
                 )
                 filter_service.save_filter_results(raw, decision, rule_name="ml")
 
@@ -215,6 +217,8 @@ def run_filter_worker():
                     user_id=user_id,
                     text=text,
                     final_text=final_text,
+                    timestamp=ev.get("timestamp"), 
+                    schema_version=ev.get("schema_version", "1.0.0")
                 )
 
                 # ✅ drop_logs가 있으면 DB에 PASS도 기록
