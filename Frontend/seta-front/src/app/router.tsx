@@ -21,9 +21,7 @@ const LoadingFallback = () => (
     </div>
 );
 
-const withSuspense = (element: ReactElement) => (
-    <Suspense fallback={<LoadingFallback/>}>{element}</Suspense>
-);
+const withSuspense = (el: ReactElement) => <Suspense fallback={<LoadingFallback/>}>{el}</Suspense>;
 
 function RootLayout() {
     return (
@@ -44,12 +42,17 @@ const router = createBrowserRouter([
             {path: "/signup", element: withSuspense(<SignUp/>)},
 
             {
-                element: <ProtectedRoute/>,
+                element: <ProtectedRoute />,
                 children: [
-                    {path: "/chat", element: withSuspense(<Chat/>)},
-                    {path: "/chat/:threadId", element: withSuspense(<ChatRoom/>)},
-                    {path: "/dashboard", element: withSuspense(<Dashboard/>)},
-                ]
+                    {
+                        path: "/chat",
+                        element: withSuspense(<Chat />),
+                        children: [
+                            { path: ":threadId", element: withSuspense(<ChatRoom />) }, // Outlet에 들어감
+                        ],
+                    },
+                    { path: "/dashboard", element: withSuspense(<Dashboard />) },
+                ],
             },
 
             {path: "*", element: withSuspense(<NotFound/>)},
