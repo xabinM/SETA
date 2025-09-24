@@ -77,15 +77,20 @@ def run_worker():
                 system_prompt += "\n\n답변은 반드시 마크다운 형식으로 작성하세요."
 
                 # 2) 최근 대화 맥락
-                context_snippets = prompt_builder_service.get_context(session, chat_room_id)
+                context_snippets = [
+                    f"{m['role']}: {m['content']}" for m in prompt_builder_service.get_recent_conversation(chat_room_id, limit=5)
+                ]
+
                 logger.info("📝 Context snippets: %d items", len(context_snippets))
 
                 # 3) ES embedding 기반 검색
-                similar_contexts = prompt_builder_service.search_user_memory_embedding(
+                similar_contexts = prompt_builder_service.search_similar_context_es(
                     query=user_input,
+                    user_id=user_id,
                     top_k=3,
-                    score_threshold=0.7,
+                    min_score=0.7,
                 )
+
                 logger.info("🔍 Similar contexts: %d items", len(similar_contexts) if similar_contexts else 0)
 
                 # 4) full_prompt 조립
