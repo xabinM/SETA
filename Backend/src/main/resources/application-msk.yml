@@ -27,6 +27,9 @@ spring:
     template:
       observation-enabled: true
 
+  elasticsearch:
+    uris: http://172.26.8.129:9200
+
 management:
   tracing:
     enabled: true
