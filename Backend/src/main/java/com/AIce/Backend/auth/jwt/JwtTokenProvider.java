@@ -89,7 +89,7 @@ public class JwtTokenProvider {
         }
     }
 
-    private String resolveToken(HttpServletRequest request) {
+    public String resolveToken(HttpServletRequest request) {
         String uri = request.getRequestURI();
 
         // SSE 요청인 경우 → Cookie 기반
