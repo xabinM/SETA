@@ -85,4 +85,13 @@ public class KafkaAdminConfig {
                 .build();
     }
 
+    @Bean
+    public NewTopic chatRawFiltered() {
+        return TopicBuilder.name("chat.raw.filtered.v1")
+                .partitions(2)
+                .replicas(1)
+                .config("retention.ms", RETENTION_1D)
+                .build();
+    }
+
 }
