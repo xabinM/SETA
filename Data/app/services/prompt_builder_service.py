@@ -100,31 +100,34 @@ def build_system_prompt(session: Session, user_id: str) -> str:
 # ES 유사 맥락 검색
 # ===============================
 def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_score: float = 0.7):
-    """
-    ES user_memory_embedding 인덱스에서 유사한 맥락 검색
-    - query: 검색할 텍스트
-    - user_id: 특정 사용자 구분
-    - top_k: 가져올 개수
-    - min_score: 유사도 임계값
-    """
     es = get_es()
 
     # 1. 임베딩 계산
     emb = embedder.encode(query).tolist()
 
-    # 2. knn 검색 (user_id 필터 추가)
+    # 2. knn + user_id 필터
     body = {
-        "knn": {
-            "field": "embedding",
-            "query_vector": emb,
-            "k": top_k,
-            "num_candidates": 100
-        },
         "query": {
-                "term": { "user_id": user_id }
+            "bool": {
+                "must": [
+                    {
+                        "knn": {
+                            "embedding": {        
+                                "vector": emb,
+                                "k": top_k,
+                                "num_candidates": 100
+                            }
+                        }
+                    },
+                    {
+                        "term": { "user_id": user_id }
+                    }
+                ]
+            }
         },
         "_source": ["content", "user_id", "created_at"]
     }
+
     resp = es.search(index="user_memory_embedding", body=body)
 
     # 3. 결과 필터링
@@ -133,3 +136,4 @@ def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_scor
         if hit.get("_score", 0.0) >= min_score:
             results.append(hit["_source"]["content"])
     return results
+
