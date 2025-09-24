@@ -1,14 +1,15 @@
-import { lazy, Suspense, type ReactElement } from "react";
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import {lazy, Suspense, type ReactElement} from "react";
+import {createBrowserRouter, RouterProvider, Outlet} from "react-router-dom";
 import AppBootstrap from "@/app/AppBootstrap";
 import ProtectedRoute from "@/app/ProtectedRoute";
 
-const Landing   = lazy(() => import("@/pages/Landing"));
-const Home      = lazy(() => import("@/pages/Home/Home"));
-const Login     = lazy(() => import("@/pages/Login/Login"));
-const SignUp    = lazy(() => import("@/pages/SignUp/SignUp"));
-const NotFound  = lazy(() => import("@/pages/NotFound/NotFound"));
-const Chat      = lazy(() => import("@/pages/Chat/Chat"));
+const Landing = lazy(() => import("@/pages/Landing"));
+const Home = lazy(() => import("@/pages/Home/Home"));
+const Login = lazy(() => import("@/pages/Login/Login"));
+const SignUp = lazy(() => import("@/pages/SignUp/SignUp"));
+const NotFound = lazy(() => import("@/pages/NotFound/NotFound"));
+const Chat = lazy(() => import("@/pages/Chat/Chat"));
+const ChatRoom = lazy(() => import("@/pages/Chat/ChatRoom"));
 const Dashboard = lazy(() => import("@/pages/Dashboard/Dashboard"));
 
 const LoadingFallback = () => (
@@ -21,41 +22,41 @@ const LoadingFallback = () => (
 );
 
 const withSuspense = (element: ReactElement) => (
-    <Suspense fallback={<LoadingFallback />}>{element}</Suspense>
+    <Suspense fallback={<LoadingFallback/>}>{element}</Suspense>
 );
 
 function RootLayout() {
     return (
         <>
-            <AppBootstrap />
-            <Outlet />
+            <AppBootstrap/>
+            <Outlet/>
         </>
     );
 }
 
 const router = createBrowserRouter([
     {
-        element: <RootLayout />,
+        element: <RootLayout/>,
         children: [
-            { path: "/", element: withSuspense(<Landing />) },
-            { path: "/home", element: withSuspense(<Home />) },
-            { path: "/login", element: withSuspense(<Login />) },
-            { path: "/signup", element: withSuspense(<SignUp />) },
+            {path: "/", element: withSuspense(<Landing/>)},
+            {path: "/home", element: withSuspense(<Home/>)},
+            {path: "/login", element: withSuspense(<Login/>)},
+            {path: "/signup", element: withSuspense(<SignUp/>)},
 
             {
-                element: <ProtectedRoute />,
+                element: <ProtectedRoute/>,
                 children: [
-                    { path: "/chat", element: withSuspense(<Chat />) },
-                    { path: "/chat/:threadId", element: withSuspense(<Chat />) },
-                    { path: "/dashboard", element: withSuspense(<Dashboard />) },
+                    {path: "/chat", element: withSuspense(<Chat/>)},
+                    {path: "/chat/:threadId", element: withSuspense(<ChatRoom/>)},
+                    {path: "/dashboard", element: withSuspense(<Dashboard/>)},
                 ]
             },
 
-            { path: "*", element: withSuspense(<NotFound />) },
+            {path: "*", element: withSuspense(<NotFound/>)},
         ],
     },
 ]);
 
 export default function AppRouter() {
-    return <RouterProvider router={router} />;
+    return <RouterProvider router={router}/>;
 }

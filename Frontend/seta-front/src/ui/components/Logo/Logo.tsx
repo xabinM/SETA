@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import logoSrc from '@/assets/seta.png'
 
 type Size = 'xs' | 'sm' | 'md' | 'lg'
@@ -14,10 +14,10 @@ type Props = {
 }
 
 const S: Record<Size, { wrapper: string; img: string; text: string; gap: string }> = {
-    xs: { wrapper: 'w-[100px] h-[100px]', img: 'w-[80px] h-[87px]', text: 'text-base', gap: 'gap-2' },
-    sm: { wrapper: 'w-[200px] h-[200px]', img: 'w-[160px] h-[174px]', text: 'text-lg', gap: 'gap-2.5' },
-    md: { wrapper: 'w-[300px] h-[300px]', img: 'w-[240px] h-[261px]', text: 'text-xl', gap: 'gap-3' },
-    lg: { wrapper: 'w-[500px] h-[500px]', img: 'w-[400px] h-[435px]', text: 'text-2xl', gap: 'gap-4' },
+    xs: {wrapper: 'w-[100px] h-[100px]', img: 'w-[80px] h-[87px]', text: 'text-base', gap: 'gap-2'},
+    sm: {wrapper: 'w-[200px] h-[200px]', img: 'w-[160px] h-[174px]', text: 'text-lg', gap: 'gap-2.5'},
+    md: {wrapper: 'w-[300px] h-[300px]', img: 'w-[240px] h-[261px]', text: 'text-xl', gap: 'gap-3'},
+    lg: {wrapper: 'w-[500px] h-[500px]', img: 'w-[400px] h-[435px]', text: 'text-2xl', gap: 'gap-4'},
 }
 
 export default function Logo({

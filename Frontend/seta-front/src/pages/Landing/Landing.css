@@ -1,177 +1,176 @@
 .landing-container {
-  width: 100%;
-  height: 100vh;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  overflow: hidden;
-  position: relative;
-  font-family: 'Arial', sans-serif;
-  perspective: 1000px;
+    width: 100%;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+    perspective: 1000px;
 }
 
 /* 배경 어둠 오버레이 - 더 부드러운 색상 */
 .background-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(15, 15, 25, 0.4) 100%),
-  radial-gradient(circle at 30% 40%, rgba(60, 140, 120, 0.08) 0%, transparent 50%),
-  radial-gradient(circle at 70% 60%, rgba(80, 160, 140, 0.04) 0%, transparent 50%);
-  pointer-events: none;
-  backdrop-filter: blur(1px);
-  animation: subtleColorShift 15s linear infinite alternate;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(15, 15, 25, 0.4) 100%),
+    radial-gradient(circle at 30% 40%, rgba(60, 140, 120, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(80, 160, 140, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+    backdrop-filter: blur(1px);
+    animation: subtleColorShift 15s linear infinite alternate;
 }
 
 @keyframes subtleColorShift {
-  0% { background-position: 0% 0%; }
-  100% { background-position: 100% 100%; }
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 100% 100%;
+    }
 }
 
 
 /* 불용어 파티클들 */
 .particles-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
 
 .stopword {
-  position: absolute;
-  color: rgba(240, 240, 245, 0.75);
-  font-weight: 400;
-  pointer-events: none;
-  user-select: none;
-  text-shadow: 0 0 4px rgba(240, 240, 245, 0.2);
-  transition: all 0.3s ease;
-  transform-style: preserve-3d;
-  will-change: transform, opacity, color;
-  image-rendering: crisp-edges;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
+    position: absolute;
+    color: rgba(240, 240, 245, 0.75);
+    font-weight: 400;
+    pointer-events: none;
+    user-select: none;
+    text-shadow: 0 0 4px rgba(240, 240, 245, 0.2);
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    will-change: transform, opacity, color;
+    image-rendering: crisp-edges;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
 }
 
 /* SETA 로고 중심체 - 크기 및 위치 조정 */
 .logo-center {
-  position: absolute;
-  top: 45%;
-  left: 48%;
-  transform: translate(-50%, -50%);
-  width: 120px;
-  height: 120px;
-  opacity: 0;
-  z-index: 500;
-  will-change: transform, scale, opacity;
+    position: absolute;
+    top: 45%;
+    left: 48%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    opacity: 0;
+    z-index: 500;
+    will-change: transform, scale, opacity;
 }
 
 /* 복잡한 링 효과 제거 */
 .logo-outer-ring,
 .logo-inner-ring {
-  display: none;
+    display: none;
 }
 
 /* 로고 주변 링들 */
 .logo-outer-ring {
-  position: absolute;
-  top: -30px;
-  left: -30px;
-  width: 140px;
-  height: 140px;
-  border: 2px solid rgba(0, 212, 170, 0.6);
-  border-radius: 50%;
-  border-style: dashed;
-  will-change: transform, scale, opacity;
+    position: absolute;
+    top: -30px;
+    left: -30px;
+    width: 140px;
+    height: 140px;
+    border: 2px solid rgba(0, 212, 170, 0.6);
+    border-radius: 50%;
+    border-style: dashed;
+    will-change: transform, scale, opacity;
 }
 
 .logo-inner-ring {
-  position: absolute;
-  top: -20px;
-  left: -20px;
-  width: 120px;
-  height: 120px;
-  border: 1px solid rgba(100, 255, 218, 0.8);
-  border-radius: 50%;
-  will-change: transform, scale, opacity;
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    width: 120px;
+    height: 120px;
+    border: 1px solid rgba(100, 255, 218, 0.8);
+    border-radius: 50%;
+    will-change: transform, scale, opacity;
 }
 
 /* SETA 로고 이미지 (.ico 파일) */
 .seta-logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: 
-    drop-shadow(0 0 20px rgba(0, 212, 170, 0.5))
-    drop-shadow(0 0 40px rgba(29, 233, 182, 0.3))
-    brightness(1.1)
-    contrast(1.05);
-  will-change: transform, filter;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(0, 212, 170, 0.5)) drop-shadow(0 0 40px rgba(29, 233, 182, 0.3)) brightness(1.1) contrast(1.05);
+    will-change: transform, filter;
 }
 
 /* SETA 텍스트 */
 .seta-text-container {
-  position: absolute;
-  top: 65%;
-  left: 80%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  opacity: 0;
-  z-index: 600;
-  will-change: transform, opacity;
+    position: absolute;
+    top: 65%;
+    left: 80%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    opacity: 0;
+    z-index: 600;
+    will-change: transform, opacity;
 }
 
 .seta-text {
-  font-size: 72px;
-  font-weight: 900;
-  background: linear-gradient(45deg, #4a9d8e, #7ab8a8, #5eb09f);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 8px;
-  margin-bottom: 10px;
-  filter: drop-shadow(0 0 15px rgba(122, 184, 168, 0.3));
-  will-change: filter;
+    font-size: 72px;
+    font-weight: 900;
+    background: linear-gradient(45deg, #4a9d8e, #7ab8a8, #5eb09f);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 8px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 15px rgba(122, 184, 168, 0.3));
+    will-change: filter;
 }
 
 .subtitle {
-  font-size: 20px;
-  color: rgba(100, 255, 218, 0.8);
-  font-weight: 300;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(100, 255, 218, 0.4);
+    font-size: 20px;
+    color: rgba(100, 255, 218, 0.8);
+    font-weight: 300;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(100, 255, 218, 0.4);
 }
 
 .progress-text {
-  position: absolute;
-  bottom: 80px;
-  left: 50%;
-  transform: translate(-50%, 20px);
-  text-align: center;
-  opacity: 0;
-  z-index: 700;
-  will-change: transform, opacity;
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translate(-50%, 20px);
+    text-align: center;
+    opacity: 0;
+    z-index: 700;
+    will-change: transform, opacity;
 }
 
 .step {
-  color: #7ab8a8;
-  font-size: 18px;
-  font-weight: 500;
-  text-shadow: 0 0 8px rgba(122, 184, 168, 0.3);
+    color: #7ab8a8;
+    font-size: 18px;
+    font-weight: 500;
+    text-shadow: 0 0 8px rgba(122, 184, 168, 0.3);
 }
 
 /* 로딩바 완전 제거 */
 .loading-bar,
 .loading-fill {
-  display: none;
+    display: none;
 }
 
 /* HUD, 데이터스트림 등 복잡한 요소들 완전 제거 */
@@ -179,7 +178,7 @@
 .hud-corner,
 .data-stream,
 .scan-line {
-  display: none;
+    display: none;
 }
 
 /* 성능 최적화를 위한 will-change 및 transform3d 활용 */
@@ -188,108 +187,108 @@
 .seta-text-container,
 .progress-text,
 .cursor {
-  transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
 }
 
 /* 반응형 */
 @media (max-width: 768px) {
-  .seta-text {
-    font-size: 54px;
-    letter-spacing: 4px;
-  }
-  
-  .subtitle {
-    font-size: 16px;
-    letter-spacing: 2px;
-  }
-  
-  .logo-center {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .logo-outer-ring {
-    width: 120px;
-    height: 120px;
-    top: -30px;
-    left: -30px;
-  }
-  
-  .logo-inner-ring {
-    width: 100px;
-    height: 100px;
-    top: -20px;
-    left: -20px;
-  }
-  
-  .progress-text {
-    bottom: 60px;
-  }
-  
-  .loading-bar {
-    width: 300px;
-  }
-  
-  .step {
-    font-size: 18px;
-  }
-  
-  .data-stream {
-    right: 30px;
-    top: 80px;
-    font-size: 11px;
-  }
-  
-  .hud-corner {
-    width: 30px;
-    height: 30px;
-  }
-  
-  .hud-top-left,
-  .hud-top-right,
-  .hud-bottom-left,
-  .hud-bottom-right {
-    margin: 20px;
-  }
+    .seta-text {
+        font-size: 54px;
+        letter-spacing: 4px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        letter-spacing: 2px;
+    }
+
+    .logo-center {
+        width: 60px;
+        height: 60px;
+    }
+
+    .logo-outer-ring {
+        width: 120px;
+        height: 120px;
+        top: -30px;
+        left: -30px;
+    }
+
+    .logo-inner-ring {
+        width: 100px;
+        height: 100px;
+        top: -20px;
+        left: -20px;
+    }
+
+    .progress-text {
+        bottom: 60px;
+    }
+
+    .loading-bar {
+        width: 300px;
+    }
+
+    .step {
+        font-size: 18px;
+    }
+
+    .data-stream {
+        right: 30px;
+        top: 80px;
+        font-size: 11px;
+    }
+
+    .hud-corner {
+        width: 30px;
+        height: 30px;
+    }
+
+    .hud-top-left,
+    .hud-top-right,
+    .hud-bottom-left,
+    .hud-bottom-right {
+        margin: 20px;
+    }
 }
 
 @media (max-width: 480px) {
-  .seta-text {
-    font-size: 42px;
-    letter-spacing: 2px;
-  }
-  
-  .subtitle {
-    font-size: 14px;
-    letter-spacing: 1px;
-  }
-  
-  .loading-bar {
-    width: 250px;
-  }
-  
-  .data-stream {
-    display: none; /* 작은 화면에서는 숨김 */
-  }
+    .seta-text {
+        font-size: 42px;
+        letter-spacing: 2px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+        letter-spacing: 1px;
+    }
+
+    .loading-bar {
+        width: 250px;
+    }
+
+    .data-stream {
+        display: none; /* 작은 화면에서는 숨김 */
+    }
 }
 
 /* 접근성: 모션 민감도 사용자 배려 */
 @media (prefers-reduced-motion: reduce) {
-  .stopword,
-  .logo-center,
-  .scan-line,
-  .seta-text {
-    animation: none !important;
-  }
-  
-  .cursor {
-    display: none;
-  }
+    .stopword,
+    .logo-center,
+    .scan-line,
+    .seta-text {
+        animation: none !important;
+    }
+
+    .cursor {
+        display: none;
+    }
 }
 
 /* 브라우저 최적화 */
 @supports (backdrop-filter: blur(10px)) {
-  .data-stream span {
-    backdrop-filter: blur(10px);
-  }
+    .data-stream span {
+        backdrop-filter: blur(10px);
+    }
 }

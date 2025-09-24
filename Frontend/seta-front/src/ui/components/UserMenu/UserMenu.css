@@ -1,63 +1,99 @@
 /* 푸터 기준 위로 뜨는 drop-up */
 .usermenu-wrap {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 0; right: 0;
-  display: flex;
-  pointer-events: none;
-  margin-left: 20px;
-  margin-bottom: 10px;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    display: flex;
+    pointer-events: none;
+    margin-left: 20px;
+    margin-bottom: 10px;
 }
-.usermenu-wrap.left  { justify-content: flex-start; }
-.usermenu-wrap.right { justify-content: flex-end; }
+
+.usermenu-wrap.left {
+    justify-content: flex-start;
+}
+
+.usermenu-wrap.right {
+    justify-content: flex-end;
+}
 
 .usermenu-panel {
-  pointer-events: auto;
-  position: relative;
-  min-width: 260px; max-width: 320px;
-  border-radius: 16px;
-  border: 1px solid var(--glass-border);
-  background:
-      radial-gradient(120% 90% at 10% 20%, rgba(188,172,242,.18) 0%, rgba(188,172,242,0) 45%),
-      radial-gradient(120% 90% at 80% 80%, rgba(121,224,211,.18) 0%, rgba(121,224,211,0) 45%),
-      var(--glass-bg);
-  backdrop-filter: blur(var(--blur)) saturate(120%);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(120%);
-  box-shadow: 0 1px 0 rgba(255,255,255,.08), 0 10px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
-  padding: 10px;
-  color: #e5e7eb;
+    pointer-events: auto;
+    position: relative;
+    min-width: 260px;
+    max-width: 320px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    background: radial-gradient(120% 90% at 10% 20%, rgba(188, 172, 242, .18) 0%, rgba(188, 172, 242, 0) 45%),
+    radial-gradient(120% 90% at 80% 80%, rgba(121, 224, 211, .18) 0%, rgba(121, 224, 211, 0) 45%),
+    var(--glass-bg);
+    backdrop-filter: blur(var(--blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(120%);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .08), 0 10px 32px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06);
+    padding: 10px;
+    color: #e5e7eb;
 }
 
 .usermenu-caret {
-  position: absolute;
-  left: 18px; /* align=right면 오른쪽으로 조정해도 됨 */
-  bottom: -8px;
-  width: 14px; height: 14px;
-  transform: rotate(45deg);
-  background: var(--glass-bg);
-  border-left: 1px solid var(--glass-border);
-  border-bottom: 1px solid var(--glass-border);
-  filter: drop-shadow(0 8px 12px rgba(0,0,0,.35));
+    position: absolute;
+    left: 18px; /* align=right면 오른쪽으로 조정해도 됨 */
+    bottom: -8px;
+    width: 14px;
+    height: 14px;
+    transform: rotate(45deg);
+    background: var(--glass-bg);
+    border-left: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .35));
 }
 
-.usermenu-email { font-size: .92rem; color: #cbd5e1; opacity: .9; padding: 10px 12px 6px; }
+.usermenu-email {
+    font-size: .92rem;
+    color: #cbd5e1;
+    opacity: .9;
+    padding: 10px 12px 6px;
+}
 
 .usermenu-item {
-  width: 100%;
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  background: transparent;
-  color: #e5e7eb;
-  cursor: pointer;
-  transition: background .15s ease, border-color .15s ease, transform .05s ease;
-  font: inherit;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: #e5e7eb;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, transform .05s ease;
+    font: inherit;
 }
-.usermenu-item:hover { background: var(--glass-bg-strong); border-color: var(--glass-border-weak); }
-.usermenu-item:active { transform: translateY(1px); }
-.usermenu-item .material-icons { font-size: 20px; color: #c7d2fe; }
-.usermenu-item.danger .material-icons { color: #fecaca; }
-.usermenu-item.danger { color: #fecaca; }
 
-.usermenu-divider { height: 1px; margin: 8px 6px; background: linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,0)); }
+.usermenu-item:hover {
+    background: var(--glass-bg-strong);
+    border-color: var(--glass-border-weak);
+}
+
+.usermenu-item:active {
+    transform: translateY(1px);
+}
+
+.usermenu-item .material-icons {
+    font-size: 20px;
+    color: #c7d2fe;
+}
+
+.usermenu-item.danger .material-icons {
+    color: #fecaca;
+}
+
+.usermenu-item.danger {
+    color: #fecaca;
+}
+
+.usermenu-divider {
+    height: 1px;
+    margin: 8px 6px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0));
+}

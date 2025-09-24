@@ -1,1 +1,1 @@
-export { default } from "./UserPersonalize";
+export {default} from "./UserPersonalize";

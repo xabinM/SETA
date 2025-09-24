@@ -1,4 +1,4 @@
-import { http } from "@/shared/api/http";
+import {http} from "@/shared/api/http";
 
 export type UserSettingServer = {
     userId: string;
@@ -12,7 +12,7 @@ export type UserSettingServer = {
 
 export async function getMyUserSetting(): Promise<UserSettingServer | null> {
     try {
-        const res = await http("/user-settings/me", { method: "GET" });
+        const res = await http("/user-settings/me", {method: "GET"});
         return res as UserSettingServer;
     } catch (e: unknown) {
         if (e && typeof e === "object" && "status" in e) {
@@ -30,12 +30,14 @@ export type UserSettingCreatePayload = {
     traits: string;
     additionalContext: string;
 };
+
 export async function createMyUserSetting(payload: UserSettingCreatePayload) {
-    return http("/user-settings/me", { method: "POST", body: payload });
+    return http("/user-settings/me", {method: "POST", body: payload});
 }
 
 
 export type UserSettingPatchPayload = Partial<UserSettingCreatePayload>;
+
 export async function patchMyUserSetting(payload: UserSettingPatchPayload) {
-    return http("/user-settings/me", { method: "PATCH", body: payload });
+    return http("/user-settings/me", {method: "PATCH", body: payload});
 }
