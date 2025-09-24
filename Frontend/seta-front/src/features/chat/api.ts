@@ -8,7 +8,7 @@ export type ChatRoom = {
 };
 
 export async function getChatRooms(): Promise<ChatRoom[]> {
-  return http<ChatRoom[]>("/api/chat/rooms", {
+  return http<ChatRoom[]>("/chat/rooms", {
     method: "GET",
     auth: true,
   });
