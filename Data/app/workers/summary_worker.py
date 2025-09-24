@@ -6,8 +6,7 @@ from datetime import datetime, timezone, timedelta
 from app.adapters.db import get_session
 from app.models import ChatMessage, RoomSummaryState
 from app.services import summary_service, embed_service, error_service
-from sqlalchemy import and_
-
+from sqlalchemy import and_, or_
 # ------------------
 # Logging 설정
 # ------------------
@@ -33,11 +32,21 @@ def run_summary_trigger_loop():
             with get_session() as session:
                 now = datetime.now(timezone.utc)
 
+
+
                 rooms = session.query(RoomSummaryState).filter(
-                    (RoomSummaryState.unsummarized_count >= UNSUM_THRESHOLD)
-                    | (RoomSummaryState.last_summary_at == None)
-                    | (RoomSummaryState.last_summary_at < (now - timedelta(seconds=IDLE_SECONDS)))
+                    or_(
+                        RoomSummaryState.unsummarized_count >= UNSUM_THRESHOLD,
+                        and_(
+                            RoomSummaryState.unsummarized_count > 0,
+                            or_(
+                                RoomSummaryState.last_summary_at == None,
+                                RoomSummaryState.last_summary_at < (now - timedelta(seconds=IDLE_SECONDS))
+                            )
+                        )
+                    )
                 ).all()
+
 
                 logger.info("🔎 Found %d rooms requiring summarization", len(rooms))
 
