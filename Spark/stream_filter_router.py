@@ -9,7 +9,7 @@ from typing import Dict, List, Tuple, Any
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import (
-    StringType, IntegerType, StructType, StructField, LongType
+    StringType, IntegerType, StructType, StructField, LongType, ArrayType
 )
 from opentelemetry import trace
 from opentelemetry.propagate import extract
