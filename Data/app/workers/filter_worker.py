@@ -68,7 +68,6 @@ def run_filter_worker():
         trace_id = ev.get("trace_id")
         room_id = ev.get("room_id") or (msg.key().decode() if msg.key() else None)
         message_id = ev.get("message_id")
-        user_id = ev.get("user_id")
         text = ev.get("text", "")
         final_text = ev.get("final_text", "")
         mode = ev.get("mode", "auto")
@@ -87,7 +86,8 @@ def run_filter_worker():
                         trace_id=trace_id,
                         chat_room_id=room_id,
                         message_id=message_id,
-                        user_id=user_id,
+                        stage="rule",
+                        action="DROP",       # AUTO는 필터링 처리라 DROP 기록
                         rule_name="rule",
                         created_at=now_utc,
                     )
@@ -109,13 +109,13 @@ def run_filter_worker():
 
             try:
                 raw = type("RawObj", (), ev)()
-                auto_logs = ev.get("filtered_words_details", [[], []])[0]  # (감지된 문구 리스트 추출)
+                auto_logs = ev.get("filtered_words_details", [[], []])[0]
                 decision = {
-                    "status": "auto",             # AUTO 모드 마킹
-                    "action": "AUTO",             # 대문자 형태도 함께 넣어줌
+                    "status": "auto",
+                    "action": "AUTO",
                     "cleaned_text": final_text or text,
                     "original_text": text,
-                    "drop_logs": auto_logs,       # ES 저장 시 사용할 로그
+                    "drop_logs": auto_logs,
                     "reason_type": "filler_removal",
                     "explanations": [],
                 }
@@ -157,10 +157,12 @@ def run_filter_worker():
                     with get_session() as session:
                         fr = FilterResult(
                             trace_id=trace_id,
-                            room_id=room_id,
+                            chat_room_id=room_id,
                             message_id=message_id,
-                            user_id=user_id,
+                            stage="ml",
+                            action="DROP",   # drop이므로 DROP 저장
                             rule_name="ml",
+                            score=decision.get("score"),
                             created_at=now_utc,
                         )
                         session.add(fr)
@@ -215,6 +217,7 @@ def run_filter_worker():
                 logger.info("📡 Published intent_classifier → %s", KAFKA_OUT_FILTER)
             else:
                 logger.info("⏩ Decision=PASS, skipping insert/publish")
+
 
 if __name__ == "__main__":
     run_filter_worker()
