@@ -2,20 +2,67 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getRoomMessages, type UIMsg /* , sendMessageToServer */ } from "@/features/chat/api";
+import { issueStreamCookie } from "@/features/auth/api";
+
+const BASE = import.meta.env.VITE_API_BASE_URL as string;
+
+type StreamStatus = "streaming" | "done" | "error";
 
 export default function ChatRoom() {
     const { threadId } = useParams<{ threadId?: string }>();
+
     const [messages, setMessages] = useState<UIMsg[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
     const [input, setInput] = useState("");
     const [ime, setIme] = useState(false);
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
-    // 🔹 1) pendingSeed: /chat에서 전달된 첫 메시지(시드)를 먼저 확보
+    // 스트리밍 관련 (다음 단계에서 사용)
+    const [isStreaming, setIsStreaming] = useState(false);
+    const streamRef = useRef<EventSource | null>(null);
+    const assistantIdRef = useRef<string | null>(null);
+
+    // /chat에서 전달된 첫 질문(시드)
     const [pendingSeed, setPendingSeed] = useState<string | null>(null);
     const seedInjectedRef = useRef(false); // 중복 주입 방지
 
+    // --- SSE 열기 함수 (쿠키로 인증) ---
+    function openRoomStream(roomId: string) {
+        // 기존 연결 있으면 닫기
+        streamRef.current?.close();
+        streamRef.current = null;
+
+        const es = new EventSource(`${BASE}/sse/chat/${roomId}`, {
+            withCredentials: true, // ★ 쿠키 인증 필수
+        });
+        streamRef.current = es;
+
+        // 서버가 skeleton을 보낼 수도 있으나, 지금은 무시해도 됨(다음 단계에서 프론트 스켈레톤 생성)
+        es.addEventListener("skeleton", (ev) => {
+            // console.log("skeleton:", ev.data);
+        });
+
+        es.addEventListener("delta", (ev) => {
+            // 아직 스켈레톤/append를 안 붙였으므로 콘솔로만 확인
+            console.log("delta:", ev.data);
+        });
+
+        es.addEventListener("done", (ev) => {
+            console.log("done:", ev.data);
+            setIsStreaming(false);
+        });
+
+        es.addEventListener("error", (e) => {
+            console.warn("SSE error", e);
+            setIsStreaming(false);
+        });
+
+        return es;
+    }
+
+    // 시드 수거
     useEffect(() => {
         if (!threadId) return;
         const key = `seta:seed:${threadId}`;
@@ -30,7 +77,7 @@ export default function ChatRoom() {
         }
     }, [threadId]);
 
-    // 🔹 2) 히스토리 로드 + (있다면) pendingSeed를 합쳐서 setMessages
+    // 히스토리 로드 (+ 시드가 있으면 일단 목록에 표시만)
     useEffect(() => {
         if (!threadId) return;
         let alive = true;
@@ -53,9 +100,6 @@ export default function ChatRoom() {
                     };
                     next = [...data, seedMsg];
                     seedInjectedRef.current = true;
-
-                    // TODO: 서버에도 실제 전송하려면 여기에 호출
-                    // await sendMessageToServer(threadId, pendingSeed).catch(console.error);
                 }
 
                 setMessages(next);
@@ -73,13 +117,40 @@ export default function ChatRoom() {
         };
     }, [threadId, pendingSeed]);
 
-    // 🔹 3) 스크롤 항상 하단
+    // 리스트 스크롤 항상 하단
     useEffect(() => {
         const el = scrollRef.current;
         if (el) el.scrollTop = el.scrollHeight;
     }, [messages, loading]);
 
-    // 🔹 4) 일반 전송
+    // ✅ 방 진입 시: 쿠키 심고 → SSE 연결
+    useEffect(() => {
+        if (!threadId) return;
+
+        const ac = new AbortController();
+
+        (async () => {
+            try {
+                // 1) SSE 전용 쿠키 발급 (Bearer → HttpOnly 쿠키)
+                await issueStreamCookie(ac.signal);
+            } catch (e) {
+                // 실패해도 서버 정책에 따라 SSE가 열릴 수 있으니 일단 시도
+                console.warn("issueStreamCookie failed (will try SSE anyway)", e);
+            } finally {
+                // 2) SSE 연결
+                openRoomStream(threadId);
+            }
+        })();
+
+        // 방 이동/언마운트 시 정리
+        return () => {
+            ac.abort();
+            streamRef.current?.close();
+            streamRef.current = null;
+        };
+    }, [threadId]);
+
+    // 전송 (다음 단계에서 스켈레톤 생성/서버 POST 연동 추가할 예정)
     const send = () => {
         const text = input.trim();
         if (!text) return;
@@ -89,11 +160,8 @@ export default function ChatRoom() {
             content: text,
             createdAt: new Date().toISOString(),
         };
-        setMessages(prev => [...prev, msg]);
+        setMessages((prev) => [...prev, msg]);
         setInput("");
-
-        // TODO: 서버 전송 연동 시
-        // if (threadId) sendMessageToServer(threadId, text).catch(console.error);
     };
 
     const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {

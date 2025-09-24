@@ -72,3 +72,21 @@ export function getMe(signal?: AbortSignal) {
         auth: true,
     });
 }
+
+export async function issueStreamCookie(signal?: AbortSignal) {
+    const BASE = import.meta.env.VITE_API_BASE_URL;
+
+    const access = tokenStore.getAccess?.();
+    if (!access) throw new Error("No access token. Please login first.");
+
+    const res = await fetch(`${BASE}/auth/stream-token`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${access}` },
+        credentials: "include",
+        signal,
+    });
+
+    if (!res.ok) {
+        throw new Error(`stream-token failed: ${res.status}`);
+    }
+}
