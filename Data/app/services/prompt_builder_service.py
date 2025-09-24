@@ -107,23 +107,14 @@ def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_scor
 
     # 2. knn + user_id 필터
     body = {
+        "knn": {
+            "field": "embedding",
+            "query_vector": emb,
+            "k": top_k,
+            "num_candidates": 100
+        },
         "query": {
-            "bool": {
-                "must": [
-                    {
-                        "knn": {
-                            "embedding": {        
-                                "vector": emb,
-                                "k": top_k,
-                                "num_candidates": 100
-                            }
-                        }
-                    },
-                    {
-                        "term": { "user_id": user_id }
-                    }
-                ]
-            }
+            "term": { "user_id": user_id }
         },
         "_source": ["content", "user_id", "created_at"]
     }
@@ -136,4 +127,3 @@ def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_scor
         if hit.get("_score", 0.0) >= min_score:
             results.append(hit["_source"]["content"])
     return results
-
