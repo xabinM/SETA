@@ -52,9 +52,6 @@ frontend-build:
     - cd Frontend/seta-front
     - npm ci
     - npm run build
-    - echo "=== dist 확인 ==="
-    - ls -l dist
-    - ls -l dist/assets
   artifacts:
     paths:
       - Frontend/seta-front/dist
@@ -109,12 +106,9 @@ frontend-build-docker:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
   before_script:
-    - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
-    - echo "=== Docker 컨텍스트 확인 ==="
-    - ls -l ./Frontend/seta-front/dist
-    - docker build -t $FRONTEND_IMAGE ./Frontend/seta-front
+    - docker build --build-arg VITE_API_BASE_URL="$VITE_API_BASE_URL" -t $FRONTEND_IMAGE ./Frontend/seta-front
     - docker push $FRONTEND_IMAGE
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
@@ -199,11 +193,6 @@ deploy-frontend:
       # 파일 전송
     - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy-frontend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
     - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.frontend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
-
-    - |
-      ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env.front <<EOF
-      VITE_API_BASE_URL=${VITE_API_BASE_URL}
-      EOF"
 
       # 파일 실행
     - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-frontend.sh && ./deploy-frontend.sh '${FRONTEND_IMAGE}' '${DEPLOY_USER}'"

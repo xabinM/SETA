@@ -18,7 +18,7 @@
   width: 100%;
   height: 100%;
   background: 
-    linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(15, 15, 25, 0.7) 100%),
+    linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(15, 15, 25, 0.4) 100%),
   radial-gradient(circle at 30% 40%, rgba(60, 140, 120, 0.08) 0%, transparent 50%),
   radial-gradient(circle at 70% 60%, rgba(80, 160, 140, 0.04) 0%, transparent 50%);
   pointer-events: none;
@@ -64,7 +64,7 @@
   position: absolute;
   top: 45%;
   left: 48%;
-  transform: translate(-50%, calc(-50% + 20px)) scale(0.5);
+  transform: translate(-50%, -50%);
   width: 120px;
   height: 120px;
   opacity: 0;
@@ -119,7 +119,7 @@
 .seta-text-container {
   position: absolute;
   top: 65%;
-  left: 50%;
+  left: 80%;
   transform: translate(-50%, -50%);
   text-align: center;
   opacity: 0;

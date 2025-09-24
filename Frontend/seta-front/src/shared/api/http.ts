@@ -1,6 +1,6 @@
 import { tokenStore, isJwtExpired } from "@/shared/auth/token";
 
-const RAW_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+const RAW_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 const BASE = RAW_BASE.replace(/\/+$/, "");
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
