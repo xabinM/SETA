@@ -93,7 +93,10 @@ public class JwtTokenProvider {
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-
+        String tokenParam = request.getParameter("token"); // TOKEN 추가
+        if (StringUtils.hasText(tokenParam)) {
+            return tokenParam;
+        }
         return null;
     }
 
