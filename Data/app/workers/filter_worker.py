@@ -238,6 +238,7 @@ def run_filter_worker():
                     value={
                         "trace_id": trace_id,
                         "room_id": room_id,
+                        "user_id": user_id,
                         "message_id": message_id,
                         "stage": "intent_classifier",
                         "stage_order": 2,
