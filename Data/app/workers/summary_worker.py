@@ -74,14 +74,12 @@ def summarize_room(room_id: str):
             summary_text = summary_service.summarize(text_block)
             embedding = embed_service.embed_text(summary_text)
 
-            # 임베딩 저장
-            embed_service.store_user_memory_embedding(
+            embed_service.store_text(
                 user_id=messages[-1].author_id,
-                room_id=room_id,
-                content=summary_text,
-                embedding=embedding,
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                source_id=room_id,
+                text=summary_text,
             )
+
 
             # 상태 업데이트
             state.last_turn_end = messages[-1].turn_index
