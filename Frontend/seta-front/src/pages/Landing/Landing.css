@@ -6,11 +6,11 @@
   background-repeat: no-repeat;
   overflow: hidden;
   position: relative;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Inter', sans-serif;
   perspective: 1000px;
 }
 
-/* 배경 어둠 오버레이 - 더 부드러운 색상 */
+/* 배경 어둠 오버레이 */
 .background-overlay {
   position: absolute;
   top: 0;
@@ -19,8 +19,8 @@
   height: 100%;
   background: 
     linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(15, 15, 25, 0.7) 100%),
-  radial-gradient(circle at 30% 40%, rgba(60, 140, 120, 0.08) 0%, transparent 50%),
-  radial-gradient(circle at 70% 60%, rgba(80, 160, 140, 0.04) 0%, transparent 50%);
+    radial-gradient(circle at 30% 40%, rgba(60, 140, 120, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(80, 160, 140, 0.04) 0%, transparent 50%);
   pointer-events: none;
   backdrop-filter: blur(1px);
   animation: subtleColorShift 15s linear infinite alternate;
@@ -31,8 +31,7 @@
   100% { background-position: 100% 100%; }
 }
 
-
-/* 불용어 파티클들 */
+/* 불용어 파티클들 - 별처럼 반짝이는 효과 */
 .particles-container {
   position: absolute;
   top: 0;
@@ -43,66 +42,57 @@
 }
 
 .stopword {
-  position: absolute;
+  position: absolute; /* 반드시 absolute 설정 */
   color: rgba(240, 240, 245, 0.75);
-  font-weight: 400;
+  font-weight: 300;
   pointer-events: none;
   user-select: none;
-  text-shadow: 0 0 4px rgba(240, 240, 245, 0.2);
+  text-shadow: 
+    0 0 2px rgba(240, 240, 245, 0.8),
+    0 0 4px rgba(100, 255, 218, 0.3),
+    0 0 8px rgba(29, 233, 182, 0.2);
   transition: all 0.3s ease;
   transform-style: preserve-3d;
-  will-change: transform, opacity, color;
-  image-rendering: crisp-edges;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  will-change: transform, opacity, color, scale;
   backface-visibility: hidden;
   transform: translate3d(0, 0, 0);
+  filter: blur(0.3px);
 }
 
-/* SETA 로고 중심체 - 크기 및 위치 조정 */
+/* 별처럼 반짝이는 추가 효과 */
+.stopword::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 2px;
+  background: radial-gradient(circle, rgba(100, 255, 218, 0.8) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* SETA 로고 중심체 */
 .logo-center {
   position: absolute;
-  top: 45%;
-  left: 48%;
-  transform: translate(-50%, calc(-50% + 20px)) scale(0.5);
-  width: 120px;
-  height: 120px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  width: 100px;
+  height: 100px;
   opacity: 0;
   z-index: 500;
   will-change: transform, scale, opacity;
 }
 
-/* 복잡한 링 효과 제거 */
-.logo-outer-ring,
-.logo-inner-ring {
-  display: none;
-}
-
-/* 로고 주변 링들 */
-.logo-outer-ring {
-  position: absolute;
-  top: -30px;
-  left: -30px;
-  width: 140px;
-  height: 140px;
-  border: 2px solid rgba(0, 212, 170, 0.6);
-  border-radius: 50%;
-  border-style: dashed;
-  will-change: transform, scale, opacity;
-}
-
-.logo-inner-ring {
-  position: absolute;
-  top: -20px;
-  left: -20px;
-  width: 120px;
-  height: 120px;
-  border: 1px solid rgba(100, 255, 218, 0.8);
-  border-radius: 50%;
-  will-change: transform, scale, opacity;
-}
-
-/* SETA 로고 이미지 (.ico 파일) */
+/* SETA 로고 이미지 */
 .seta-logo-img {
   width: 100%;
   height: 100%;
@@ -115,10 +105,10 @@
   will-change: transform, filter;
 }
 
-/* SETA 텍스트 */
+/* SETA 텍스트 - 로고 위에 위치 */
 .seta-text-container {
   position: absolute;
-  top: 65%;
+  top: 42%; /* 로고보다 위쪽에 */
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
@@ -128,79 +118,116 @@
 }
 
 .seta-text {
-  font-size: 72px;
+  font-size: clamp(3rem, 8vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: 0.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+/* SETA 개별 글자 스타일 - 피그마 디자인 반영 */
+.seta-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30px) scale(0.8) rotateX(45deg);
+  background: linear-gradient(
+    135deg,
+    #00d4aa 0%,
+    #64ffda 25%,
+    #1de9b6 50%,
+    #00bcd4 75%,
+    #0097a7 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  /* 3D 글래스모피즘 효과 */
+  text-shadow: 
+    0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 212, 170, 0.3),
+    0 4px 8px rgba(0, 212, 170, 0.2),
+    0 8px 16px rgba(0, 212, 170, 0.1);
+  
+  /* 네온 글로우 효과 */
+  filter: 
+    drop-shadow(0 0 10px rgba(100, 255, 218, 0.6))
+    drop-shadow(0 0 20px rgba(29, 233, 182, 0.4))
+    drop-shadow(0 0 30px rgba(0, 212, 170, 0.3));
+  
+  will-change: transform, opacity, filter;
+  transform-style: preserve-3d;
+}
+
+.circular-text {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.letter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+  font-size: 48px;
   font-weight: 900;
   background: linear-gradient(45deg, #4a9d8e, #7ab8a8, #5eb09f);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 8px;
-  margin-bottom: 10px;
   filter: drop-shadow(0 0 15px rgba(122, 184, 168, 0.3));
-  will-change: filter;
+  animation: gentleGradientShift 4s ease-in-out infinite;
+}
+
+@keyframes gentleGradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+
+
+/* 개별 글자 호버 효과 */
+.seta-letter:hover {
+  filter: 
+    drop-shadow(0 0 15px rgba(100, 255, 218, 0.8))
+    drop-shadow(0 0 25px rgba(29, 233, 182, 0.6))
+    drop-shadow(0 0 35px rgba(0, 212, 170, 0.5));
+  transform: translateY(25px) scale(1.1) rotateX(0deg);
 }
 
 .subtitle {
-  font-size: 20px;
+  font-size: clamp(0.8rem, 2vw, 1.2rem);
   color: rgba(100, 255, 218, 0.8);
   font-weight: 300;
-  letter-spacing: 4px;
+  letter-spacing: 0.2rem;
   text-transform: uppercase;
   text-shadow: 0 0 10px rgba(100, 255, 218, 0.4);
-}
-
-.progress-text {
-  position: absolute;
-  bottom: 80px;
-  left: 50%;
-  transform: translate(-50%, 20px);
-  text-align: center;
   opacity: 0;
-  z-index: 700;
-  will-change: transform, opacity;
+  transform: translateY(20px);
 }
 
-.step {
-  color: #7ab8a8;
-  font-size: 18px;
-  font-weight: 500;
-  text-shadow: 0 0 8px rgba(122, 184, 168, 0.3);
-}
-
-/* 로딩바 완전 제거 */
-.loading-bar,
-.loading-fill {
-  display: none;
-}
-
-/* HUD, 데이터스트림 등 복잡한 요소들 완전 제거 */
-.hud-elements,
-.hud-corner,
-.data-stream,
-.scan-line {
-  display: none;
-}
-
-/* 성능 최적화를 위한 will-change 및 transform3d 활용 */
+/* 성능 최적화 */
 .stopword,
 .logo-center,
-.seta-text-container,
-.progress-text,
-.cursor {
+.seta-text-container {
   transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 /* 반응형 */
 @media (max-width: 768px) {
   .seta-text {
-    font-size: 54px;
-    letter-spacing: 4px;
+    font-size: clamp(2rem, 12vw, 3rem);
+    letter-spacing: 0.3rem;
   }
   
   .subtitle {
-    font-size: 16px;
-    letter-spacing: 2px;
+    font-size: clamp(0.6rem, 3vw, 1rem);
+    letter-spacing: 0.15rem;
   }
   
   .logo-center {
@@ -208,88 +235,24 @@
     height: 60px;
   }
   
-  .logo-outer-ring {
-    width: 120px;
-    height: 120px;
-    top: -30px;
-    left: -30px;
-  }
-  
-  .logo-inner-ring {
-    width: 100px;
-    height: 100px;
-    top: -20px;
-    left: -20px;
-  }
-  
-  .progress-text {
-    bottom: 60px;
-  }
-  
-  .loading-bar {
-    width: 300px;
-  }
-  
-  .step {
-    font-size: 18px;
-  }
-  
-  .data-stream {
-    right: 30px;
-    top: 80px;
-    font-size: 11px;
-  }
-  
-  .hud-corner {
-    width: 30px;
-    height: 30px;
-  }
-  
-  .hud-top-left,
-  .hud-top-right,
-  .hud-bottom-left,
-  .hud-bottom-right {
-    margin: 20px;
+  .seta-text-container {
+    top: 40%;
   }
 }
 
 @media (max-width: 480px) {
   .seta-text {
-    font-size: 42px;
-    letter-spacing: 2px;
+    font-size: clamp(1.5rem, 15vw, 2.5rem);
+    letter-spacing: 0.2rem;
   }
   
   .subtitle {
-    font-size: 14px;
-    letter-spacing: 1px;
+    font-size: clamp(0.5rem, 4vw, 0.8rem);
+    letter-spacing: 0.1rem;
   }
   
-  .loading-bar {
-    width: 250px;
-  }
-  
-  .data-stream {
-    display: none; /* 작은 화면에서는 숨김 */
-  }
-}
-
-/* 접근성: 모션 민감도 사용자 배려 */
-@media (prefers-reduced-motion: reduce) {
-  .stopword,
-  .logo-center,
-  .scan-line,
-  .seta-text {
-    animation: none !important;
-  }
-  
-  .cursor {
-    display: none;
-  }
-}
-
-/* 브라우저 최적화 */
-@supports (backdrop-filter: blur(10px)) {
-  .data-stream span {
-    backdrop-filter: blur(10px);
+  .logo-center {
+    width: 50px;
+    height: 50px;
   }
 }
