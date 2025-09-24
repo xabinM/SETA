@@ -94,12 +94,20 @@ def run_filter_worker():
                     session.add(fr)
 
                     tu = TokenUsage(
-                        trace_id=trace_id,
+                        message_id=message_id,
                         prompt_tokens=token_count,
                         completion_tokens=0,
                         total_tokens=token_count,
+                        cost_usd=None,
+                        energy_wh=None,
+                        co2_g=None,
+                        saved_tokens=0,
+                        saved_cost_usd=None,
+                        saved_energy_wh=None,
+                        saved_co2_g=None,
                         created_at=now_utc,
                     )
+
                     session.add(tu)
                     session.commit()
                 logger.info("💾 Saved FilterResult & TokenUsage (AUTO)")
@@ -168,12 +176,20 @@ def run_filter_worker():
                         session.add(fr)
 
                         tu = TokenUsage(
-                            trace_id=trace_id,
+                            message_id=message_id,
                             prompt_tokens=token_count,
                             completion_tokens=0,
                             total_tokens=token_count,
+                            cost_usd=None,
+                            energy_wh=None,
+                            co2_g=None,
+                            saved_tokens=0,
+                            saved_cost_usd=None,
+                            saved_energy_wh=None,
+                            saved_co2_g=None,
                             created_at=now_utc,
                         )
+
                         session.add(tu)
                         session.commit()
                     logger.info("💾 Saved FilterResult & TokenUsage (PASS)")

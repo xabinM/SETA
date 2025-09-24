@@ -161,7 +161,6 @@ def run_worker():
                                 saved_cost_usd=usage.get("saved_cost_usd", 0),
                                 saved_energy_wh=usage.get("saved_energy_wh", 0),
                                 saved_co2_g=usage.get("saved_co2_g", 0),
-                                user_id=user_id,
                                 created_at=datetime.now(timezone.utc),
                             )
                             session.add(token_usage)

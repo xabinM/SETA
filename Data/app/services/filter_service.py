@@ -89,7 +89,7 @@ def save_to_es(raw: RawFilteredMessage, decision: Dict[str, Any]) -> None:
 
     # 2) pass 모드: decision.drop_logs
     else:
-        logs = decision.get("drop_logs", [])
+        logs = getattr(decision, "drop_logs", [])
         if isinstance(logs, list) and len(logs) > 0:
             for log in logs:
                 dropped_list = _as_list(log.get("필터된 내용") or log.get("dropped_text"))

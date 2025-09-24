@@ -106,7 +106,6 @@ class TokenUsage(Base):
     saved_cost_usd = Column(Numeric(14, 6))
     saved_energy_wh = Column(Numeric(14, 6))
     saved_co2_g = Column(Numeric(14, 6))
-    user_id = Column(Integer, ForeignKey("users.user_id"))
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
 
 
