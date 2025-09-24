@@ -70,7 +70,7 @@ def run_filter_worker():
         user_id = ev.get("user_id")
         text = ev.get("text", "")
         final_text = ev.get("final_text", "")
-        mode = ev.get("mode", "auto")
+        mode = ev.get("mode", "PASS")
 
         now_utc = datetime.now(timezone.utc)
         logger.info("➡️ Processing trace_id=%s, mode=%s", trace_id, mode)
