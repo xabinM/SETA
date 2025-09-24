@@ -27,7 +27,7 @@ tokenizer = AutoTokenizer.from_pretrained(FILTER_MODEL_PATH, local_files_only=Tr
 model = AutoModelForSequenceClassification.from_pretrained(FILTER_MODEL_PATH, local_files_only=True)
 logger.info("✅ Model loaded successfully")
 
-KAFKA_IN = os.getenv("KAFKA_TOPIC_IN_RAW", "chat.raw.request.v1")
+KAFKA_IN = os.getenv("KAFKA_TOPIC_IN_RAW", "chat.raw.filtered.v1")
 KAFKA_OUT_FILTER = os.getenv("KAFKA_TOPIC_FILTER_RESULT", "chat.filter.result.v1")
 
 KST = timezone(timedelta(hours=9))
