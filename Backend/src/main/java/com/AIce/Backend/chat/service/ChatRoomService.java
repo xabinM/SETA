@@ -55,7 +55,7 @@ public class ChatRoomService {
 
     @Transactional(readOnly = true)
     public List<ChatRoomResponse> listMyRooms(Long userId) {
-        List<ChatRoom> rooms = chatRoomRepository.findByUser(userRepository.findByUserId(userId))
+        List<ChatRoom> rooms = chatRoomRepository.findByUserOrderByUpdatedAtDesc(userRepository.findByUserId(userId))
                 .orElse(Collections.emptyList());
         return rooms.stream()
                 .map(ChatRoomResponse::from)
