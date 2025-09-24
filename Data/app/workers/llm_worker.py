@@ -123,7 +123,7 @@ def run_worker():
 
         chunks = []
         try:
-            for event in llm_client.call_llm(model_name, full_prompt, temperature):
+            for event in llm_client.llm_client.call_llm( full_prompt, stream=True, model=model_name, temperature=temperature):
                 if event["type"] == "delta":
                     delta = event["delta"]
                     chunks.append(delta)
