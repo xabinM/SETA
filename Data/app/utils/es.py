@@ -10,14 +10,6 @@ import os
 _settings = get_settings()
 _es: Optional[Elasticsearch] = None
 
-@lru_cache(maxsize=1)
-def get_es() -> Elasticsearch:
-    """
-    싱글톤 ES 클라이언트 (연결 재사용)
-    """
-    hosts = os.getenv("ELASTICSEARCH_HOSTS", "http://elasticsearch:9200").split(",")
-    return Elasticsearch(hosts)
-
 def es_health_ok() -> bool:
     try:
         get_es().cluster.health()
@@ -26,7 +18,6 @@ def es_health_ok() -> bool:
         return False
 
 def get_es() -> Elasticsearch:
-
     global _es
     if _es is None:
         _es = Elasticsearch(
