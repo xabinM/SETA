@@ -87,7 +87,6 @@ def run_worker():
                     query=user_input,
                     user_id=user_id,
                     top_k=3,
-                    score_threshold=0.7,
                     min_score=0.7
                 )
                 logger.info("🔍 Similar contexts: %d items", len(similar_contexts) if similar_contexts else 0)
