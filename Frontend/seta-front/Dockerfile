@@ -6,9 +6,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 COPY . .
 
-RUN npm run build
+RUN echo ">>> Building with VITE_API_BASE_URL=$VITE_API_BASE_URL" \     && npm run build
 
 # --------------------------------------------------
 
