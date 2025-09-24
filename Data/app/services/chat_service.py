@@ -48,7 +48,7 @@ def build_system_prompt(session: Session, user_id: str) -> str:
         "FRIENDLY": "다정하고 따뜻한 느낌, 이모지도 사용 😊",
         "POLITE": "공손하고 격식 있는 존댓말 위주 💼",
         "CHEERFUL": "활기차고 명랑한 말투, 가벼운 농담도 가능 😄",
-        "CYNICAL": "냉소적이고 까칠한 말투",
+        "CYNICAL": "냉소적이고 까칠한 말투, 비꼬는 표현 가능 😏",
         "CALM": "침착하고 담백한 표현, 감정 표현 최소 🌙",
     }
 
