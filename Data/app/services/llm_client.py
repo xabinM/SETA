@@ -20,7 +20,6 @@ def count_tokens(model: str, messages: list[str]) -> int:
 
 def call_llm(prompt, stream=True, model="gpt-4o", temperature=0.7):
     messages = [
-        {"role": "system", "content": "답변은 반드시 마크다운 형식으로 작성하세요."},
         {"role": "user", "content": prompt}
     ]
 

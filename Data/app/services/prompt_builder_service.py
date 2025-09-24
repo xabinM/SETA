@@ -64,9 +64,6 @@ def get_recent_conversation(room_id: str, limit: int = 5):
 # System Prompt 생성
 # ===============================
 def build_system_prompt(session: Session, user_id: str) -> str:
-    """
-    user_setting 기반으로 system_prompt 구성
-    """
     setting = session.query(UserSetting).filter(UserSetting.user_id == user_id).first()
     if not setting:
         return "You are a helpful assistant that replies in Korean."
@@ -81,13 +78,15 @@ def build_system_prompt(session: Session, user_id: str) -> str:
     }
 
     parts = ["당신은 한국 AI 어시스턴트 입니다."]
+
     if setting.call_me:
         parts.append(f'사용자를 "{setting.call_me}"이라고 부르세요.')
     if setting.role_description:
         parts.append(f"역할: {setting.role_description}")
     if setting.preferred_tone:
-        tone_desc = tone_map.get(setting.preferred_tone, "")
-        parts.append(f"응답 톤: {setting.preferred_tone} ({tone_desc})")
+        tone_key = getattr(setting.preferred_tone, "name", str(setting.preferred_tone))
+        tone_desc = tone_map.get(tone_key, "")
+        parts.append(f"응답 톤: {tone_key} ({tone_desc})")
     if setting.traits:
         parts.append(f"성격/특징: {setting.traits}")
     if setting.additional_context:
@@ -101,31 +100,23 @@ def build_system_prompt(session: Session, user_id: str) -> str:
 # ===============================
 def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_score: float = 0.7):
     es = get_es()
-
-    # 1. 임베딩 계산
     emb = embedder.encode(query).tolist()
 
-    # 2. knn + user_id 필터
     body = {
-            "knn": {
-                "field": "embedding",
-                "query_vector": emb,
-                "k": top_k,
-                "num_candidates": 100
-            },
-            "_source": ["content", "user_id", "created_at"]
-        }
+        "knn": {
+            "field": "embedding",
+            "query_vector": emb,
+            "k": top_k,
+            "num_candidates": 100,
+        },
+        "_source": ["content", "user_id", "created_at"],
+    }
 
-        # user_id가 존재할 때만 filter 추가
     if user_id:
-        body["knn"]["filter"] = {
-            "term": {"user_id": user_id}
-        }
-
+        body["knn"]["filter"] = {"term": {"user_id": user_id}}
 
     resp = es.search(index="user_memory_embedding", body=body)
 
-    # 3. 결과 필터링
     results = []
     for hit in resp["hits"]["hits"]:
         if hit.get("_score", 0.0) >= min_score:
