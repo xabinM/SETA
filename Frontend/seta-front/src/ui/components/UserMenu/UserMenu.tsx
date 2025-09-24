@@ -84,7 +84,7 @@ export default function UserMenu({
             tokenStore.clear();
             setLoggingOut(false);
             onClose();
-            navigate("/home", { replace: true });
+            navigate("/home", {replace: true});
         }
     };
 

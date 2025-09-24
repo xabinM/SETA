@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 import logoSrc from '@/assets/seta.png';
 import './CustomToast.css';
 
@@ -31,7 +31,7 @@ export default function CustomToast({
         <div className="custom-toast">
             <div className="toast-content">
         <span className="toast-logo">
-          <img src={logoSrc} alt="SETA" draggable={false} />
+          <img src={logoSrc} alt="SETA" draggable={false}/>
         </span>
                 <div className="toast-texts">
                     <div className="toast-title">{message}</div>

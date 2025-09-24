@@ -39,7 +39,7 @@
     font-size: clamp(48px, 8vw, 72px);
     line-height: 1.1;
     letter-spacing: -0.04em;
-    background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(156,163,175,1) 100%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 1) 0%, rgba(156, 163, 175, 1) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -86,21 +86,21 @@
 .btn-secondary {
     padding: clamp(10px, 2.5vw, 12px) clamp(20px, 5vw, 26px);
     border-radius: 9999px;
-    background: rgba(255,255,255,0.10);
-    border: 1px solid rgba(255,255,255,0.20);
-    color: rgba(255,255,255,0.92);
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    color: rgba(255, 255, 255, 0.92);
     cursor: pointer;
     font-size: clamp(14px, 2.5vw, 16px);
-    box-shadow: 0px 2px 8px rgba(255,255,255,0.1);
+    box-shadow: 0px 2px 8px rgba(255, 255, 255, 0.1);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateY(0px);
 }
 
 .btn-secondary:hover {
     transform: translateY(-2px);
-    background: rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.30);
-    box-shadow: 0px 8px 25px rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.30);
+    box-shadow: 0px 8px 25px rgba(255, 255, 255, 0.15);
 }
 
 .btn-primary:focus,

@@ -1,7 +1,7 @@
 // UserPersonalizeContainer.tsx
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import UserPersonalize, { type PersonalizeValues } from "@/ui/components/Modal/UserPersonalize/UserPersonalize";
+import {useEffect, useState} from "react";
+import {createPortal} from "react-dom";
+import UserPersonalize, {type PersonalizeValues} from "@/ui/components/Modal/UserPersonalize/UserPersonalize";
 import {
     getMyUserSetting,
     type UserSettingServer,
@@ -9,7 +9,7 @@ import {
     patchMyUserSetting,
     type UserSettingCreatePayload,
 } from "@/features/user-setting/api";
-import { parseTraits, joinTraits } from "@/features/user-setting/normalize";
+import {parseTraits, joinTraits} from "@/features/user-setting/normalize";
 import CustomToast from "@/ui/components/Toast/CustomToast";
 
 /* ==== 톤 매핑 (UI 한글 ↔ API 영문) ==== */
@@ -39,6 +39,7 @@ function toUI(v?: string | null): ToneUI {
     const key = v.toLowerCase?.() ?? v;
     return CODE2UI[key] ?? "기본";
 }
+
 function toCode(v: ToneUI): string {
     return UI2CODE[v] ?? "neutral";
 }
@@ -130,7 +131,7 @@ export default function UserPersonalizeContainer({
             if (hasSetting) {
                 const diff = buildDiffPayload(values, initialValues);
                 if (Object.keys(diff).length === 0) {
-                    setToast({ message: "변경사항 없음", description: "수정된 내용이 없습니다." });
+                    setToast({message: "변경사항 없음", description: "수정된 내용이 없습니다."});
                     return;
                 }
                 await patchMyUserSetting(diff);
@@ -143,12 +144,12 @@ export default function UserPersonalizeContainer({
             setInitialValues(values);
 
             // 성공 토스트 먼저 띄우고,
-            setToast({ message: "저장 완료", description: "개인 맞춤 설정이 적용되었습니다." });
+            setToast({message: "저장 완료", description: "개인 맞춤 설정이 적용되었습니다."});
             // 다음 프레임에 모달 닫기(토스트가 즉시 보이도록)
             requestAnimationFrame(() => onClose());
         } catch (e) {
             console.error("설정 저장 실패:", e);
-            setToast({ message: "저장 실패", description: "잠시 후 다시 시도해 주세요." });
+            setToast({message: "저장 실패", description: "잠시 후 다시 시도해 주세요."});
         }
     };
 

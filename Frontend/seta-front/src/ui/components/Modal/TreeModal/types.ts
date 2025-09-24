@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type {ReactNode} from "react";
 
 export type Tokens = { current: number; goal: number; step: number };
 
