@@ -17,7 +17,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=3.35.206.91:29092
       - INPUT_TOPIC=chat.raw.request.v1
       - OUTPUT_TO_KAFKA=true
-      - OUTPUT_TOPIC=chat.filter.result.v1
+      - OUTPUT_TOPIC=chat.raw.filtered.v1
       - FILTER_JSON_PATH=filter_word.json
       # 서버1 메인 PostgreSQL 연결
       - POSTGRES_HOST=${POSTGRES_HOST}
