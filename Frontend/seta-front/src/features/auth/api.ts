@@ -57,3 +57,18 @@ export async function logout(signal?: AbortSignal) {
         signal,
     });
 }
+
+export type Me = {
+    username: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export function getMe(signal?: AbortSignal) {
+    return http<Me>("/auth/me", {
+        method: "GET",
+        signal,
+        auth: true,
+    });
+}
