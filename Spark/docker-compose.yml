@@ -79,6 +79,8 @@ services:
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
       - PYTHONIOENCODING=UTF-8
+      - JAEGER_AGENT_HOST=3.35.206.91
+      - JAEGER_AGENT_PORT=6831
     networks:
       - app-network
     depends_on:
