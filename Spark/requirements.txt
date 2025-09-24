@@ -1,11 +1,11 @@
 kafka-python==2.0.2
 pyspark==3.5.0
-tiktoken
-numpy
-pandas
-requests
-py4j
-findspark
+# tiktoken
+# numpy
+# pandas
+# requests
+# py4j
+# findspark
 psycopg2-binary
 opentelemetry-api
 opentelemetry-sdk
