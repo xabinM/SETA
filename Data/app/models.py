@@ -9,6 +9,7 @@ from pgvector.sqlalchemy import Vector
 from datetime import datetime
 import uuid
 import enum
+from sqlalchemy import Column, DateTime
 
 Base = declarative_base()
 
@@ -127,7 +128,7 @@ class RoomSummaryState(Base):
 
     chat_room_id = Column(UUID(as_uuid=True), ForeignKey("chat_room.chat_room_id"), primary_key=True)
     last_turn_end = Column(Integer, nullable=False, default=0)
-    last_summary_at = Column(TIMESTAMP, nullable=True, default=datetime.utcnow)
+    last_summary_at = Column(DateTime(timezone=True))
     unsummarized_count = Column(Integer, nullable=False, default=0)
 
     chat_room = relationship("ChatRoom", backref="summary_state")
