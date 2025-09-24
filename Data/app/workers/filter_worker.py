@@ -68,7 +68,7 @@ def run_filter_worker():
                 with get_session() as session:
                     fr = FilterResult(
                         trace_id=trace_id,
-                        room_id=room_id,
+                        chat_room_id=room_id,
                         message_id=message_id,
                         user_id=user_id,
                         rule_name="rule",  # auto는 rule

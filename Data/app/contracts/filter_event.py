@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 class FilterEvent(BaseModel):
     trace_id: str
-    room_id: str
+    chat_room_id: str
     message_id: str
     user_id: str
     action: Literal["PASS", "DROP"]

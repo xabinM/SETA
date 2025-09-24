@@ -20,23 +20,31 @@ def run_worker():
     consumer = make_consumer([KAFKA_IN], group_id="llm-worker")
     producer = make_producer()
 
-    for msg in consumer:
+    while True:
+        msg = consumer.poll(1.0)
+        if msg is None:
+            continue
+        if msg.error():
+            print(f"Kafka error: {msg.error()}")
+            continue
+
+        try:
+            ev = json.loads(msg.value().decode("utf-8"))
+        except Exception:
+            continue
+
         headers_dict = read_headers(msg)
         tp = extract_traceparent(headers_dict)
 
-        data = msg.value()
-        if not data:
-            continue
-
-        rule = data.get("rule")
+        rule = ev.get("rule")
         if rule not in ("ml-pass", "auto"):
             continue  # drop은 무시
 
-        trace_id = data["trace_id"]
-        room_id = data["room_id"]
-        message_id = data.get("message_id")
-        user_id = data.get("user_id")
-        user_input = data.get("text") or ""
+        trace_id = ev["trace_id"]
+        chat_room_id = ev.get("room_id")
+        message_id = ev.get("message_id")
+        user_id = ev.get("user_id")
+        user_input = ev.get("text") or ""
 
         try:
             with get_session() as session:
