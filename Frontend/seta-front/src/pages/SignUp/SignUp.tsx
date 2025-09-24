@@ -1,10 +1,10 @@
-import { useState } from "react";
+import {useState} from "react";
 import SignUpBg from "@/assets/loginBackground.png";
 import CustomToast from "@/ui/components/Toast/CustomToast";
 import "./SignUp.css";
 import {useNavigate} from "react-router-dom";
 import {signUp} from "@/features/auth/api";
-import { ApiError } from "@/shared/api/http";
+import {ApiError} from "@/shared/api/http";
 
 export default function SignUp() {
     const navigate = useNavigate();
@@ -34,7 +34,7 @@ export default function SignUp() {
         if (matchStatus !== "match") {
             setToast(null);
             setTimeout(() => {
-                setToast({ msg: "비밀번호가 일치하지 않습니다.", desc: "다시 확인해주세요." });
+                setToast({msg: "비밀번호가 일치하지 않습니다.", desc: "다시 확인해주세요."});
             }, 0);
             return;
         }
@@ -49,7 +49,7 @@ export default function SignUp() {
         if (!payload.username || !payload.password || !payload.name) {
             setToast(null);
             setTimeout(() => {
-                setToast({ msg: "입력값을 확인해주세요.", desc: "이름/아이디/비밀번호는 필수입니다." });
+                setToast({msg: "입력값을 확인해주세요.", desc: "이름/아이디/비밀번호는 필수입니다."});
             }, 0);
             return;
         }
@@ -59,10 +59,10 @@ export default function SignUp() {
             await signUp(payload);
             setToast(null);
             setTimeout(() => {
-                setToast({ msg: "회원가입 요청 전송!", desc: "환영합니다. SETA의 새로운 모험가님 🚀" });
+                setToast({msg: "회원가입 요청 전송!", desc: "환영합니다. SETA의 새로운 모험가님 🚀"});
             }, 0);
 
-            setTimeout(() => navigate("/login"),500);
+            setTimeout(() => navigate("/login"), 500);
         } catch (err) {
             const msg =
                 err instanceof ApiError
@@ -72,7 +72,7 @@ export default function SignUp() {
                         : "알 수 없는 오류";
             setToast(null);
             setTimeout(() => {
-                setToast({ msg: "회원가입 실패", desc: msg });
+                setToast({msg: "회원가입 실패", desc: msg});
             }, 0);
         } finally {
             setLoading(false);
@@ -89,7 +89,7 @@ export default function SignUp() {
                 backgroundRepeat: "no-repeat",
             }}
         >
-            <div className="absolute inset-0 bg-black/40 z-10" />
+            <div className="absolute inset-0 bg-black/40 z-10"/>
 
             <main className="relative z-20 min-h-screen flex items-center justify-center px-4">
                 <section className="signup-card" role="dialog" aria-labelledby="signup-title">

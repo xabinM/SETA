@@ -1,5 +1,5 @@
 import HomeBg from '@/assets/homebackground.png'
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import './Home.css';
 
 export default function Home() {
@@ -13,7 +13,7 @@ export default function Home() {
             }}
         >
 
-            <div className="home-overlay" />
+            <div className="home-overlay"/>
 
             <main className="home-main">
                 <section className="home-content">

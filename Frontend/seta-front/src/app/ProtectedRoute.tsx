@@ -1,5 +1,5 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { tokenStore, isJwtExpired } from "@/shared/auth/token";
+import {Navigate, Outlet, useLocation} from "react-router-dom";
+import {tokenStore, isJwtExpired} from "@/shared/auth/token";
 
 export default function ProtectedRoute() {
     const loc = useLocation();
@@ -7,7 +7,7 @@ export default function ProtectedRoute() {
 
     if (!at || isJwtExpired(at)) {
         const next = encodeURIComponent(loc.pathname + loc.search);
-        return <Navigate to={`/login?next=${next}`} replace />;
+        return <Navigate to={`/login?next=${next}`} replace/>;
     }
-    return <Outlet />;
+    return <Outlet/>;
 }

@@ -1,10 +1,10 @@
 // src/ui/components/Modal/CarModal/CarModal.tsx
 
-import { useEffect, useMemo, useRef } from "react";
-import { createPortal } from "react-dom";
-import { gsap } from "gsap";
+import {useEffect, useMemo, useRef} from "react";
+import {createPortal} from "react-dom";
+import {gsap} from "gsap";
 import "./CarModal.css";
-import type { CarModalProps } from "./types";
+import type {CarModalProps} from "./types";
 
 export default function CarModal({
                                      open,
@@ -46,10 +46,10 @@ export default function CarModal({
         kpis && kpis.length
             ? kpis
             : [
-                { icon: "🔋", label: "누적 전력 절약", value: `${currentKwh.toLocaleString()} kWh` },
-                { icon: "🌿", label: "CO₂ 절감", value: `${Math.round(currentKwh * 0.2).toLocaleString()} kg` }, // 0.2kg/kWh 가정
-                { icon: "💰", label: "비용 절감", value: `${Math.round(currentKwh * 110).toLocaleString()} 원` }, // 110원/kWh 가정
-                { icon: "⚙️", label: "전비", value: `${efficiency.toLocaleString()} km/kWh` },
+                {icon: "🔋", label: "누적 전력 절약", value: `${currentKwh.toLocaleString()} kWh`},
+                {icon: "🌿", label: "CO₂ 절감", value: `${Math.round(currentKwh * 0.2).toLocaleString()} kg`}, // 0.2kg/kWh 가정
+                {icon: "💰", label: "비용 절감", value: `${Math.round(currentKwh * 110).toLocaleString()} 원`}, // 110원/kWh 가정
+                {icon: "⚙️", label: "전비", value: `${efficiency.toLocaleString()} km/kWh`},
             ];
 
     // 구간 상태(단계 기준)
@@ -93,8 +93,8 @@ export default function CarModal({
         if (fillRef.current) {
             gsap.fromTo(
                 fillRef.current,
-                { width: `${prev * 100}%` },
-                { width: `${next * 100}%`, duration: 0.8, ease: "power2.out" }
+                {width: `${prev * 100}%`},
+                {width: `${next * 100}%`, duration: 0.8, ease: "power2.out"}
             );
         }
         prevRef.current = next;
@@ -122,7 +122,8 @@ export default function CarModal({
                     {/* 닫기 */}
                     <button className="cm-close" aria-label="닫기" onClick={onClose}>
                         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                            <path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                            <path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" strokeWidth="2"
+                                  strokeLinecap="round"/>
                         </svg>
                     </button>
 
@@ -140,7 +141,7 @@ export default function CarModal({
                                 <h1 className="cm-title">절약 전력으로 가는 가상 주행</h1>
                                 <p className="cm-subtitle">
                                     {(trip?.origin ?? "출발지")} → {(trip?.destination ?? "도착지")} 총 {fmt(totalKm, "km")} 여정.
-                                    <br />
+                                    <br/>
                                     절약한 에너지로 <b>{fmt(equivKm, "km")}</b> 만큼 달릴 수 있어요.
                                 </p>
                             </div>
@@ -176,8 +177,9 @@ export default function CarModal({
                         </div>
 
                         <div className="cm-tripbar">
-                            <div className="cm-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
-                                <div ref={fillRef} className="cm-fill" />
+                            <div className="cm-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100}
+                                 aria-valuenow={pct}>
+                                <div ref={fillRef} className="cm-fill"/>
                                 <div className="cm-pct">{pct}%</div>
                                 <div className="cm-car" aria-hidden="true">
                                     <img
@@ -232,12 +234,14 @@ export default function CarModal({
                                         <div className="cm-card-lite">
                                             <div className="cm-item__head">
                                                 <h3 className="cm-stage">{seg.title}</h3>
-                                                <span className={st === "done" ? "cm-st cm-st--done" : st === "progress" ? "cm-st cm-st--progress" : "cm-st"}>
+                                                <span
+                                                    className={st === "done" ? "cm-st cm-st--done" : st === "progress" ? "cm-st cm-st--progress" : "cm-st"}>
                           {st === "done" ? "완료" : st === "progress" ? "진행중" : "예정"}
                         </span>
                                             </div>
                                             <div className="cm-date">{seg.km}km 구간</div>
-                                            <div className="cm-desc">{st === "progress" ? "거의 도착!" : st === "done" ? "구간 완료" : "출발 준비"}</div>
+                                            <div
+                                                className="cm-desc">{st === "progress" ? "거의 도착!" : st === "done" ? "구간 완료" : "출발 준비"}</div>
                                         </div>
                                     </div>
                                 );

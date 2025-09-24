@@ -1,6 +1,6 @@
 import type React from "react";
 import {useEffect, useRef, useState, Children, isValidElement} from "react";
-import { createPortal } from "react-dom";
+import {createPortal} from "react-dom";
 import "./UserPersonalize.css";
 
 export type PersonalizeValues = {
@@ -203,7 +203,7 @@ export default function UserPersonalize({
                     </button>
                 </div>
 
-                <div className="pmodal-divider" />
+                <div className="pmodal-divider"/>
 
                 <div className="pmodal-body">
                     <label className="pfield">
@@ -223,7 +223,8 @@ export default function UserPersonalize({
                     <label className="pfield">
                         <div className="pfield-top">
                             <span className="pfield-label">역할/직무 설명</span>
-                            <span className="pfield-hint">예: 프론트엔드 개발자 · PM · 데이터 엔지니어 (최대 {LIMITS.roleDescription}자)</span>
+                            <span
+                                className="pfield-hint">예: 프론트엔드 개발자 · PM · 데이터 엔지니어 (최대 {LIMITS.roleDescription}자)</span>
                         </div>
                         <input
                             className="pinput"
@@ -348,7 +349,7 @@ export default function UserPersonalize({
                     </label>
                 </div>
 
-                <div className="pmodal-divider" />
+                <div className="pmodal-divider"/>
 
                 <div className="pmodal-footer">
                     <div className="preview">

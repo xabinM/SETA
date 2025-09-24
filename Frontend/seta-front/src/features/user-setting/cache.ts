@@ -1,4 +1,4 @@
-import { getMyUserSetting, type UserSettingServer } from "./api";
+import {getMyUserSetting, type UserSettingServer} from "./api";
 
 let cache: UserSettingServer | null | undefined;
 
