@@ -1,14 +1,15 @@
-// src/pages/Chat/Chat.tsx
 import "./Chat.css";
 import Header from "@/ui/components/Header/Header";
 import Logo from "@/assets/seta.png";
 import ChatBg from "@/assets/ChatBackground.png";
 import UserMenu from "@/ui/components/UserMenu/UserMenu";
 import UserPersonalizeContainer from "@/ui/containers/UserPersonalize/UserPersonalizeContainer";
-import {useCallback, useEffect, useRef, useState, type SVGProps} from "react";
-import {Outlet, useNavigate, useParams} from "react-router-dom";
-import {getChatRooms, createChatRoom, deleteChatRoom, type ChatRoom} from "@/features/chat/api";
-import {loadCachedRooms, saveCachedRooms} from "@/features/chat/cache";
+import { useCallback, useEffect, useRef, useState, type SVGProps } from "react";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { getChatRooms, createChatRoom, deleteChatRoom, type ChatRoom } from "@/features/chat/api";
+import { loadCachedRooms, saveCachedRooms } from "@/features/chat/cache";
+import { getMe } from "@/features/auth/api";
+import type { Me } from "@/features/auth/api";
 
 function AddIcon(props: SVGProps<SVGSVGElement>) {
     return (
@@ -20,24 +21,18 @@ function AddIcon(props: SVGProps<SVGSVGElement>) {
                 />
             </g>
             <defs>
-                <filter id="filter0_d_add_373_2459" x="-4" y="0" width="32.0047" height="32.0049"
-                        filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-                    <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-                    <feColorMatrix
-                        in="SourceAlpha"
-                        type="matrix"
-                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                        result="hardAlpha"
-                    />
-                    <feOffset dy="4"/>
-                    <feGaussianBlur stdDeviation="2"/>
-                    <feComposite in2="hardAlpha" operator="out"/>
-                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_373_2459"/>
-                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_373_2459" result="shape"/>
+                <filter id="filter0_d_add_373_2459" x="-4" y="0" width="32.0047" height="32.0049" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                    <feOffset dy="4" />
+                    <feGaussianBlur stdDeviation="2" />
+                    <feComposite in2="hardAlpha" operator="out" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_373_2459" />
+                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_373_2459" result="shape" />
                 </filter>
                 <clipPath id="clip0_add_373_2459">
-                    <rect width="24.0047" height="24.0047" fill="white"/>
+                    <rect width="24.0047" height="24.0047" fill="white" />
                 </clipPath>
             </defs>
         </svg>
@@ -48,8 +43,12 @@ type CtxMenu = { open: boolean; x: number; y: number; roomId: string | null };
 
 export default function Chat() {
     const navigate = useNavigate();
-    const {threadId} = useParams<{ threadId?: string }>(); // /chat 에선 undefined
+    const { threadId } = useParams<{ threadId?: string }>(); // /chat 에선 undefined
     const activeId = threadId ?? null;
+
+    // 사용자 정보
+    const [me, setMe] = useState<Me | null>(null);
+    const [meLoading, setMeLoading] = useState(false);
 
     // 방 목록/에러/로딩/생성/삭제
     const [rooms, setRooms] = useState<ChatRoom[]>(() => loadCachedRooms());
@@ -59,7 +58,7 @@ export default function Chat() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     // 컨텍스트 메뉴
-    const [ctx, setCtx] = useState<CtxMenu>({open: false, x: 0, y: 0, roomId: null});
+    const [ctx, setCtx] = useState<CtxMenu>({ open: false, x: 0, y: 0, roomId: null });
 
     // 유저 메뉴/개인화 모달
     const footerRef = useRef<HTMLDivElement>(null);
@@ -76,8 +75,26 @@ export default function Chat() {
     }, []);
 
     const onLogout = useCallback(() => {
-        navigate("/home", {replace: true});
+        navigate("/home", { replace: true });
     }, [navigate]);
+
+    // /api/auth/me
+    useEffect(() => {
+        const ac = new AbortController();
+        (async () => {
+            try {
+                setMeLoading(true);
+                const data = await getMe(ac.signal);
+                setMe(data);
+            } catch (err) {
+                console.warn("getMe failed", err);
+                setMe(null);
+            } finally {
+                setMeLoading(false);
+            }
+        })();
+        return () => ac.abort();
+    }, []);
 
     // 새 방 생성
     const onCreateRoom = useCallback(async () => {
@@ -107,7 +124,6 @@ export default function Chat() {
             try {
                 setCreating(true);
                 const room = await createChatRoom();
-                // 시드 메시지 sessionStorage로 전달
                 sessionStorage.setItem(`seta:seed:${room.chatRoomId}`, trimmed);
                 setRooms((prev) => {
                     const next = [room, ...prev.filter((p) => p.chatRoomId !== room.chatRoomId)];
@@ -126,7 +142,7 @@ export default function Chat() {
         [creating, navigate]
     );
 
-    // 스크롤 잠금 (디자인 요구)
+    // 스크롤 잠금
     useEffect(() => {
         document.body.classList.add("no-scroll");
         document.documentElement.classList.add("no-scroll-html");
@@ -172,14 +188,14 @@ export default function Chat() {
         const pad = 8;
         const x = Math.min(e.clientX, window.innerWidth - MENU_W - pad);
         const y = Math.min(e.clientY, window.innerHeight - MENU_H - pad);
-        setCtx({open: true, x, y, roomId: id});
+        setCtx({ open: true, x, y, roomId: id });
     };
 
     // ESC로 컨텍스트 메뉴 닫기
     useEffect(() => {
         if (!ctx.open) return;
         const onEsc = (e: KeyboardEvent) => {
-            if (e.key === "Escape") setCtx({open: false, x: 0, y: 0, roomId: null});
+            if (e.key === "Escape") setCtx({ open: false, x: 0, y: 0, roomId: null });
         };
         window.addEventListener("keydown", onEsc);
         return () => window.removeEventListener("keydown", onEsc);
@@ -189,7 +205,7 @@ export default function Chat() {
     const onDeleteRoom = useCallback(async () => {
         if (!ctx.roomId) return;
         const roomId = ctx.roomId;
-        setCtx({open: false, x: 0, y: 0, roomId: null});
+        setCtx({ open: false, x: 0, y: 0, roomId: null });
 
         try {
             setDeletingId(roomId);
@@ -199,7 +215,7 @@ export default function Chat() {
                 saveCachedRooms(next);
                 return next;
             });
-            if (activeId === roomId) navigate("/chat", {replace: true});
+            if (activeId === roomId) navigate("/chat", { replace: true });
         } catch (e) {
             console.error(e);
             alert("채팅방 삭제에 실패했습니다.");
@@ -219,7 +235,7 @@ export default function Chat() {
                 backgroundAttachment: "fixed",
             }}
         >
-            <Header/>
+            <Header />
 
             <div className="chat-stage">
                 <div className="chat-canvas">
@@ -229,7 +245,7 @@ export default function Chat() {
                             <div className="sidebar-header">
                                 <div className="sidebar-user">
                                     <div className="sidebar-avatar">
-                                        <img src={Logo} alt="SETA" className="avatar-img"/>
+                                        <img src={Logo} alt="SETA" className="avatar-img" />
                                     </div>
                                     <div className="sidebar-user-info">
                                         <h3>SETA</h3>
@@ -250,19 +266,19 @@ export default function Chat() {
                                         aria-busy={creating}
                                         title={creating ? "생성 중…" : "새로운 채팅 시작하기"}
                                     >
-                                        <AddIcon/>
+                                        <AddIcon />
                                         {creating ? "생성 중…" : "새로운 채팅 시작하기"}
                                     </button>
 
                                     {/* 서버 채팅방 목록 */}
                                     <div className="thread-list">
                                         {rooms.length === 0 && loadingRooms && (
-                                            <div className="thread-item" style={{opacity: 0.7}}>
+                                            <div className="thread-item" style={{ opacity: 0.7 }}>
                                                 불러오는 중…
                                             </div>
                                         )}
                                         {roomsError && rooms.length === 0 && (
-                                            <div className="thread-item" style={{color: "#f66"}}>
+                                            <div className="thread-item" style={{ color: "#f66" }}>
                                                 {roomsError}
                                             </div>
                                         )}
@@ -294,7 +310,7 @@ export default function Chat() {
                                                 >
                                                     {r.title || "(제목 없음)"}
                                                 </div>
-                                                <div style={{width: 4, flex: "0 0 4px"}}/>
+                                                <div style={{ width: 4, flex: "0 0 4px" }} />
                                             </div>
                                         ))}
                                     </div>
@@ -312,13 +328,13 @@ export default function Chat() {
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" || e.key === " ") setMenuOpen((v) => !v);
                                 }}
-                                style={{position: "relative", cursor: "pointer"}}
+                                style={{ position: "relative", cursor: "pointer" }}
                             >
                                 <div className="sidebar-avatar">
-                                    <img src={Logo} alt="USER" className="avatar-img"/>
+                                    <img src={Logo} alt="USER" className="avatar-img" />
                                 </div>
                                 <div className="sidebar-user-info">
-                                    <h3>USER</h3>
+                                    <h3>{me?.name || me?.username || (meLoading ? "불러오는 중…" : "USER")}</h3>
                                     <p>PLUS</p>
                                 </div>
 
@@ -338,7 +354,7 @@ export default function Chat() {
                             <div className="chat-header">
                                 <div className="chat-user">
                                     <div className="chat-avatar">
-                                        <img src={Logo} alt="SETA Assistant" className="avatar-img"/>
+                                        <img src={Logo} alt="SETA Assistant" className="avatar-img" />
                                     </div>
                                     <div className="chat-user-info">
                                         <h3>SETA Assistant</h3>
@@ -350,34 +366,30 @@ export default function Chat() {
                             </div>
 
                             {threadId ? (
-                                <Outlet/>
+                                <Outlet />
                             ) : (
                                 <>
                                     <div className="chat-main">
                                         <div className="welcome-content">
                                             <div className="welcome-logo">
-                                                <img src={Logo} alt="SETA Logo"/>
+                                                <img src={Logo} alt="SETA Logo" />
                                             </div>
                                             <div className="welcome-title">안녕하세요!</div>
                                             <div className="welcome-subtitle">SETA Assistant입니다. 무엇을 도와드릴까요?</div>
                                             <div className="feature-cards">
-                                                <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("프로젝트 아이디어가 필요해요")}>
+                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("프로젝트 아이디어가 필요해요")}>
                                                     <div className="feature-title">💡 프로젝트 아이디어</div>
                                                     <div className="feature-description">새로운 프로젝트 아이디어를 제안해드릴까요?</div>
                                                 </div>
-                                                <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("리액트/타입스크립트 이슈 상담할게요")}>
+                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("리액트/타입스크립트 이슈 상담할게요")}>
                                                     <div className="feature-title">💻 기술 상담</div>
                                                     <div className="feature-description">기술적인 질문이나 문제해결을 도와드릴게요</div>
                                                 </div>
-                                                <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("학습 로드맵 추천해줘")}>
+                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("학습 로드맵 추천해줘")}>
                                                     <div className="feature-title">📚 학습 가이드</div>
                                                     <div className="feature-description">새로운 기술을 배우고 싶으신가요?</div>
                                                 </div>
-                                                <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("빠른 질문: ")}>
+                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("빠른 질문: ")}>
                                                     <div className="feature-title">⚡ 빠른 질문</div>
                                                     <div className="feature-description">궁금한 것이 있으시면 언제든지 물어보세요</div>
                                                 </div>
@@ -421,21 +433,18 @@ export default function Chat() {
 
             {/* Context menu (우클릭) */}
             {ctx.open && (
-                <div onClick={() => setCtx({open: false, x: 0, y: 0, roomId: null})}
-                     style={{position: "fixed", inset: 0, zIndex: 9999}}>
+                <div onClick={() => setCtx({ open: false, x: 0, y: 0, roomId: null })} style={{ position: "fixed", inset: 0, zIndex: 9999 }}>
                     <div
                         role="menu"
                         aria-label="채팅방 메뉴"
                         className="ctxmenu"
-                        style={{top: ctx.y, left: ctx.x, position: "fixed"}}
+                        style={{ top: ctx.y, left: ctx.x, position: "fixed" }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button type="button" onClick={onDeleteRoom} disabled={deletingId === ctx.roomId}
-                                className="ctxitem danger">
+                        <button type="button" onClick={onDeleteRoom} disabled={deletingId === ctx.roomId} className="ctxitem danger">
               <span className="ctxitem__icon" aria-hidden>
                 <svg viewBox="0 0 24 24" width="18" height="18">
-                  <path d="M9 3h6a1 1 0 0 1 1 1v1h4" fill="none" stroke="currentColor" strokeWidth="1.6"
-                        strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M9 3h6a1 1 0 0 1 1 1v1h4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                   <path
                       d="M4 5h16M6 5l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"
                       fill="none"
@@ -444,8 +453,7 @@ export default function Chat() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                   />
-                  <path d="M10 9v8M14 9v8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"
-                        strokeLinejoin="round"/>
+                  <path d="M10 9v8M14 9v8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
                             <span className="ctxitem__label">{deletingId === ctx.roomId ? "Deleting…" : "Delete"}</span>
@@ -454,7 +462,7 @@ export default function Chat() {
                 </div>
             )}
 
-            <UserPersonalizeContainer open={personalizeOpen} onClose={() => setPersonalizeOpen(false)}/>
+            <UserPersonalizeContainer open={personalizeOpen} onClose={() => setPersonalizeOpen(false)} />
         </div>
     );
 }
