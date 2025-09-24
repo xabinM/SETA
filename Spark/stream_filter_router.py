@@ -24,7 +24,7 @@ from opentelemetry.sdk.resources import Resource
 KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "kafka:29092")
 INPUT_TOPIC = os.environ.get("INPUT_TOPIC", "chat.raw.request.v1")
 OUTPUT_TO_KAFKA = os.environ.get("OUTPUT_TO_KAFKA", "false").lower() == "true"
-OUTPUT_TOPIC = os.environ.get("OUTPUT_TOPIC", "chat.filter.result.v1")
+OUTPUT_TOPIC = os.environ.get("OUTPUT_TOPIC", "chat.raw.filtered.v1")
 FILTER_JSON_PATH = os.environ.get("FILTER_JSON_PATH", "filter_word.json")
 JAEGER_HOST = os.environ.get("JAEGER_AGENT_HOST", "localhost")
 JAEGER_PORT = int(os.environ.get("JAEGER_AGENT_PORT", 6831))
