@@ -44,7 +44,7 @@ function AddIcon(props: React.SVGProps<SVGSVGElement>) {
 export default function Chat() {
     const navigate = useNavigate();
     const {threadId} = useParams();
-    const [rooms, setRooms] = useState<ChatRoom[]>(() => loadCachedRooms()); // ✅ 캐시로 초기화
+    const [rooms, setRooms] = useState<ChatRoom[]>(() => loadCachedRooms());
     const [loadingRooms, setLoadingRooms] = useState(false);
     const [roomsError, setRoomsError] = useState<string | null>(null);
 
@@ -66,13 +66,34 @@ export default function Chat() {
         navigate("/home", {replace: true});
     };
 
-    // 스크롤 잠금
+    // 스크롤 처리 - 하나의 useEffect로 통합 및 mobile-scroll-enabled 클래스 추가
     useEffect(() => {
-        document.body.classList.add("no-scroll");
-        document.documentElement.classList.add("no-scroll-html");
+        const updateScrollBehavior = () => {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // 모바일: 스크롤 허용
+                document.body.classList.remove("no-scroll");
+                document.documentElement.classList.remove("no-scroll-html");
+                document.body.classList.add("mobile-scroll-enabled");
+            } else {
+                // 데스크톱: 스크롤 잠금
+                document.body.classList.remove("mobile-scroll-enabled");
+                document.body.classList.add("no-scroll");
+                document.documentElement.classList.add("no-scroll-html");
+            }
+        };
+
+        // 초기 설정
+        updateScrollBehavior();
+        
+        // 리사이즈 이벤트 리스너
+        window.addEventListener('resize', updateScrollBehavior);
+        
         return () => {
-            document.body.classList.remove("no-scroll");
+            document.body.classList.remove("no-scroll", "mobile-scroll-enabled");
             document.documentElement.classList.remove("no-scroll-html");
+            window.removeEventListener('resize', updateScrollBehavior);
         };
     }, []);
 
@@ -96,7 +117,7 @@ export default function Chat() {
                 const data = await getChatRooms();
                 if (!mounted) return;
                 setRooms(data);
-                saveCachedRooms(data); // ✅ 최신값 캐시에 저장
+                saveCachedRooms(data); // 최신값 캐시에 저장
             } catch (e: unknown) {
                 if (!mounted) return;
                 setRoomsError(e instanceof Error ? e.message : "채팅방 목록 불러오기 실패");
