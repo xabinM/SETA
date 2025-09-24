@@ -3,7 +3,7 @@ import json
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 from confluent_kafka import Consumer, Producer, KafkaException
 
-KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "3.35.206.91:29092")
 
 def make_producer(bootstrap: Optional[str] = None) -> Producer:
     """
