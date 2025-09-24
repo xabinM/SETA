@@ -241,3 +241,61 @@
     width: 80%;
     height: 80%;
 }
+
+/* Context menu (dark card) */
+.ctxmenu{
+    background: rgba(24,24,28,0.95);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+    min-width: 220px;
+    padding: 8px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: ctx-fade-in 120ms ease-out;
+}
+
+/* Single menu item */
+.ctxitem{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: #d1d5db;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, transform 60ms ease;
+    text-align: left;
+}
+.ctxitem:hover{
+    background: rgba(255,255,255,0.06);
+    color: #e5e7eb;
+}
+.ctxitem:active{ transform: translateY(1px); }
+
+/* Icon */
+.ctxitem__icon{
+    width: 22px; height: 22px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #9aa0a6;
+}
+.ctxitem:hover .ctxitem__icon{ color: #e5e7eb; }
+
+/* Danger variant */
+.ctxitem.danger{ color: #fca5a5; }
+.ctxitem.danger .ctxitem__icon{ color: #f87171; }
+.ctxitem.danger:hover{
+    background: rgba(248, 113, 113, 0.12);
+    color: #fecaca;
+}
+
+/* small entrance anim */
+@keyframes ctx-fade-in {
+    from { opacity: 0; transform: translateY(4px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
