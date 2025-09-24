@@ -58,7 +58,8 @@ services:
 
   # Spark Streaming Application (새로운 필터링 로직)
   spark-streaming-app:
-    image: bitnami/spark:3.5
+    # image: bitnami/spark:3.5
+    build: .
     container_name: spark-streaming-app-new
     mem_limit: 4g
     ports:
