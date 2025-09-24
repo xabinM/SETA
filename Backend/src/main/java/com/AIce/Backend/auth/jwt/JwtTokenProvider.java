@@ -6,6 +6,7 @@ import com.AIce.Backend.auth.exception.InvalidTokenException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.util.StringUtils;
@@ -88,15 +89,27 @@ public class JwtTokenProvider {
         }
     }
 
-    public String resolveToken(HttpServletRequest request) {
+    private String resolveToken(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+
+        // SSE 요청인 경우 → Cookie 기반
+        if (uri.startsWith("/api/sse")) {
+            if (request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if ("access_token".equals(cookie.getName())) {
+                        return cookie.getValue();
+                    }
+                }
+            }
+            return null;
+        }
+
+        // 일반 요청인 경우 → Authorization 헤더 기반
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-        String tokenParam = request.getParameter("token"); // TOKEN 추가
-        if (StringUtils.hasText(tokenParam)) {
-            return tokenParam;
-        }
+
         return null;
     }
 
