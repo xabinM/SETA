@@ -107,17 +107,18 @@ def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_scor
 
     # 2. knn + user_id 필터
     body = {
-        "knn": {
-            "field": "embedding",
-            "query_vector": emb,
-            "k": top_k,
-            "num_candidates": 100
-        },
-        "query": {
-            "term": { "user_id": user_id }
-        },
-        "_source": ["content", "user_id", "created_at"]
-    }
+    "knn": {
+        "field": "embedding",
+        "query_vector": emb,
+        "k": top_k,
+        "num_candidates": 100,
+        "filter": {
+            "term": {"user_id": user_id}
+        }
+    },
+    "_source": ["content", "user_id", "created_at"]
+}
+
 
     resp = es.search(index="user_memory_embedding", body=body)
 
