@@ -98,3 +98,6 @@ def summarize_room(room_id: str):
             error_type="SUMMARY_ROOM_ERROR",
             error=e,
         )
+
+if __name__ == "__main__":
+    run_summary_trigger_loop()

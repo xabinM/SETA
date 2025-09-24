@@ -194,3 +194,6 @@ def run_filter_worker():
                 )
             else:
                 continue
+            
+if __name__ == "__main__":
+    run_filter_worker()

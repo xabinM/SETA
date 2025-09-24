@@ -205,3 +205,6 @@ def run_worker():
                 error_type="LLM_CALL_ERROR",
                 error=e,
             )
+
+if __name__ == "__main__":
+    run_worker()
