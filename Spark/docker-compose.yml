@@ -3,7 +3,7 @@ services:
   spark:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.jupyter
     image: pyspark-tiktoken-app
     container_name: spark-streaming-dev
     ports:
@@ -44,7 +44,9 @@ services:
   # Spark Worker
   spark-worker:
     # image: bitnami/spark:3.5
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
     container_name: spark-worker
     mem_limit: 4g
     environment:
@@ -60,7 +62,9 @@ services:
   # Spark Streaming Application (새로운 필터링 로직)
   spark-streaming-app:
     # image: bitnami/spark:3.5
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
     container_name: spark-streaming-app-new
     mem_limit: 4g
     ports:
@@ -91,7 +95,9 @@ services:
   # 배치 처리용 Spark (토큰 사용량 집계) 
   spark-batch:
     # image: bitnami/spark:3.5
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
     container_name: spark-batch-processor
     volumes:
       - ./spark_batch_aggregation.py:/opt/bitnami/spark/app/spark_batch_aggregation.py
