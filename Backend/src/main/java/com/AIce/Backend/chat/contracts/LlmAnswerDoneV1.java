@@ -13,17 +13,18 @@ public class LlmAnswerDoneV1 {
     private String trace_id;
     private String message_id;
     private String room_id;
-    private Content content;
+    private Response response;
     private Usage usage;
-    private String status;
+    private Long latency_ms;
+    private String schema_version;
+    private Long timestamp;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class Content {
-        private String final_text;
-        private String finish_reason;
+    public static class Response {
+        private String text;
     }
 
     @Data
