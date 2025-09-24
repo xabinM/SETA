@@ -1,5 +1,7 @@
 import os
 import time
+import json
+import logging
 from datetime import datetime, timezone
 import traceback
 
@@ -10,6 +12,14 @@ from app.adapters.db import get_session
 from app.services import prompt_builder_service, llm_client, error_service
 from app.adapters.redis_io import append_conversation
 
+# ------------------
+# Logging 설정
+# ------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
+)
+logger = logging.getLogger("llm-worker")
 
 KAFKA_IN = os.getenv("KAFKA_TOPIC_IN_LLM", "chat.filter.result.v1")
 KAFKA_OUT_DELTA = os.getenv("KAFKA_TOPIC_OUT_LLM_DELTA", "chat.llm.answer.delta.v1")
@@ -17,20 +27,24 @@ KAFKA_OUT_DONE = os.getenv("KAFKA_TOPIC_OUT_LLM_DONE", "chat.llm.answer.done.v1"
 
 
 def run_worker():
+    logger.info("🚀 Starting LLM worker. Subscribing to %s", KAFKA_IN)
     consumer = make_consumer([KAFKA_IN], group_id="llm-worker")
     producer = make_producer()
+    logger.info("✅ Kafka consumer/producer ready.")
 
     while True:
         msg = consumer.poll(1.0)
         if msg is None:
             continue
         if msg.error():
-            print(f"Kafka error: {msg.error()}")
+            logger.error("❌ Kafka error: %s", msg.error())
             continue
 
         try:
             ev = json.loads(msg.value().decode("utf-8"))
-        except Exception:
+            logger.info("📩 Received event: %s", ev)
+        except Exception as e:
+            logger.error("❌ Failed to decode Kafka message: %s", e)
             continue
 
         headers_dict = read_headers(msg)
@@ -38,7 +52,8 @@ def run_worker():
 
         rule = ev.get("rule")
         if rule not in ("ml-pass", "auto"):
-            continue  # drop은 무시
+            logger.info("⏩ Skipping message (rule=%s)", rule)
+            continue
 
         trace_id = ev["trace_id"]
         chat_room_id = ev.get("room_id")
@@ -46,21 +61,27 @@ def run_worker():
         user_id = ev.get("user_id")
         user_input = ev.get("text") or ""
 
+        logger.info("➡️ Processing trace_id=%s room_id=%s", trace_id, chat_room_id)
+
         try:
             with get_session() as session:
-                # 1) system_prompt (마크다운 고정)
+                logger.info("⚙️ Building prompt for user_id=%s", user_id)
+
+                # 1) system_prompt
                 system_prompt = prompt_builder_service.build_system_prompt(session, user_id)
                 system_prompt += "\n\n답변은 반드시 마크다운 형식으로 작성하세요."
 
                 # 2) 최근 대화 맥락
-                context_snippets = prompt_builder_service.get_context(session, room_id)
+                context_snippets = prompt_builder_service.get_context(session, chat_room_id)
+                logger.info("📝 Context snippets: %d items", len(context_snippets))
 
-                # 3) ES embedding 기반 유사 검색
+                # 3) ES embedding 기반 검색
                 similar_contexts = prompt_builder_service.search_user_memory_embedding(
                     query=user_input,
                     top_k=3,
                     score_threshold=0.7,
                 )
+                logger.info("🔍 Similar contexts: %d items", len(similar_contexts) if similar_contexts else 0)
 
                 # 4) full_prompt 조립
                 full_prompt = (
@@ -79,19 +100,18 @@ def run_worker():
                 )
                 session.add(pb)
                 session.commit()
+                logger.info("💾 PromptBuilt saved (trace_id=%s)", trace_id)
 
         except Exception as e:
-            error_service.save_error(
-                trace_id=trace_id,
-                error_type="PROMPT_BUILD_ERROR",
-                error=e,
-            )
+            logger.exception("❌ Prompt build failed")
+            error_service.save_error(trace_id=trace_id, error_type="PROMPT_BUILD_ERROR", error=e)
             continue
 
-        # === LLM 스트리밍 호출 ===
+        # === LLM 호출 ===
         start = time.time()
         model_name = os.getenv("LLM_MODEL", "gpt-4o")
         temperature = float(os.getenv("LLM_TEMPERATURE", "0.7"))
+        logger.info("🤖 Calling LLM model=%s temperature=%.2f", model_name, temperature)
 
         chunks = []
         try:
@@ -99,34 +119,34 @@ def run_worker():
                 if event["type"] == "delta":
                     delta = event["delta"]
                     chunks.append(delta)
+                    logger.debug("✏️ Delta chunk: %s", delta)
 
                     try:
                         publish(
                             producer,
                             KAFKA_OUT_DELTA,
-                            key=room_id,
+                            key=chat_room_id,
                             value={
                                 "trace_id": trace_id,
-                                "room_id": room_id,
+                                "room_id": chat_room_id,
                                 "message_id": message_id,
                                 "delta": delta,
                                 "timestamp": int(datetime.now(timezone.utc).timestamp() * 1000),
                             },
                             headers=[("traceparent", tp.encode())] if tp else None,
                         )
+                        logger.debug("📡 Published delta chunk")
                     except Exception as e:
-                        error_service.save_error(
-                            trace_id=trace_id,
-                            error_type="KAFKA_DELTA_ERROR",
-                            error=e,
-                        )
+                        logger.exception("❌ Failed to publish delta")
+                        error_service.save_error(trace_id, "KAFKA_DELTA_ERROR", e)
 
                 elif event["type"] == "done":
                     usage = event["usage"]
                     latency_ms = int((time.time() - start) * 1000)
                     full_text = "".join(chunks)
+                    logger.info("✅ LLM done (latency=%dms tokens=%s)", latency_ms, usage)
 
-                    # === TokenUsage 저장 ===
+                    # TokenUsage 저장
                     try:
                         with get_session() as session:
                             token_usage = TokenUsage(
@@ -146,51 +166,45 @@ def run_worker():
                             )
                             session.add(token_usage)
                             session.commit()
+                        logger.info("💾 TokenUsage saved")
                     except Exception as e:
-                        error_service.save_error(
-                            trace_id=trace_id,
-                            error_type="DB_INSERT_ERROR",
-                            error=e,
-                        )
+                        logger.exception("❌ Failed to save TokenUsage")
+                        error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
-                    # === Redis Append ===
+                    # Redis Append
                     try:
                         append_conversation(
-                            room_id=room_id,
+                            room_id=chat_room_id,
                             user_input=user_input,
                             assistant_output=full_text,
                         )
+                        logger.info("💾 Redis conversation appended")
                     except Exception as e:
-                        error_service.save_error(
-                            trace_id=trace_id,
-                            error_type="REDIS_APPEND_ERROR",
-                            error=e,
-                        )
+                        logger.exception("❌ Redis append failed")
+                        error_service.save_error(trace_id, "REDIS_APPEND_ERROR", e)
 
-                    # === unsummarized_count 증가 ===
+                    # unsummarized_count++
                     try:
                         with get_session() as session:
-                            state = session.query(RoomSummaryState).filter_by(chat_room_id=room_id).first()
+                            state = session.query(RoomSummaryState).filter_by(chat_room_id=chat_room_id).first()
                             if state:
                                 state.unsummarized_count = (state.unsummarized_count or 0) + 1
                                 session.add(state)
                                 session.commit()
+                        logger.info("🔄 Updated unsummarized_count")
                     except Exception as e:
-                        error_service.save_error(
-                            trace_id=trace_id,
-                            error_type="DB_UPDATE_ERROR",
-                            error=e,
-                        )
+                        logger.exception("❌ Failed to update RoomSummaryState")
+                        error_service.save_error(trace_id, "DB_UPDATE_ERROR", e)
 
-                    # === Kafka DONE 발행 ===
+                    # Kafka DONE 발행
                     try:
                         publish(
                             producer,
                             KAFKA_OUT_DONE,
-                            key=room_id,
+                            key=chat_room_id,
                             value={
                                 "trace_id": trace_id,
-                                "room_id": room_id,
+                                "room_id": chat_room_id,
                                 "message_id": message_id,
                                 "response": {"text": full_text},
                                 "usage": usage,
@@ -200,19 +214,15 @@ def run_worker():
                             },
                             headers=[("traceparent", tp.encode())] if tp else None,
                         )
+                        logger.info("📡 Published DONE → %s", KAFKA_OUT_DONE)
                     except Exception as e:
-                        error_service.save_error(
-                            trace_id=trace_id,
-                            error_type="KAFKA_DONE_ERROR",
-                            error=e,
-                        )
+                        logger.exception("❌ Failed to publish DONE")
+                        error_service.save_error(trace_id, "KAFKA_DONE_ERROR", e)
 
         except Exception as e:
-            error_service.save_error(
-                trace_id=trace_id,
-                error_type="LLM_CALL_ERROR",
-                error=e,
-            )
+            logger.exception("❌ LLM call failed")
+            error_service.save_error(trace_id, "LLM_CALL_ERROR", e)
+
 
 if __name__ == "__main__":
     run_worker()
