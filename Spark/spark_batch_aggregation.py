@@ -41,6 +41,13 @@ def insert_batch_results(df, target_table):
     """
     집계된 DataFrame을 지정된 테이블에 append 모드로 INSERT합니다.
     """
+    if df.rdd.isEmpty():
+        print(f"No data to insert into {target_table}. Skipping.")
+        return
+
+    print(f"--- Inserting data into {target_table}: ---")
+    df.show(truncate=False)
+
     df.write.jdbc(
         url=JDBC_URL,
         table=target_table,
@@ -66,45 +73,29 @@ print(f"Based on current minute ({now.minute}), calculated end minute for 5-min 
 print(f"==> 5-min batch window: {five_min_start_time} to {five_min_end_time} (UTC)")
 print(f"==> 24-hour rolling window: {twenty_four_hour_start_time} to {now} (UTC)\n")
 
-
-five_min_source_df = spark.read.jdbc(
+base_df = spark.read.jdbc(
     url=JDBC_URL,   
     table=SOURCE_TABLE,
     properties=CONNECTION_PROPERTIES
-).where(
+).filter(F.col("user_id").isNotNull())
+
+five_min_source_df = base_df.where(
     F.col("created_at").between(five_min_start_time, five_min_end_time)
 )
-
 five_min_source_df.cache()
+print(f"--- Found {five_min_source_df.count()} records with valid user_id in the last 5 minutes. ---")
+if not five_min_source_df.rdd.isEmpty():
+    five_min_source_df.show(5, truncate=False)
 
-if five_min_source_df.rdd.isEmpty():
-    print("No data found for the given time window. Exiting.")
-    spark.stop()
-    exit()
-
-five_min_user_agg = five_min_source_df.groupBy(F.col("user_id").cast("string").alias("user_id")).agg(
-    F.sum("saved_tokens").alias("new_saved_tokens"),
-    F.sum("total_tokens").alias("new_token_sum"),
-    F.sum("cost_usd").alias("new_cost_sum_usd"),
-    F.count(F.lit(1)).alias("new_request_count")
-)
-
-five_min_global_agg = five_min_source_df.agg(
-    F.sum("saved_tokens").alias("new_saved_tokens"),
-    F.sum("total_tokens").alias("new_token_sum"),
-    F.sum("cost_usd").alias("new_cost_sum_usd"),
-    F.count(F.lit(1)).alias("new_request_count")
-)
-
-twenty_four_hour_source_df = spark.read.jdbc(
-    url=JDBC_URL,
-    table=SOURCE_TABLE,
-    properties=CONNECTION_PROPERTIES
-).where(
+twenty_four_hour_source_df = base_df.where(
     F.col("created_at").between(twenty_four_hour_start_time, now)
 )
+print(f"--- Found {twenty_four_hour_source_df.count()} records with valid user_id in the last 24 hours. ---")
+if not twenty_four_hour_source_df.rdd.isEmpty():
+    twenty_four_hour_source_df.show(5, truncate=False)
 
 
+# ✨ 수정된 로직 1: 24시간 롤링 집계는 항상 수행합니다.
 daily_user_agg = twenty_four_hour_source_df.groupBy(F.col("user_id").cast("string").alias("user_id")).agg(
     F.sum("saved_tokens").alias("saved_tokens"),
     F.sum("total_tokens").alias("token_sum"),
@@ -119,13 +110,29 @@ daily_global_agg = twenty_four_hour_source_df.agg(
     F.count(F.lit(1)).alias("request_count")
 ).withColumn("window_start", F.lit(now))
 
-
 print("Inserting 24-hour rolling aggregation into daily tables...")
 insert_batch_results(daily_user_agg, USER_DAILY_TABLE)
 insert_batch_results(daily_global_agg, GLOBAL_DAILY_TABLE)
 
-if not five_min_source_df.rdd.isEmpty():
-    print("Calculating and inserting cumulative totals...")
+
+# ✨ 수정된 로직 2: 5분 데이터가 있을 때만 누적 합계를 계산합니다.
+if five_min_source_df.rdd.isEmpty():
+    print("No new data in the last 5 minutes to update total tables.")
+else:
+    print("Calculating and inserting cumulative totals based on 5-minute aggregation...")
+    five_min_user_agg = five_min_source_df.groupBy(F.col("user_id").cast("string").alias("user_id")).agg(
+        F.sum("saved_tokens").alias("new_saved_tokens"),
+        F.sum("total_tokens").alias("new_token_sum"),
+        F.sum("cost_usd").alias("new_cost_sum_usd"),
+        F.count(F.lit(1)).alias("new_request_count")
+    )
+    five_min_global_agg = five_min_source_df.agg(
+        F.sum("saved_tokens").alias("new_saved_tokens"),
+        F.sum("total_tokens").alias("new_token_sum"),
+        F.sum("cost_usd").alias("new_cost_sum_usd"),
+        F.count(F.lit(1)).alias("new_request_count")
+    )
+
     # Global Total
     try:
         prev_global_total_df = spark.read.jdbc(url=JDBC_URL, table=GLOBAL_TOTAL_TABLE, properties=CONNECTION_PROPERTIES)
@@ -150,7 +157,7 @@ if not five_min_source_df.rdd.isEmpty():
         insert_batch_results(global_total_to_insert, GLOBAL_TOTAL_TABLE)
 
     except Exception as e:
-        print(f"Could not process global_saved_token_total. It might be empty. Treating as first run. Error: {e}")
+        print(f"Could not process {GLOBAL_TOTAL_TABLE}. It might be empty or an error occurred. Treating as first run. Error: {e}")
         first_global_total = five_min_global_agg.select(
             F.col("new_request_count").alias("request_count"),
             F.col("new_saved_tokens").alias("saved_tokens"),
@@ -177,7 +184,7 @@ if not five_min_source_df.rdd.isEmpty():
         insert_batch_results(user_total_to_insert, USER_TOTAL_TABLE)
 
     except Exception as e:
-        print(f"Could not process user_saved_token_total. It might be empty. Treating as first run. Error: {e}")
+        print(f"Could not process {USER_TOTAL_TABLE}. It might be empty or an error occurred. Treating as first run. Error: {e}")
         first_user_total = five_min_user_agg.select(
             "user_id",
             F.col("new_request_count").alias("request_count"),
@@ -186,8 +193,6 @@ if not five_min_source_df.rdd.isEmpty():
             F.col("new_cost_sum_usd").alias("cost_sum_usd")
         ).withColumn("stat_date", F.lit(now))
         insert_batch_results(first_user_total, USER_TOTAL_TABLE)
-else:
-    print("No new data in the last 5 minutes to update total tables.")
 
 spark.stop()
 print("Batch aggregation job finished successfully.")
