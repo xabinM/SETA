@@ -35,12 +35,8 @@ def append_conversation(room_id: str, role: str, content: str, max_turns: int = 
     r.setex(key, REDIS_TTL_SEC, json.dumps(history, ensure_ascii=False))
 
 
-def get_conversation(room_id: str):
-    """
-    Redis에서 대화 불러오기
-    """
+def get_conversation(room_id: str, limit: int | None = None):
     key = f"chat:{room_id}:messages"
     history_json = r.get(key)
-    if not history_json:
-        return []
-    return json.loads(history_json)
+    history = json.loads(history_json) if history_json else []
+    return history[-limit:] if (limit and limit > 0) else history

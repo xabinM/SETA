@@ -91,10 +91,10 @@ def search_similar_context_es(query: str, user_id: str, top_k: int = KNN_TOP_K, 
             "k": top_k,
             "num_candidates": KNN_NUM_CANDIDATES,
             "filter": {
-                "term": { "user_seq": user_id }   # 인덱스의 필드명이 user_seq인 경우
+                "term": { "user_id": user_id } 
             }
         },
-        "_source": ["content", "user_seq", "trace_id", "created_at"]
+        "_source": ["content", "user_id", "trace_id", "created_at"]
     }
 
     resp = es.search(index=USER_MEMORY_EMBED_INDEX, body=body)

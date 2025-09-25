@@ -8,21 +8,14 @@ INDEX_NAME = _settings.EMBED_INDEX_NAME
 EMBED_DIMS = _settings.EMBED_DIMS
 
 MAPPING = {
-    "mappings": {
-        "properties": {
-            "user_seq":   {"type": "keyword"},
-            "trace_id":   {"type": "keyword"},
-            "content":    {"type": "text"},
-            "embedding":  {
-                "type": "dense_vector",
-                "dims": EMBED_DIMS,
-                "index": True,
-                "similarity": "cosine"
-            },
-            "created_at": {"type": "date"}
-        }
-    }
-}
+  "mappings": {"properties": {
+    "user_id":   {"type": "keyword"},
+    "source_id": {"type": "keyword"},
+    "content":   {"type": "text"},
+    "embedding": {"type": "dense_vector", "dims": EMBED_DIMS, "index": True, "similarity": "cosine"},
+    "created_at":{"type": "date"}
+}}}
+
 
 def create_index_if_needed():
     try:
