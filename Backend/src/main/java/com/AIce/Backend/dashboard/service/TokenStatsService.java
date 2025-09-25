@@ -76,14 +76,14 @@ public class TokenStatsService {
         SearchResponse<Void> response = esClient.search(s -> s
                         .index("filter-logs")
                         .size(0)
-                        .aggregations("top_reasons", a -> a
-                                .terms(t -> t.field("reason_type").size(5))
+                        .aggregations("top_dropped", a -> a
+                                .terms(t -> t.field("dropped_text").size(5))
                         ),
                 Void.class
         );
 
         return response.aggregations()
-                .get("top_reasons")
+                .get("top_dropped")
                 .sterms()
                 .buckets()
                 .array()
