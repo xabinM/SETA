@@ -121,6 +121,13 @@ body.mobile-scroll-enabled {
     display: block;
 }
 
+.sidebar-user-info-sidebar h3{
+    margin-left: 10px;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #e5e7eb;
+}
+
 .sidebar-user-info h3 {
     font-weight: 700;
     font-size: 1.25rem;
