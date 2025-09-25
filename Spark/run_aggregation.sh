@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ~/.bashrc
+
 # 1. 스파크 작업이 있는 폴더로 이동
 cd "$(dirname "$0")" || exit
 
