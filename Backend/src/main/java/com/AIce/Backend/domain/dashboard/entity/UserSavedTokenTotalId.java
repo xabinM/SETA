@@ -11,5 +11,5 @@ import java.time.*;
 @EqualsAndHashCode
 public class UserSavedTokenTotalId implements Serializable {
     private String userId;
-    private LocalDate statDate;
+    private OffsetDateTime statDate;
 }
