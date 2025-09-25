@@ -11,5 +11,5 @@ public class GmsOpenAiProperties {
     private String completionsPath;
     private String model;
     private String apiKey;
-    private long timeoutMs = 10000; // 10초
+    private long timeoutMs = 30000; // 10초
 }

@@ -1,22 +1,71 @@
-// src/pages/Chat/ChatRoom.tsx
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getRoomMessages, sendMessageToServer, type UIMsg } from "@/features/chat/api";
-import { issueStreamCookie } from "@/features/auth/api";
+import {useEffect, useMemo, useRef, useState, type HTMLAttributes, type AnchorHTMLAttributes, type MutableRefObject,} from "react";
+import {createPortal} from "react-dom";
+import {useParams} from "react-router-dom";
+import {getRoomMessages, sendMessageToServer, type UIMsg} from "@/features/chat/api";
+import {issueStreamCookie} from "@/features/auth/api";
+import CustomToast from "@/ui/components/Toast/CustomToast";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 
 const RAW_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 const BASE = RAW_BASE.replace(/\/+$/, "");
 
-// ===== 튜닝 파라미터 =====
-const BACKOFF_BASE_MS = 600;       // 초기 지연
-const BACKOFF_MAX_MS  = 20_000;    // 최대 지연
-const IDLE_TIMEOUT_MS = 45_000;    // 이 시간 동안 아무 이벤트 없으면 재연결
-const HEARTBEAT_NAMES = new Set(["ping", "heartbeat"]); // 서버 하트비트 이벤트
+const BACKOFF_BASE_MS = 600;
+const BACKOFF_MAX_MS = 20_000;
+const IDLE_TIMEOUT_MS = 45_000;
+const HEARTBEAT_NAMES = new Set(["ping", "heartbeat"]);
 
 type StreamStatus = "idle" | "streaming" | "done" | "error";
 
+function makePreWithCopy(onCopied?: (ok: boolean) => void) {
+    return (props: HTMLAttributes<HTMLPreElement>) => {
+        const ref = useRef<HTMLPreElement | null>(null);
+        const onCopy = async () => {
+            const text = ref.current?.textContent ?? "";
+            try {
+                await navigator.clipboard.writeText(text);
+                onCopied?.(true);
+            } catch {
+                try {
+                    const ta = document.createElement("textarea");
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(ta);
+                    onCopied?.(true);
+                } catch {
+                    onCopied?.(false);
+                }
+            }
+        };
+        return (
+            <div className="codewrap">
+                <pre ref={ref} {...props} />
+                <button type="button" className="copybtn" onClick={onCopy}>
+                    Copy
+                </button>
+            </div>
+        );
+    };
+}
+
+const InlineCode = (props: HTMLAttributes<HTMLElement>) => {
+    const isInline = !/language-/.test(props.className || "");
+    return isInline ? <code {...props} /> : <code {...props} />;
+};
+
+const LinkNewTab = (props: AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a {...props} target="_blank" rel="noreferrer"/>
+);
+
+/* ============================================================ */
+
+type LocalToast = { id: number; message: string; description?: string; duration?: number };
+
 export default function ChatRoom() {
-    const { threadId } = useParams<{ threadId?: string }>();
+    const {threadId} = useParams<{ threadId?: string }>();
 
     const [messages, setMessages] = useState<UIMsg[]>([]);
     const [loading, setLoading] = useState(false);
@@ -28,21 +77,29 @@ export default function ChatRoom() {
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
+    // ===== 로컬 토스트 스택 (CustomToast 원본 사용, 포털로 body에 렌더) =====
+    const [toasts, setToasts] = useState<LocalToast[]>([]);
+    const pushToast = (message: string, description?: string, duration = 2000) => {
+        const id = Date.now() + Math.random();
+        setToasts((prev) => [...prev, {id, message, description, duration}]);
+    };
+    const removeToast = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
+
     // ===== SSE 상태 관리 =====
     const esRef = useRef<EventSource | null>(null);
     const connectingRef = useRef(false);
     const assistantIdRef = useRef<string | null>(null);
 
     const abortedRef = useRef(false);
-    const reconnectTimerRef = useRef<number | null>(null);
-    const idleTimerRef = useRef<number | null>(null);
+    const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastEventAtRef = useRef<number>(Date.now());
-    const attemptRef = useRef(0); // 재연결 횟수
+    const attemptRef = useRef(0);
 
     // /chat에서 전달된 첫 질문(시드)
     const [pendingSeed, setPendingSeed] = useState<string | null>(null);
-    const seedInjectedRef = useRef(false); // UI 주입 중복 방지
-    const seedSentRef = useRef(false);     // 실제 서버 전송 1회 보장
+    const seedInjectedRef = useRef(false);
+    const seedSentRef = useRef(false);
 
     /* ------------------ seed pickup ------------------ */
     useEffect(() => {
@@ -73,7 +130,6 @@ export default function ChatRoom() {
                 if (!alive) return;
 
                 let next = data;
-                // 시드가 있으면 UI에만 먼저 보여주기 (실제 전송은 mount-effect에서 1회)
                 if (pendingSeed && !seedInjectedRef.current) {
                     next = [
                         ...data,
@@ -81,7 +137,7 @@ export default function ChatRoom() {
                             id: `u-seed-${Date.now()}`,
                             role: "user",
                             content: pendingSeed,
-                            createdAt: new Date().toISOString(),
+                            createdAt: new Date().toISOString()
                         },
                     ];
                     seedInjectedRef.current = true;
@@ -107,34 +163,33 @@ export default function ChatRoom() {
     }, [messages, loading, status]);
 
     /* ------------------ 유틸 ------------------ */
-    function clearTimer(ref: React.MutableRefObject<number | null>) {
-        if (ref.current) {
-            window.clearTimeout(ref.current);
+    function clearTimer(ref: MutableRefObject<ReturnType<typeof setTimeout> | null>) {
+        if (ref.current !== null) {
+            clearTimeout(ref.current);
             ref.current = null;
         }
     }
+
     function resetIdleWatchdog() {
         lastEventAtRef.current = Date.now();
         clearTimer(idleTimerRef);
-        idleTimerRef.current = window.setTimeout(() => {
+        idleTimerRef.current = setTimeout(() => {
             if (abortedRef.current) return;
-            // 일정 시간 이벤트가 없으면 연결 재생성
             console.warn("SSE idle watchdog: no events for", IDLE_TIMEOUT_MS, "→ reconnect");
             safeReconnect();
         }, IDLE_TIMEOUT_MS);
     }
+
     function backoffDelay(attempt: number) {
         const cap = Math.min(BACKOFF_MAX_MS, BACKOFF_BASE_MS * 2 ** attempt);
-        const jitter = Math.random() * 0.25 + 0.75; // 0.75x ~ 1.0x
+        const jitter = Math.random() * 0.25 + 0.75;
         return Math.floor(cap * jitter);
     }
 
     /* ------------------ SSE Handlers ------------------ */
     function attachSseHandlers(es: EventSource) {
-        // 모든 이벤트에서 워치독 리셋
         es.onmessage = () => resetIdleWatchdog();
 
-        // skeleton: 서버가 message_id 내려줌
         es.addEventListener("skeleton", (ev) => {
             resetIdleWatchdog();
             const d = safeJSON<{ message_id?: string; id?: string }>((ev as MessageEvent).data);
@@ -143,11 +198,10 @@ export default function ChatRoom() {
             setStatus("streaming");
             setMessages((prev) => [
                 ...prev,
-                { id: draftId, role: "assistant", content: "", createdAt: new Date().toISOString() },
+                {id: draftId, role: "assistant", content: "", createdAt: new Date().toISOString()},
             ]);
         });
 
-        // delta: 서버가 delta 문자열을 내려줌
         es.addEventListener("delta", (ev) => {
             resetIdleWatchdog();
             const d = safeJSON<{ delta?: string; message_id?: string }>((ev as MessageEvent).data);
@@ -157,28 +211,24 @@ export default function ChatRoom() {
             const targetId = assistantIdRef.current ?? d?.message_id ?? null;
             setMessages((prev) => {
                 const next = [...prev];
-                // skeleton 없이 delta가 먼저 와도 안전하게 생성
                 let idx = next.findIndex((m) => m.role === "assistant" && (!targetId || m.id === targetId));
                 if (idx === -1) {
                     const draftId = targetId ?? `a-${Date.now()}`;
                     assistantIdRef.current = draftId;
-                    next.push({ id: draftId, role: "assistant", content: "", createdAt: new Date().toISOString() });
+                    next.push({id: draftId, role: "assistant", content: "", createdAt: new Date().toISOString()});
                     idx = next.length - 1;
                 }
-                next[idx] = { ...next[idx], content: (next[idx].content || "") + chunk };
+                next[idx] = {...next[idx], content: (next[idx].content || "") + chunk};
                 return next;
             });
         });
 
         es.addEventListener("done", () => {
             resetIdleWatchdog();
-            // 필요하면 message_id 확인: const d = safeJSON<{ message_id?: string }>((ev as MessageEvent).data);
             setStatus("done");
             assistantIdRef.current = null;
-            // 서버/프록시가 닫으면 onerror로 떨어짐
         });
 
-        // 서버 하트비트
         for (const name of HEARTBEAT_NAMES) {
             es.addEventListener(name, () => resetIdleWatchdog());
         }
@@ -193,49 +243,45 @@ export default function ChatRoom() {
         if (connectingRef.current) return;
         connectingRef.current = true;
 
-        // 기존 연결 정리
         esRef.current?.close();
         esRef.current = null;
 
         const url = `${BASE}/sse/chat/${encodeURIComponent(roomId)}`;
-        const es = new EventSource(url, { withCredentials: true });
+        const es = new EventSource(url, {withCredentials: true});
         esRef.current = es;
 
         attachSseHandlers(es);
         resetIdleWatchdog();
 
-        attemptRef.current = 0; // 연결(최초 이벤트까지) 성공 가정
+        attemptRef.current = 0;
         connectingRef.current = false;
     }
 
     async function connectWithCookie(roomId: string) {
-        // 쿠키 발급 실패 시 연결하지 않음 (403 루프 방지)
-        await issueStreamCookie();
+        await issueStreamCookie(); // 실패 시 throw → 루프 방지
         openRoomStream(roomId);
     }
 
     function safeReconnect() {
         if (abortedRef.current) return;
-        if (reconnectTimerRef.current) return; // 중복 스케줄 방지
+        if (reconnectTimerRef.current) return;
 
-        // 재연결 전에 현재 연결 종료
         esRef.current?.close();
         esRef.current = null;
 
         const delay = backoffDelay(attemptRef.current++);
-        reconnectTimerRef.current = window.setTimeout(async () => {
+        reconnectTimerRef.current = setTimeout(async () => {
             reconnectTimerRef.current = null;
             if (abortedRef.current || !threadId) return;
 
             try {
-                // 몇 번에 한 번은 쿠키도 재발급 (예: 3회마다)
                 if (attemptRef.current % 3 === 1) {
                     await issueStreamCookie();
                 }
                 openRoomStream(threadId);
             } catch (e) {
                 console.error("reconnect cookie failed:", e);
-                safeReconnect(); // 다음 백오프로 이어가기
+                safeReconnect();
             }
         }, delay);
     }
@@ -247,9 +293,9 @@ export default function ChatRoom() {
 
         (async () => {
             try {
-                await connectWithCookie(threadId); // 1) 쿠키 심고 2) 연결
+                await connectWithCookie(threadId);
                 if (pendingSeed && !seedSentRef.current) {
-                    await sendMessageToServer(threadId, pendingSeed); // 3) seed 실제 전송 1회
+                    await sendMessageToServer(threadId, pendingSeed);
                     setStatus("streaming");
                     seedSentRef.current = true;
                 }
@@ -260,7 +306,6 @@ export default function ChatRoom() {
             }
         })();
 
-        // 온라인/오프라인 & 탭가시성 이벤트로 노이즈 줄이기
         const onOnline = () => safeReconnect();
         const onVisibility = () => {
             if (document.visibilityState === "visible") safeReconnect();
@@ -289,21 +334,29 @@ export default function ChatRoom() {
         const text = input.trim();
         if (!threadId || !text || sendingLocked) return;
 
-        // 로컬에 유저 메시지 먼저 반영
         setMessages((prev) => [
             ...prev,
-            { id: `u-${Date.now()}`, role: "user", content: text, createdAt: new Date().toISOString() },
+            {id: `u-${Date.now()}`, role: "user", content: text, createdAt: new Date().toISOString()},
         ]);
         setInput("");
         setStatus("streaming");
         try {
             await sendMessageToServer(threadId, text);
-            // 서버가 SSE로 skeleton→delta→done push
         } catch (e) {
             setStatus("error");
             console.error(e);
         }
     }
+
+    /* ---------- react-markdown: Copy→CustomToast ---------- */
+    const PreWithLocalToast = useMemo(
+        () =>
+            makePreWithCopy((ok) => {
+                if (ok) pushToast("클립보드에 복사됐어요.");
+                else pushToast("복사에 실패했어요.", "브라우저 권한을 확인해 주세요.");
+            }),
+        []
+    );
 
     const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
         if (ime) return;
@@ -314,19 +367,43 @@ export default function ChatRoom() {
         <>
             <div className="messages" ref={scrollRef}>
                 {loading ? (
-                    <div style={{ opacity: 0.6, textAlign: "center", marginTop: 24 }}>히스토리 불러오는 중…</div>
+                    <div style={{opacity: 0.6, textAlign: "center", marginTop: 24}}>히스토리 불러오는 중…</div>
                 ) : error ? (
-                    <div style={{ opacity: 0.85, color: "#f66", textAlign: "center", marginTop: 24 }}>{error}</div>
+                    <div style={{opacity: 0.85, color: "#f66", textAlign: "center", marginTop: 24}}>{error}</div>
                 ) : messages.length === 0 ? (
-                    <div style={{ opacity: 0.6, textAlign: "center", marginTop: 24 }}>
+                    <div style={{opacity: 0.6, textAlign: "center", marginTop: 24}}>
                         아직 메시지가 없어요. 아래 입력창에 메시지를 입력해보세요.
                     </div>
                 ) : (
-                    messages.map((m) => (
-                        <div key={m.id} className={`msg ${m.role}`}>
-                            <div className="bubble">{m.content}</div>
-                        </div>
-                    ))
+                    messages.map((m) => {
+                        const isAssistant = m.role === "assistant";
+                        const showLoader = isAssistant && status === "streaming" && (!m.content || m.content.length === 0);
+                        return (
+                            <div key={m.id} className={`msg ${m.role}`}>
+                                <div className="bubble">
+                                    {isAssistant ? (
+                                        showLoader ? (
+                                            <div className="three-dots">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        ) : (
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm]}
+                                                rehypePlugins={[rehypeHighlight]}
+                                                components={{pre: PreWithLocalToast, code: InlineCode, a: LinkNewTab}}
+                                            >
+                                                {m.content || ""}
+                                            </ReactMarkdown>
+                                        )
+                                    ) : (
+                                        <>{m.content}</>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })
                 )}
             </div>
 
@@ -349,7 +426,21 @@ export default function ChatRoom() {
                 </div>
                 <div className="chat-disclaimer">SETA는 실수를 할 수 있습니다. 중요한 정보는 검증해 주세요.</div>
             </div>
-          </>
+
+            {/* ====== 포털로 body에 렌더: Login 화면과 동일한 오른쪽 상단 위치 사용 ====== */}
+            {toasts.map((t) =>
+                createPortal(
+                    <CustomToast
+                        key={t.id}
+                        message={t.message}
+                        description={t.description}
+                        duration={t.duration}
+                        onClose={() => removeToast(t.id)}
+                    />,
+                    document.body
+                )
+            )}
+        </>
     );
 }
 

@@ -1,0 +1,28 @@
+@import "highlight.js/styles/github-dark-dimmed.css";
+
+/* 약간의 튜닝(선택) */
+.codewrap { position: relative; }
+.codewrap > pre {
+    border-radius: 12px;
+    padding: 14px 16px;
+    overflow: auto;
+    background: #0f1220;           /* 테마보다 살짝 어두운 배경 */
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+/* 복사 버튼이 코드 위에 잘 보이게 */
+.codewrap .copybtn {
+    position: absolute; top: 8px; right: 8px;
+    padding: 4px 8px; font-size: 12px;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    backdrop-filter: blur(4px);
+}
+
+/* 코드 폰트(선택) — 시스템에 없으면 기본 monospace로 폴백 */
+.codewrap code, .codewrap pre, code, pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "JetBrains Mono",
+    "Fira Code", Consolas, "Liberation Mono", monospace;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
