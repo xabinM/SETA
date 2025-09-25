@@ -416,7 +416,7 @@ export default function ChatRoom() {
                     <input
                         type="text"
                         className="chat-input"
-                        placeholder={sendingLocked ? "답변 생성 중… (잠시만)" : "메시지를 입력하세요…"}
+                        placeholder={sendingLocked ? "답변 생성 중…" : "메시지를 입력하세요…"}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={onKeyDown}
