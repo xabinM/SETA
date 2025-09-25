@@ -36,15 +36,9 @@ LABEL_PRIORITY = {
 # === 조사 세트 ===
 KOREAN_PARTICLES = {"은", "는", "이", "가", "를", "을"}
 
-def has_particle_attached(token: str, drop_word: str) -> bool:
-    """
-    토큰이 drop_word + 조사 로 끝나는 경우 → drop 하지 않음
-    ex) drop_word="안녕" → "안녕은", "안녕이" 는 PASS
-    """
-    for particle in KOREAN_PARTICLES:
-        if token == drop_word + particle:
-            return True
-    return False
+def token_has_particle(token: str) -> bool:
+    """토큰이 조사(은/는/이/가/를/을)로 끝나면 True"""
+    return any(token.endswith(p) for p in KOREAN_PARTICLES)
 
 
 def resolve_final_label(drop_logs: List[Dict[str, Any]]) -> Optional[str]:
@@ -84,6 +78,7 @@ def filter_classifier(
     2) 각 문장에서 앞 1~3gram 슬라이딩으로 prefix 필터 적용
        - 걸리면 해당 토큰만 제거하고 나머지 계속 검사
        - meaningful이면 강제 PASS
+       - 조사 붙은 경우(drop_word+은/는/이/가/를)는 PASS
     3) 남은 tokens로 full-sentence 검사
     4) 최종적으로 남은 tokens만 kept_sentences에 반영
     5) drop_logs 기준으로 최종 라벨/스코어 결정
@@ -130,8 +125,8 @@ def filter_classifier(
                 top_score = probs[pred]
                 use_th = LABEL_THRESHOLDS.get(pred, threshold)
                 if pred in PREFIX_FILTER_LABELS and top_score >= use_th:
-                    # 조사 부착 여부 확인 → 붙어 있으면 drop하지 않고 PASS
-                    if any(has_particle_attached(tok, prefix) for tok in tokens[:n]):
+                    #  조사 예외: n==1 이고 조사 붙은 경우 → drop하지 않고 PASS
+                    if n == 1 and token_has_particle(tokens[0]):
                         kept_sentences.append(" ".join(tokens))
                         tokens = []
                         matched_prefix = True
@@ -165,12 +160,7 @@ def filter_classifier(
             top_score = probs[pred]
             use_th = LABEL_THRESHOLDS.get(pred, threshold)
             if pred in FULL_FILTER_LABELS and top_score >= use_th:
-                # 조사 부착 여부 확인
-                if any(has_particle_attached(tok, remaining) for tok in tokens):
-                    kept_sentences.append(remaining)
-                    tokens = []
-                    break
-
+                # full-sentence는 조사 예외 적용하지 않음
                 drop_logs.append({
                     "원문": sent,
                     "단계": "full-sentence",
