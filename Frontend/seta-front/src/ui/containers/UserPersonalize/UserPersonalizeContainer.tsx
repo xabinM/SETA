@@ -19,6 +19,7 @@ const UI2CODE = {
     "정중한": "polite",
     "유쾌한": "cheerful",
     "차분한": "calm",
+    "냉소적인": "cynical"
 } as const;
 
 type ToneUI = keyof typeof UI2CODE;
@@ -29,6 +30,7 @@ const CODE2UI: Record<string, ToneUI> = {
     polite: "정중한",
     cheerful: "유쾌한",
     calm: "차분한",
+    cynical: "냉소적인"
 };
 
 function toUI(v?: string | null): ToneUI {

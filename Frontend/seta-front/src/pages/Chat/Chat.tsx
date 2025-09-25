@@ -434,7 +434,7 @@ export default function Chat() {
                                                     <div className="feature-description">새로운 프로젝트 아이디어를 제안해드릴까요?</div>
                                                 </div>
                                                 <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("리액트/타입스크립트 이슈 상담할게요")}>
+                                                     onClick={() => onCreateRoomAndSeed("기술적인 문제에 대해서 궁금해요")}>
                                                     <div className="feature-title">💻 기술 상담</div>
                                                     <div className="feature-description">기술적인 질문이나 문제해결을 도와드릴게요</div>
                                                 </div>
