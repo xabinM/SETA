@@ -10,7 +10,7 @@ from app.models import FilterResult
 KST = timezone(timedelta(hours=9))
 
 
-def save_filter_results(raw: RawFilteredMessage, decision: Dict[str, Any], rule_name: str = "ml"):
+def save_filter_results(raw: RawFilteredMessage, decision: Dict[str, Any], rule_name: str = "no_meaning"):
     """
     DB에 필터링 결과 저장
     - filter_result 테이블에만 기록

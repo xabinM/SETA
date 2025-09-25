@@ -73,7 +73,7 @@ def run_filter_worker():
         text = ev.get("text", "")
         final_text = ev.get("final_text", "")
         mode = ev.get("mode", "pass")
-
+        top_category = ev.get("top_category", "no_meaning")
         now_utc = datetime.now(timezone.utc)
         logger.info("➡️ Processing trace_id=%s, mode=%s", trace_id, mode)
 
@@ -93,7 +93,7 @@ def run_filter_worker():
                         message_id=message_id,
                         stage="rule",
                         action="DROP",
-                        rule_name="rule",
+                        rule_name=top_category,
                         created_at=now_utc,
                     )
                     session.add(fr)
@@ -182,7 +182,7 @@ def run_filter_worker():
                     timestamp=ev.get("timestamp"),
                     schema_version=ev.get("schema_version", "1.0.0"),
                 )
-                filter_service.save_filter_results(raw, decision, rule_name="ml")
+                filter_service.save_filter_results(raw, decision, rule_name="no_meaning")
 
                 # TokenUsage 저장
                 try:
@@ -267,7 +267,7 @@ def run_filter_worker():
 
                 # drop_logs 있으면 DB 기록
                 if getattr(decision, "drop_logs", None) or decision.get("drop_logs"):
-                    filter_service.save_filter_results(raw, decision, rule_name="ml")
+                    filter_service.save_filter_results(raw, decision, rule_name="mo_meaning")
 
                 # TokenUsage 저장
                 try:
