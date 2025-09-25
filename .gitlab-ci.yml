@@ -123,7 +123,7 @@ frontend-build-docker:
 # ----------------
 deploy-backend:
   stage: deploy
-  image: alpine:latest
+  image: ubuntu:22.04
   needs:
     - job: backend-build-docker
   rules:
@@ -131,7 +131,7 @@ deploy-backend:
       when: always
     - when: never
   before_script:
-    - apk add --no-cache openssh-client bash rsync
+    - apt-get update && apt-get install -y openssh-client bash rsync
     - mkdir -p ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
@@ -176,7 +176,7 @@ deploy-backend:
 # ----------------
 deploy-frontend:
   stage: deploy
-  image: alpine:latest
+  image: ubuntu:22.04
   needs:
     - job: frontend-build-docker
   rules:
@@ -184,7 +184,7 @@ deploy-frontend:
       when: always
     - when: never
   before_script:
-    - apk add --no-cache openssh-client bash rsync
+    - apt-get update && apt-get install -y openssh-client bash rsync
     - mkdir -p ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
