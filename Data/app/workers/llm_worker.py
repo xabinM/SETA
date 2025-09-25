@@ -3,7 +3,6 @@ import time
 import json
 import logging
 from datetime import datetime, timezone
-import traceback
 
 from app.models import RoomSummaryState, PromptBuilt, TokenUsage
 from app.adapters.kafka_io import make_consumer, make_producer, publish, read_headers
@@ -11,6 +10,7 @@ from app.utils.trace import extract_traceparent
 from app.adapters.db import get_session
 from app.services import prompt_builder_service, llm_client, error_service
 from app.adapters.redis_io import append_conversation
+from app.utils.usage import estimate_usage_by_tokens  # ✅ 소비량 계산 유틸
 
 # ------------------
 # Logging 설정
@@ -51,9 +51,8 @@ def run_worker():
         tp = extract_traceparent(headers_dict)
 
         # --- PASS만 처리 ---
-        # action은 기본적으로 ev["decision"]["action"]에 실린다.
         decision = ev.get("decision") or {}
-        action = decision.get("action") or ev.get("action")  # 폴백: 혹시 탑레벨에 있을 때
+        action = decision.get("action") or ev.get("action")
         if action != "PASS":
             logger.info("⏩ Skipping message (action=%s)", action)
             continue
@@ -64,7 +63,7 @@ def run_worker():
         user_id = ev.get("user_id")
         user_id = int(user_id) if user_id is not None else None
 
-        # 입력 텍스트 확보: text → cleaned_text → original_text
+        # 입력 텍스트 확보
         user_input = ev.get("text") or ev.get("cleaned_text") or ev.get("original_text") or ""
 
         logger.info("➡️ Processing trace_id=%s room_id=%s", trace_id, chat_room_id)
@@ -124,7 +123,7 @@ def run_worker():
 
         chunks = []
         try:
-            for event in llm_client.call_llm( full_prompt, stream=True, model=model_name, temperature=temperature):
+            for event in llm_client.call_llm(full_prompt, stream=True, model=model_name, temperature=temperature):
                 if event["type"] == "delta":
                     delta = event["delta"]
                     chunks.append(delta)
@@ -155,22 +154,25 @@ def run_worker():
                     full_text = "".join(chunks)
                     logger.info("✅ LLM done (latency=%dms tokens=%s)", latency_ms, usage)
 
-                    # TokenUsage 저장
+                    # TokenUsage 저장 (실제 사용량 계산)
                     try:
                         with get_session() as session:
+                            total_tokens = usage.get("total_tokens", 0)
+                            cost_usd, energy_wh, co2_g, water_ml = estimate_usage_by_tokens(total_tokens)
+
                             token_usage = TokenUsage(
                                 message_id=message_id,
                                 user_id=user_id,
                                 prompt_tokens=usage.get("prompt_tokens", 0),
                                 completion_tokens=usage.get("completion_tokens", 0),
-                                total_tokens=usage.get("total_tokens", 0),
-                                cost_usd=usage.get("cost_usd"),
-                                energy_wh=usage.get("energy_wh"),
-                                co2_g=usage.get("co2_g"),
-                                saved_tokens=usage.get("saved_tokens", 0),
-                                saved_cost_usd=usage.get("saved_cost_usd"),
-                                saved_energy_wh=usage.get("saved_energy_wh"),
-                                saved_co2_g=usage.get("saved_co2_g"),
+                                total_tokens=total_tokens,
+                                cost_usd=cost_usd,
+                                energy_wh=energy_wh,
+                                co2_g=co2_g,
+                                saved_tokens=0,
+                                saved_cost_usd=0,
+                                saved_energy_wh=0,
+                                saved_co2_g=0,
                                 created_at=datetime.now(timezone.utc),
                             )
                             session.add(token_usage)
@@ -180,12 +182,17 @@ def run_worker():
                         logger.exception("❌ Failed to save TokenUsage")
                         error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
-                    # Redis Append
+                    # Redis Append (user + assistant 대화 저장)
                     try:
                         append_conversation(
                             room_id=chat_room_id,
-                            user_input=user_input,
-                            assistant_output=full_text,
+                            role="user",
+                            content=user_input,
+                        )
+                        append_conversation(
+                            room_id=chat_room_id,
+                            role="assistant",
+                            content=full_text,
                         )
                         logger.info("💾 Redis conversation appended")
                     except Exception as e:

@@ -2,7 +2,6 @@ import os
 import json
 import redis
 from typing import Optional
-
 # 환경 변수 기반 설정
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))

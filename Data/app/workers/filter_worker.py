@@ -10,6 +10,7 @@ from app.adapters.db import get_session
 from app.models import FilterResult, TokenUsage
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from app.contracts.raw_filtered import RawFilteredMessage
+from app.utils.usage import estimate_usage_by_tokens  # ✅ 추가
 
 # ------------------
 # Logging 설정
@@ -81,6 +82,9 @@ def run_filter_worker():
             logger.info("⚙️ Auto mode → filler_removal pipeline")
             token_count = estimate_tokens(text)
 
+            # 🔹 절약량 계산
+            saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(token_count)
+
             try:
                 with get_session() as session:
                     fr = FilterResult(
@@ -88,7 +92,7 @@ def run_filter_worker():
                         chat_room_id=room_id,
                         message_id=message_id,
                         stage="rule",
-                        action="DROP",       # AUTO는 무조건 DROP
+                        action="DROP",
                         rule_name="rule",
                         created_at=now_utc,
                     )
@@ -103,10 +107,10 @@ def run_filter_worker():
                         cost_usd=None,
                         energy_wh=None,
                         co2_g=None,
-                        saved_tokens=0,
-                        saved_cost_usd=None,
-                        saved_energy_wh=None,
-                        saved_co2_g=None,
+                        saved_tokens=token_count,
+                        saved_cost_usd=saved_cost,
+                        saved_energy_wh=saved_energy,
+                        saved_co2_g=saved_co2,
                         created_at=now_utc,
                     )
                     session.add(tu)
@@ -160,12 +164,14 @@ def run_filter_worker():
             logger.info("⚙️ Pass mode → intent_classifier")
             decision = filter_classifier(final_text or text, model, tokenizer)
             logger.info("🤖 Classifier decision: %s", decision)
-            token_count = estimate_tokens(text)
 
             status = decision["status"] if isinstance(decision, dict) else getattr(decision, "action", None)
 
             if status == "drop":
-                # ML DROP → 무조건 DB 기록
+                # === ML DROP ===
+                original_tokens = estimate_tokens(text)
+                saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(original_tokens)
+
                 raw = RawFilteredMessage(
                     trace_id=trace_id,
                     room_id=room_id,
@@ -173,10 +179,35 @@ def run_filter_worker():
                     user_id=user_id,
                     text=text,
                     final_text=final_text,
-                    timestamp=ev.get("timestamp"), 
-                    schema_version=ev.get("schema_version", "1.0.0")
+                    timestamp=ev.get("timestamp"),
+                    schema_version=ev.get("schema_version", "1.0.0"),
                 )
                 filter_service.save_filter_results(raw, decision, rule_name="ml")
+
+                # TokenUsage 저장
+                try:
+                    with get_session() as session:
+                        tu = TokenUsage(
+                            message_id=message_id,
+                            user_id=user_id,
+                            prompt_tokens=original_tokens,
+                            completion_tokens=0,
+                            total_tokens=original_tokens,
+                            cost_usd=None,
+                            energy_wh=None,
+                            co2_g=None,
+                            saved_tokens=original_tokens,
+                            saved_cost_usd=saved_cost,
+                            saved_energy_wh=saved_energy,
+                            saved_co2_g=saved_co2,
+                            created_at=now_utc,
+                        )
+                        session.add(tu)
+                        session.commit()
+                    logger.info("💾 TokenUsage saved (ML DROP)")
+                except Exception as e:
+                    logger.exception("❌ Failed DB insert (ML DROP)")
+                    error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
                 try:
                     filter_service.save_to_es(raw, decision)
@@ -211,7 +242,7 @@ def run_filter_worker():
                 logger.info("📡 Published intent_classifier DROP → %s", KAFKA_OUT_FILTER)
 
             else:
-                # ML PASS
+                # === ML PASS ===
                 raw = RawFilteredMessage(
                     trace_id=trace_id,
                     room_id=room_id,
@@ -219,13 +250,49 @@ def run_filter_worker():
                     user_id=user_id,
                     text=text,
                     final_text=final_text,
-                    timestamp=ev.get("timestamp"), 
-                    schema_version=ev.get("schema_version", "1.0.0")
+                    timestamp=ev.get("timestamp"),
+                    schema_version=ev.get("schema_version", "1.0.0"),
                 )
 
-                # ✅ drop_logs가 있으면 DB에 PASS도 기록
+                # 토큰 계산
+                original_tokens = estimate_tokens(text)
+                cleaned_text = decision.get("content") or (final_text or text)
+                cleaned_tokens = estimate_tokens(cleaned_text)
+                saved_tokens = max(0, original_tokens - cleaned_tokens)
+
+                # 실제 사용량
+                cost_usd, energy_wh, co2_g, _ = estimate_usage_by_tokens(cleaned_tokens)
+                # 절약량
+                saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(saved_tokens)
+
+                # drop_logs 있으면 DB 기록
                 if getattr(decision, "drop_logs", None) or decision.get("drop_logs"):
                     filter_service.save_filter_results(raw, decision, rule_name="ml")
+
+                # TokenUsage 저장
+                try:
+                    with get_session() as session:
+                        tu = TokenUsage(
+                            message_id=message_id,
+                            user_id=user_id,
+                            prompt_tokens=cleaned_tokens,
+                            completion_tokens=0,
+                            total_tokens=cleaned_tokens,
+                            cost_usd=cost_usd,
+                            energy_wh=energy_wh,
+                            co2_g=co2_g,
+                            saved_tokens=saved_tokens,
+                            saved_cost_usd=saved_cost,
+                            saved_energy_wh=saved_energy,
+                            saved_co2_g=saved_co2,
+                            created_at=now_utc,
+                        )
+                        session.add(tu)
+                        session.commit()
+                    logger.info("💾 TokenUsage saved (ML PASS)")
+                except Exception as e:
+                    logger.exception("❌ Failed DB insert (ML PASS)")
+                    error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
                 try:
                     filter_service.save_to_es(raw, decision)
