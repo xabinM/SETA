@@ -53,6 +53,7 @@ def insert_batch_results(df, target_table):
 # Main Logic
 # -------------------------------------------------------------------
 now = datetime.now(timezone.utc)
+print(f"[*] Current script execution time (UTC): {now}")
 
 end_minute = now.minute - (now.minute % 5)
 five_min_end_time = now.replace(minute=end_minute, second=0, microsecond=0)
@@ -60,8 +61,11 @@ five_min_start_time = five_min_end_time - timedelta(minutes=5)
 
 twenty_four_hour_start_time = now - timedelta(hours=24)
 
-print(f"5-min batch window: {five_min_start_time} to {five_min_end_time} (UTC)")
-print(f"24-hour rolling window: {twenty_four_hour_start_time} to {now} (UTC)")
+print("\n--- Time Window Calculation ---")
+print(f"Based on current minute ({now.minute}), calculated end minute for 5-min window: {end_minute}")
+print(f"==> 5-min batch window: {five_min_start_time} to {five_min_end_time} (UTC)")
+print(f"==> 24-hour rolling window: {twenty_four_hour_start_time} to {now} (UTC)\n")
+
 
 five_min_source_df = spark.read.jdbc(
     url=JDBC_URL,   
@@ -72,7 +76,6 @@ five_min_source_df = spark.read.jdbc(
 )
 
 five_min_source_df.cache()
-
 
 if five_min_source_df.rdd.isEmpty():
     print("No data found for the given time window. Exiting.")
