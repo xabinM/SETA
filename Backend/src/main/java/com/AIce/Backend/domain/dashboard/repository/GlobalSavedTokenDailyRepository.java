@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.*;
 import java.util.Optional;
 
-public interface GlobalSavedTokenDailyRepository extends JpaRepository<GlobalSavedTokenDaily, LocalDateTime> {
+public interface GlobalSavedTokenDailyRepository extends JpaRepository<GlobalSavedTokenDaily, OffsetDateTime> {
     Optional<GlobalSavedTokenDaily> findTopByOrderByWindowStartDesc();
 }

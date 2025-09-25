@@ -63,6 +63,7 @@ public class ChatRoomService {
     }
 
     /* 채팅방 제목 수정용 */
+    @Transactional
     public void updateRoom(Long userId, UUID roomId, String title) {
         ChatRoom room = chatRoomRepository.findByChatRoomIdAndUser(roomId, userRepository.findByUserId(userId))
                 .orElseThrow(() -> new NotFoundChatRoomException("ChatRoom not found"));
