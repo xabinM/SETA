@@ -33,6 +33,19 @@ LABEL_PRIORITY = {
     "connector_filler": 8,
 }
 
+# === 조사 세트 ===
+KOREAN_PARTICLES = {"은", "는", "이", "가", "를", "을"}
+
+def has_particle_attached(token: str, drop_word: str) -> bool:
+    """
+    토큰이 drop_word + 조사 로 끝나는 경우 → drop 하지 않음
+    ex) drop_word="안녕" → "안녕은", "안녕이" 는 PASS
+    """
+    for particle in KOREAN_PARTICLES:
+        if token == drop_word + particle:
+            return True
+    return False
+
 
 def resolve_final_label(drop_logs: List[Dict[str, Any]]) -> Optional[str]:
     """드랍 로그들에서 최종 라벨 선택 (우선순위 반영)"""
@@ -117,7 +130,14 @@ def filter_classifier(
                 top_score = probs[pred]
                 use_th = LABEL_THRESHOLDS.get(pred, threshold)
                 if pred in PREFIX_FILTER_LABELS and top_score >= use_th:
-                    # 앞 n 토큰만 제거
+                    # 조사 부착 여부 확인 → 붙어 있으면 drop하지 않고 PASS
+                    if any(has_particle_attached(tok, prefix) for tok in tokens[:n]):
+                        kept_sentences.append(" ".join(tokens))
+                        tokens = []
+                        matched_prefix = True
+                        break
+
+                    # 정상 drop
                     drop_logs.append({
                         "원문": sent,
                         "단계": f"{n}-gram prefix",
@@ -145,6 +165,12 @@ def filter_classifier(
             top_score = probs[pred]
             use_th = LABEL_THRESHOLDS.get(pred, threshold)
             if pred in FULL_FILTER_LABELS and top_score >= use_th:
+                # 조사 부착 여부 확인
+                if any(has_particle_attached(tok, remaining) for tok in tokens):
+                    kept_sentences.append(remaining)
+                    tokens = []
+                    break
+
                 drop_logs.append({
                     "원문": sent,
                     "단계": "full-sentence",
