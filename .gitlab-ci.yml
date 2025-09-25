@@ -44,7 +44,6 @@ frontend-build:
   stage: build
   image:
     name: node:20-alpine
-    pull_policy: if-not-present
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -69,7 +68,6 @@ backend-build-docker:
   stage: build-docker
   image:
     name: docker:25
-    pull_policy: if-not-present
   services:
     - name: docker:dind
       alias: docker
@@ -101,7 +99,6 @@ frontend-build-docker:
   stage: build-docker
   image:
     name: docker:25
-    pull_policy: if-not-present
   services:
     - name: docker:dind
       alias: docker
