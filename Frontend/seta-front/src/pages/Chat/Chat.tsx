@@ -57,7 +57,9 @@ export default function Chat() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [ime, setIme] = useState(false);
     const [personalizeOpen, setPersonalizeOpen] = useState(false);
-
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    
     const onOpenPersonalize = () => {
         setMenuOpen(false);
         setPersonalizeOpen(true);
@@ -96,6 +98,17 @@ export default function Chat() {
             window.removeEventListener('resize', updateScrollBehavior);
         };
     }, []);
+
+    useEffect(() => {
+    const checkMobile = () => {
+        setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+}, []);
 
     // URL 파라미터로 activeId 설정
     useEffect(() => {
@@ -171,16 +184,28 @@ export default function Chat() {
             <div className="chat-stage">
                 <div className="chat-canvas">
                     <div className="container">
+                        {/* 모바일용 백드롭 */}
+                        {isMobile && (
+                            <div 
+                                className={`sidebar-backdrop ${sidebarOpen ? 'sidebar-open' : ''}`}
+                                onClick={() => setSidebarOpen(false)}
+                            />
+                        )}
+                        
                         {/* Sidebar */}
-                        <aside className="sidebar">
+                        <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
                             <div className="sidebar-header">
                                 <div className="sidebar-user">
                                     <div className="sidebar-avatar"><img src={Logo} alt="SETA" className="avatar-img"/>
                                     </div>
                                     <div className="sidebar-user-info"><h3>SETA</h3></div>
                                 </div>
-                                <button className="sidebar-menu-btn" aria-label="sidebar menu">
-                                    <span className="material-icons">more_horiz</span>
+                                <button 
+                                    className="sidebar-menu-btn" 
+                                    onClick={() => isMobile ? setSidebarOpen(false) : undefined}
+                                    aria-label={isMobile ? "사이드바 닫기" : "sidebar menu"}
+                                >
+                                    <span className="material-icons">{isMobile ? "close" : "more_horiz"}</span>
                                 </button>
                             </div>
 
@@ -246,6 +271,15 @@ export default function Chat() {
                         <main className="main-chat">
                             <div className="chat-header">
                                 <div className="chat-user">
+                                    {isMobile && (
+                                        <button 
+                                            className="chat-menu-btn" 
+                                            onClick={() => setSidebarOpen(true)}
+                                            aria-label="사이드바 열기"
+                                        >
+                                            <span className="material-icons">menu</span>
+                                        </button>
+                                    )}
                                     <div className="chat-avatar"><img src={Logo} alt="SETA Assistant"
                                                                       className="avatar-img"/></div>
                                     <div className="chat-user-info"><h3>SETA Assistant</h3></div>

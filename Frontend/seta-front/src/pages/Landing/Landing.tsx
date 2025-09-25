@@ -110,7 +110,7 @@ const Landing: React.FC = () => {
       particlesRef.current.forEach((particle, index) => {
         if (particle) {
           gsap.to(particle, {
-            color: '#ff6b6b',
+            color: '#dddd', 
             scale: 1.1,
             duration: 0.5,
             delay: index * 0.001,
@@ -161,42 +161,33 @@ const Landing: React.FC = () => {
     }, 3.5)
     
     .add(() => {
-  if (setaTextRef.current && logoRef.current) {
-    const logoRect = logoRef.current.getBoundingClientRect();
+      if (setaTextRef.current && logoRef.current) {
+        const logoRect = logoRef.current.getBoundingClientRect();
+        const centerX = logoRect.left + logoRect.width / 2;
+        const centerY = logoRect.top + logoRect.height / 2 - 80; // 로고보다 위쪽
 
-    const centerX = logoRect.left + logoRect.width / 2;
-    const centerY = logoRect.top + logoRect.height / 2 - 40;
-
-    // 위치를 절대 위치(px)로 세팅, transform translate 대신 gsap의 xPercent, yPercent로 중앙 정렬
-    gsap.set(setaTextRef.current, {
-      position: 'absolute',
-      top: centerY,
-      left: centerX,
-      xPercent: -50,
-      yPercent: -50,
-      opacity: 0,
-      y: 0,
-      scale: 0.5,
-    });
-
-    // 등장 애니메이션
-    gsap.to(setaTextRef.current, {
-      opacity: 1,
-      scale: 1,
-      duration: 1.5,
-      ease: "back.out(1.7)",
-    });
-  }
-}, 4.5)
+        gsap.set(setaTextRef.current, {
+          position: 'absolute',
+          top: centerY,
+          left: centerX,
+          xPercent: -50,
+          yPercent: -50,
+          opacity: 1, 
+          scale: 1,
+        });
+      }
+    }, 5.0)
     
     // 6단계: SETA 글자들 개별 등장 효과
-    .staggerTo('.letter', 0.4, {
+    .to('.letter', {
       opacity: 1,
       y: 0,
-      rotation: 360,
+      rotation: 0,
       scale: 1,
-      ease: "back.out(2)"
-    }, 0.1)
+      duration: 0.6,
+      ease: "back.out(2)",
+      stagger: 0.15 // stagger를 옵션으로 추가
+    }, 5.2)
     
     // 7단계: Green AI 부제목 등장
     .to('.subtitle', {
@@ -217,7 +208,7 @@ const Landing: React.FC = () => {
             navigate('/home');
           }
         });
-      }, 2000);
+      }, 1000);
     }, 7.5);
   };
 
@@ -266,20 +257,14 @@ const Landing: React.FC = () => {
         />
       </div>
       
-      <div 
-  ref={setaTextRef}
-  className="seta-text-container"
->
-  <div className="circular-text">
-    <span className="letter" style={{ transform: 'rotate(-35deg) translateY(-60px)' }}>S</span>
-    <span className="letter" style={{ transform: 'rotate(-10deg) translateY(-80px)' }}>E</span>
-    <span className="letter" style={{ transform: 'rotate(10deg) translateY(-80px)' }}>T</span>
-    <span className="letter" style={{ transform: 'rotate(35deg) translateY(-60px)' }}>A</span>
-  </div>
-</div>
-
-
-
+      <div ref={setaTextRef} className="seta-text-container">
+        <div className="circular-text" style={{ width: 200, height: 100 }}>
+          <span className="letter" style={{ transform: 'rotate(-35deg) translateY(-70px)' }}>S</span>
+          <span className="letter" style={{ transform: 'rotate(-10deg) translateY(-85px)' }}>E</span>
+          <span className="letter" style={{ transform: 'rotate(10deg) translateY(-85px)' }}>T</span>
+          <span className="letter" style={{ transform: 'rotate(35deg) translateY(-70px)' }}>A</span>
+        </div>
+      </div>
           </div>
         );
       };
