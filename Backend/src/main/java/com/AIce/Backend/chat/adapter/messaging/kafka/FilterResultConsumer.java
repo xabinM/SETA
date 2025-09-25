@@ -1,12 +1,9 @@
 package com.AIce.Backend.chat.adapter.messaging.kafka;
 
 import com.AIce.Backend.chat.contracts.FilterResultV1;
-import com.AIce.Backend.chat.contracts.LlmResponseV1;
 import com.AIce.Backend.chat.service.ChatMessageService;
 import com.AIce.Backend.chat.service.DropResponder;
-import com.AIce.Backend.domain.chat.repository.ChatMessageRepository;
 import com.AIce.Backend.domain.chat.repository.ChatRoomRepository;
-import com.AIce.Backend.domain.usersetting.entity.UserSetting;
 import com.AIce.Backend.domain.usersetting.repository.UserSettingRepository;
 import com.AIce.Backend.global.sse.SseHub;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,8 +20,6 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-
-import static org.hibernate.internal.util.NullnessHelper.coalesce;
 
 @Slf4j
 @Component

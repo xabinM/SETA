@@ -89,28 +89,22 @@ public class JwtTokenProvider {
         }
     }
 
-    public String resolveToken(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-
-        // SSE 요청인 경우 → Cookie 기반
-        if (uri.startsWith("/api/sse")) {
-            if (request.getCookies() != null) {
-                for (Cookie cookie : request.getCookies()) {
-                    if ("access_token".equals(cookie.getName())) {
-                        return cookie.getValue();
-                    }
-                }
-            }
-            return null;
+    String resolveToken(HttpServletRequest request) {
+        // 1) Authorization 헤더 먼저
+        String bearer = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
         }
 
-        // 일반 요청인 경우 → Authorization 헤더 기반
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        // 2) 쿠키에서 access_token 확인
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("access_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
 
         return null;
     }
-
 }
