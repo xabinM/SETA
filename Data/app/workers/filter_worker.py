@@ -126,7 +126,7 @@ def run_filter_worker():
                 auto_logs = ev.get("filtered_words_details", [[], []])[0]
                 es_decision = {
                     "action": "DROP",
-                    "cleaned_text": final_text or text,
+                    "cleaned_text": "",
                     "original_text": text,
                     "drop_logs": auto_logs,
                     "reason_type": top_category,
@@ -150,7 +150,7 @@ def run_filter_worker():
                     "stage_order": 1,
                     "timestamp": int(datetime.now().timestamp() * 1000),
                     "original_text": text,
-                    "cleaned_text": final_text or text,
+                    "cleaned_text": "",
                     "detected_phrases": ev.get("filtered_words_details", [[], []])[0],
                     "decision": {"action": "DROP",
                                  "reason_type": top_category
@@ -170,7 +170,6 @@ def run_filter_worker():
             status = decision["status"] if isinstance(decision, dict) else getattr(decision, "action", None)
 
             if status == "drop":
-                # === ML DROP ===
                 original_tokens = estimate_tokens(text)
                 saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(original_tokens)
 
@@ -180,7 +179,7 @@ def run_filter_worker():
                     message_id=message_id,
                     user_id=user_id,
                     text=text,
-                    final_text=final_text,
+                    final_text= "",
                     timestamp=ev.get("timestamp"),
                     schema_version=ev.get("schema_version", "1.0.0"),
                 )
@@ -195,9 +194,9 @@ def run_filter_worker():
                             prompt_tokens=original_tokens,
                             completion_tokens=0,
                             total_tokens=original_tokens,
-                            cost_usd=None,
-                            energy_wh=None,
-                            co2_g=None,
+                            cost_usd=0,
+                            energy_wh=0,
+                            co2_g=0,
                             saved_tokens=original_tokens,
                             saved_cost_usd=saved_cost,
                             saved_energy_wh=saved_energy,
@@ -251,7 +250,7 @@ def run_filter_worker():
                     message_id=message_id,
                     user_id=user_id,
                     text=text,
-                    final_text=final_text,
+                    final_text= decision.get("content") or "",
                     timestamp=ev.get("timestamp"),
                     schema_version=ev.get("schema_version", "1.0.0"),
                 )
@@ -315,7 +314,7 @@ def run_filter_worker():
                         "stage_order": 2,
                         "timestamp": int(datetime.now().timestamp() * 1000),
                         "original_text": text,
-                        "cleaned_text": final_text or text,
+                        "cleaned_text": decision.get("content") or text,
                         "decision": {
                             "action": "PASS",
                             "score": decision.get("score"),
