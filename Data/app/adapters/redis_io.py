@@ -1,6 +1,7 @@
 import os
 import json
 import redis
+from typing import Optional
 
 # 환경 변수 기반 설정
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
@@ -35,7 +36,7 @@ def append_conversation(room_id: str, role: str, content: str, max_turns: int = 
     r.setex(key, REDIS_TTL_SEC, json.dumps(history, ensure_ascii=False))
 
 
-def get_conversation(room_id: str, limit: int | None = None):
+def get_conversation(room_id: str, limit: Optional[int] = None):
     key = f"chat:{room_id}:messages"
     history_json = r.get(key)
     history = json.loads(history_json) if history_json else []
