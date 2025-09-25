@@ -96,6 +96,7 @@ def run_filter_worker():
 
                     tu = TokenUsage(
                         message_id=message_id,
+                        user_id=user_id,
                         prompt_tokens=token_count,
                         completion_tokens=0,
                         total_tokens=token_count,
