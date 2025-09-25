@@ -25,6 +25,8 @@ USER_TOTAL_TABLE = "user_saved_token_total"
 GLOBAL_DAILY_TABLE = "global_saved_token_daily"
 GLOBAL_TOTAL_TABLE = "global_saved_token_total"
 
+DB_TIMEZONE = "Asia/Seoul"
+
 print(f"Connecting to main PostgreSQL at {POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
 
 # -------------------------------------------------------------------
@@ -67,7 +69,9 @@ five_min_source_df = spark.read.jdbc(
     url=JDBC_URL,   
     table=SOURCE_TABLE,
     properties=CONNECTION_PROPERTIES
-).where(F.col("created_at").between(five_min_start_time, five_min_end_time))
+).where(
+    F.to_utc_timestamp(F.col("created_at"), DB_TIMEZONE).between(five_min_start_time, five_min_end_time)
+)
 
 five_min_source_df.cache()
 
@@ -95,7 +99,9 @@ twenty_four_hour_source_df = spark.read.jdbc(
     url=JDBC_URL,
     table=SOURCE_TABLE,
     properties=CONNECTION_PROPERTIES
-).where(F.col("created_at").between(twenty_four_hour_start_time, now))
+).where(
+    F.to_utc_timestamp(F.col("created_at"), DB_TIMEZONE).between(twenty_four_hour_start_time, now)
+)
 
 
 daily_user_agg = twenty_four_hour_source_df.groupBy(F.col("user_id").cast("string").alias("user_id")).agg(
