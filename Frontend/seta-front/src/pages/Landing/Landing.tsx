@@ -164,8 +164,7 @@ const Landing: React.FC = () => {
       if (setaTextRef.current && logoRef.current) {
         const logoRect = logoRef.current.getBoundingClientRect();
         const centerX = logoRect.left + logoRect.width / 2;
-        const centerY = logoRect.top + logoRect.height / 2 - 80; // 로고보다 위쪽
-
+        const centerY = logoRect.top + logoRect.height / 2 - 80;
         gsap.set(setaTextRef.current, {
           position: 'absolute',
           top: centerY,
@@ -258,12 +257,13 @@ const Landing: React.FC = () => {
       </div>
       
       <div ref={setaTextRef} className="seta-text-container">
-        <div className="circular-text" style={{ width: 200, height: 100 }}>
-          <span className="letter" style={{ transform: 'rotate(-35deg) translateY(-70px)' }}>S</span>
-          <span className="letter" style={{ transform: 'rotate(-10deg) translateY(-85px)' }}>E</span>
-          <span className="letter" style={{ transform: 'rotate(10deg) translateY(-85px)' }}>T</span>
-          <span className="letter" style={{ transform: 'rotate(35deg) translateY(-70px)' }}>A</span>
+        <div className="circular-text" style={{ width: 250, height: 250 }}>
+          <span className="letter" style={{ transform: 'rotate(-60deg) translateY(-100px)' }}>S</span>
+          <span className="letter" style={{ transform: 'rotate(-20deg) translateY(-100px)' }}>E</span>
+          <span className="letter" style={{ transform: 'rotate(20deg) translateY(-100px)' }}>T</span>
+          <span className="letter" style={{ transform: 'rotate(60deg) translateY(-100px)' }}>A</span>
         </div>
+
       </div>
           </div>
         );

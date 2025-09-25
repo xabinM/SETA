@@ -109,8 +109,8 @@
 /* SETA 텍스트 - 로고 위에 위치 */
 .seta-text-container {
   position: absolute;
-  top: 35%; /* 로고와 같은 높이로 조정 */
-  left: 50%;
+  top:25%; /* 로고와 같은 높이로 조정 */
+  left: 45%;
   transform: translate(-50%, -50%);
   text-align: center;
   opacity: 0;
@@ -164,16 +164,16 @@
 
 .circular-text {
   position: relative;
-  width: 200px; /* 크기 조정 */
-  height: 200px;
+  width: 250px; /* 크기 조정 */
+  height: 250px;
 }
 
 .letter {
   position: absolute;
-  top: 50%;
+  top: 30%;
   left: 50%;
   transform-origin: center;
-  font-size: 45px; /* 폰트 크기 조정 */
+  font-size: 50px; /* 폰트 크기 조정 */
   font-weight: 900;
   background: linear-gradient(45deg, #00d4aa, #64ffda, #1de9b6);
   -webkit-background-clip: text;
