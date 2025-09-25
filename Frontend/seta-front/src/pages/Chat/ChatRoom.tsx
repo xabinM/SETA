@@ -1,3 +1,4 @@
+// src/pages/Chat/ChatRoom.tsx
 import {useEffect, useMemo, useRef, useState, type HTMLAttributes, type AnchorHTMLAttributes, type MutableRefObject,} from "react";
 import {createPortal} from "react-dom";
 import {useParams} from "react-router-dom";
@@ -389,13 +390,16 @@ export default function ChatRoom() {
                                                 <span></span>
                                             </div>
                                         ) : (
-                                            <ReactMarkdown
-                                                remarkPlugins={[remarkGfm]}
-                                                rehypePlugins={[rehypeHighlight]}
-                                                components={{pre: PreWithLocalToast, code: InlineCode, a: LinkNewTab}}
-                                            >
-                                                {m.content || ""}
-                                            </ReactMarkdown>
+                                            /* 👇 margin collapse 방지용 래퍼 */
+                                            <div className="md">
+                                                <ReactMarkdown
+                                                    remarkPlugins={[remarkGfm]}
+                                                    rehypePlugins={[rehypeHighlight]}
+                                                    components={{pre: PreWithLocalToast, code: InlineCode, a: LinkNewTab}}
+                                                >
+                                                    {m.content || ""}
+                                                </ReactMarkdown>
+                                            </div>
                                         )
                                     ) : (
                                         <>{m.content}</>
