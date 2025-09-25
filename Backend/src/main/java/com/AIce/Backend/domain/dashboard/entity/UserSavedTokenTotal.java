@@ -18,7 +18,7 @@ public class UserSavedTokenTotal {
     private String userId;
 
     @Id
-    private LocalDate statDate;
+    private OffsetDateTime statDate;
 
     private Long requestCount;
     private Long savedTokens;
