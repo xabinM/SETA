@@ -110,7 +110,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     command: /bin/bash -c "
       echo 'Waiting for dependencies...' &&
-      sleep 30 &&
+      sleep 10 &&
       echo 'Starting token usage aggregation...' &&
       /opt/bitnami/spark/bin/spark-submit 
       --master local[*] 
@@ -118,7 +118,6 @@ services:
       /opt/bitnami/spark/app/spark_batch_aggregation.py"
     networks:
       - app-network
-    restart: unless-stopped
 
 networks:
   app-network:
