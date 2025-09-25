@@ -159,6 +159,7 @@ def run_worker():
                         with get_session() as session:
                             token_usage = TokenUsage(
                                 message_id=message_id,
+                                user_id=user_id,
                                 prompt_tokens=usage.get("prompt_tokens", 0),
                                 completion_tokens=usage.get("completion_tokens", 0),
                                 total_tokens=usage.get("total_tokens", 0),

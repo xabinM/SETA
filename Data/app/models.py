@@ -97,6 +97,7 @@ class TokenUsage(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     message_id = Column(UUID(as_uuid=True), ForeignKey("chat_message.message_id"))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
     prompt_tokens = Column(Integer)
     completion_tokens = Column(Integer)
     total_tokens = Column(Integer)
