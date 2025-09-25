@@ -109,13 +109,14 @@
 /* SETA 텍스트 - 로고 위에 위치 */
 .seta-text-container {
   position: absolute;
-  top:25%; /* 로고와 같은 높이로 조정 */
+  top: 5%; /* 로고와 같은 높이로 조정 */
   left: 45%;
   transform: translate(-50%, -50%);
   text-align: center;
   opacity: 0;
   z-index: 600;
   will-change: transform, opacity;
+  margin-top: -100px;
 }
 
 .seta-text {
@@ -164,8 +165,9 @@
 
 .circular-text {
   position: relative;
-  width: 250px; /* 크기 조정 */
+  width: 250px;
   height: 250px;
+  margin: 0 auto; /* 중앙 정렬 */
 }
 
 .letter {
