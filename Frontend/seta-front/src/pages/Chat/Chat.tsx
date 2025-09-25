@@ -64,7 +64,9 @@ export default function Chat() {
     const footerRef = useRef<HTMLDivElement>(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [personalizeOpen, setPersonalizeOpen] = useState(false);
-
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    
     // /chat 입력창 상태 (시드)
     const [seed, setSeed] = useState("");
     const [ime, setIme] = useState(false);
@@ -142,15 +144,48 @@ export default function Chat() {
         [creating, navigate]
     );
 
-    // 스크롤 잠금
+    // 스크롤 처리 - 하나의 useEffect로 통합 및 mobile-scroll-enabled 클래스 추가
     useEffect(() => {
-        document.body.classList.add("no-scroll");
-        document.documentElement.classList.add("no-scroll-html");
+        const updateScrollBehavior = () => {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // 모바일: 스크롤 허용
+                document.body.classList.remove("no-scroll");
+                document.documentElement.classList.remove("no-scroll-html");
+                document.body.classList.add("mobile-scroll-enabled");
+            } else {
+                // 데스크톱: 스크롤 잠금
+                document.body.classList.remove("mobile-scroll-enabled");
+                document.body.classList.add("no-scroll");
+                document.documentElement.classList.add("no-scroll-html");
+            }
+        };
+
+        // 초기 설정
+        updateScrollBehavior();
+        
+        // 리사이즈 이벤트 리스너
+        window.addEventListener('resize', updateScrollBehavior);
+        
         return () => {
-            document.body.classList.remove("no-scroll");
+            document.body.classList.remove("no-scroll", "mobile-scroll-enabled");
             document.documentElement.classList.remove("no-scroll-html");
+                     window.removeEventListener('resize', updateScrollBehavior);
         };
     }, []);
+
+
+    useEffect(() => {
+    const checkMobile = () => {
+        setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+}, []);
 
     // 서버에서 방 목록 최신화
     useEffect(() => {
@@ -240,8 +275,16 @@ export default function Chat() {
             <div className="chat-stage">
                 <div className="chat-canvas">
                     <div className="container">
-                        {/* ===== Sidebar ===== */}
-                        <aside className="sidebar">
+                        {/* 모바일용 백드롭 */}
+                        {isMobile && (
+                            <div 
+                                className={`sidebar-backdrop ${sidebarOpen ? 'sidebar-open' : ''}`}
+                                onClick={() => setSidebarOpen(false)}
+                            />
+                        )}
+                        
+                        {/* Sidebar */}
+                        <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
                             <div className="sidebar-header">
                                 <div className="sidebar-user">
                                     <div className="sidebar-avatar">
@@ -251,8 +294,12 @@ export default function Chat() {
                                         <h3>SETA</h3>
                                     </div>
                                 </div>
-                                <button className="sidebar-menu-btn" aria-label="sidebar menu">
-                                    <span className="material-icons">more_horiz</span>
+                                <button 
+                                    className="sidebar-menu-btn" 
+                                    onClick={() => isMobile ? setSidebarOpen(false) : undefined}
+                                    aria-label={isMobile ? "사이드바 닫기" : "sidebar menu"}
+                                >
+                                    <span className="material-icons">{isMobile ? "close" : "more_horiz"}</span>
                                 </button>
                             </div>
 
@@ -353,6 +400,18 @@ export default function Chat() {
                         <main className="main-chat">
                             <div className="chat-header">
                                 <div className="chat-user">
+                                    {isMobile && (
+                                        <button 
+                                            className="chat-menu-btn" 
+                                            onClick={() => setSidebarOpen(true)}
+                                            aria-label="사이드바 열기"
+                                        >
+                                            <span className="material-icons">menu</span>
+                                        </button>
+                                    )}
+                                    <div className="chat-avatar"><img src={Logo} alt="SETA Assistant"
+                                                                      className="avatar-img"/></div>
+                                    <div className="chat-user-info"><h3>SETA Assistant</h3></div>
                                     <div className="chat-avatar">
                                         <img src={Logo} alt="SETA Assistant" className="avatar-img" />
                                     </div>

@@ -1,36 +1,23 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {gsap} from 'gsap';
+import React, { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { gsap } from 'gsap';
 import ChatBackground from '@/assets/ChatBackground.png';
 import './Landing.css';
 
 const Landing: React.FC = () => {
-    const navigate = useNavigate();
-    const containerRef = useRef<HTMLDivElement>(null);
-    const logoRef = useRef<HTMLImageElement>(null);
-    const logoContainerRef = useRef<HTMLDivElement>(null);
-    const setaTextRef = useRef<HTMLDivElement>(null);
-    const textContainerRef = useRef<HTMLDivElement>(null);
-    const [displayText, setDisplayText] = useState('');
-    const [isScrambling, setIsScrambling] = useState(true);
-    const [isBackspacing, setIsBackspacing] = useState(false);
-
-    // 더 확실하고 긴 불용어들
-    const koreanWords = ['안녕하세요', '그런데요', '하지만요', '사실은요', '어쨌든요', '그러므로요', '따라서요', '그리하여요', '왜냐하면요', '때문입니다', '그렇습니다', '그런겁니다', '어디에서든지', '언제든지', '누구든지', '무엇이든지', '어떻게든지', '아무튼간에', '그럼에도불구하고', '그렇기때문에', '어떤경우에든', '사실상으로는', '일반적으로는', '보통의경우', '대부분의경우', '거의모든경우', '어쨌거나간에', '그렇다고하더라도', '그런것치고는', '그런편이긴하지만', '어떻게보면', '생각해보니까', '돌이켜보면', '말하자면요', '다시말해서요', '바꿔말하면요', '요약하자면요'];
-
-    const englishWords = ['however', 'therefore', 'furthermore', 'nevertheless', 'nonetheless', 'consequently', 'accordingly', 'specifically', 'particularly', 'especially', 'obviously', 'certainly', 'definitely', 'absolutely', 'completely', 'essentially', 'basically', 'fundamentally', 'generally', 'typically', 'normally', 'usually', 'frequently', 'occasionally', 'sometimes', 'meanwhile', 'otherwise', 'moreover', 'additionally', 'similarly', 'likewise', 'conversely', 'alternatively', 'subsequently', 'previously', 'ultimately', 'eventually', 'immediately', 'simultaneously', 'temporarily', 'permanently', 'approximately', 'relatively', 'significantly'];
-
-    const generateLongText = () => {
-        const result = [];
-        for (let i = 0; i < 30; i++) {
-            if (i % 2 === 0) {
-                result.push(koreanWords[Math.floor(Math.random() * koreanWords.length)]);
-            } else {
-                result.push(englishWords[Math.floor(Math.random() * englishWords.length)]);
-            }
-        }
-        return result.join(' ');
-    };
+  const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLImageElement>(null);
+  const setaTextRef = useRef<HTMLDivElement>(null);
+  const particlesRef = useRef<HTMLDivElement[]>([]);
+  
+  // 불용어 목록 (기존과 동일)
+  const stopwords = [
+    // 한국어 불용어
+    '안녕하세요', '그런데요', '하지만요', '사실은요', '어쨌든요', '그러므로요', '따라서요', '그리하여요', '왜냐하면요', '때문입니다', '그렇습니다', '그런겁니다', '어디에서든지', '언제든지', '누구든지', '무엇이든지', '어떻게든지', '아무튼간에', '그럼에도불구하고', '그렇기때문에', '어떤경우에든', '사실상으로는', '일반적으로는', '보통의경우', '대부분의경우', '거의모든경우', '어쨌거나간에', '그렇다고하더라도', '그런것치고는', '그런편이긴하지만', '어떻게보면', '생각해보니까', '돌이켜보면', '말하자면요', '다시말해서요', '바꿔말하면요', '요약하자면요',
+    // 영어 불용어
+    'however', 'therefore', 'furthermore', 'nevertheless', 'nonetheless', 'consequently', 'accordingly', 'specifically', 'particularly', 'especially', 'obviously', 'certainly', 'definitely', 'absolutely', 'completely', 'essentially', 'basically', 'fundamentally', 'generally', 'typically', 'normally', 'usually', 'frequently', 'occasionally', 'sometimes', 'meanwhile', 'otherwise', 'moreover', 'additionally', 'similarly', 'likewise', 'conversely', 'alternatively', 'subsequently', 'previously', 'ultimately', 'eventually', 'immediately', 'simultaneously', 'temporarily', 'permanently', 'approximately', 'relatively', 'significantly'
+  ];
 
     useEffect(() => {
         gsap.config({
@@ -38,297 +25,248 @@ const Landing: React.FC = () => {
             nullTargetWarn: false
         });
 
-        const initialText = generateLongText();
-        setDisplayText(initialText);
+    // 별 반짝임 애니메이션 (점점 많아지는 효과)
+    animateStarfield();
 
-        const mainTimeline = gsap.timeline({delay: 0.5});
-        startMainSequence(mainTimeline);
+    // 메인 시퀀스 시작 (5초 후 - 별들이 충분히 많아진 후)
+    const mainTimeline = gsap.timeline({ delay: 5 });
+    startMainSequence(mainTimeline);
 
         return () => {
             mainTimeline.kill();
         };
     }, [navigate]);
 
-    // 단어 교체 효과
-    useEffect(() => {
-        if (!isScrambling) return;
+  const animateStarfield = () => {
+    // 불용어들을 3개 그룹으로 나누어 순차적으로 등장
+    const totalWords = stopwords.length * 3;
+    
+    particlesRef.current.forEach((particle, index) => {
+      if (particle) {
+        // 초기 상태: 투명하고 작게
+        gsap.set(particle, { 
+          opacity: 0,
+          scale: 0.3,
+          force3D: true,
+          transformOrigin: "center center"
+        });
 
-        const scrambleInterval = setInterval(() => {
-            setDisplayText(prevText => {
-                const words = prevText.split(' ');
-                const newWords = words.map(word => {
-                    if (Math.random() < 0.15) {
-                        const isKorean = /[가-힣]/.test(word);
-                        if (isKorean) {
-                            const availableKorean = koreanWords.filter(w => w !== word);
-                            return availableKorean[Math.floor(Math.random() * availableKorean.length)];
-                        } else {
-                            const availableEnglish = englishWords.filter(w => w !== word);
-                            return availableEnglish[Math.floor(Math.random() * availableEnglish.length)];
-                        }
-                    }
-                    return word;
-                });
-                return newWords.join(' ');
-            });
-
-            if (Math.random() < 0.1) {
-                const newText = generateLongText();
-                setDisplayText(newText);
-            }
-        }, 350);
-
-        return () => clearInterval(scrambleInterval);
-    }, [isScrambling]);
-
-    const startMainSequence = (tl: gsap.core.Timeline) => {
-        // 1단계: 해킹 스타일 텍스트 변화
-        tl.add(() => {
-            setIsScrambling(true);
-        })
-
-            // 2단계: 텍스트 교체 완전 중단
-            .add(() => {
-                setIsScrambling(false);
-            }, 3)
-
-            // 3단계: 백스페이스 시작
-            .add(() => {
-                startBackspace();
-            }, 4.5);
-    };
-
-    const startBackspace = () => {
-        console.log('백스페이스 함수 실행됨');
-        setIsBackspacing(true);
-
-        setTimeout(() => {
-            let currentText = displayText;
-
-            if (!currentText || currentText.trim().length === 0) {
-                currentText = generateLongText();
-                setDisplayText(currentText);
-            }
-
-            const deleteSpeed = 20;
-            let remainingText = currentText;
-
-            const backspaceInterval = setInterval(() => {
-                if (remainingText.length > 0) {
-                    remainingText = remainingText.slice(0, -1);
-                    setDisplayText(remainingText);
-
-                    if (textContainerRef.current) {
-                        const progress = 1 - remainingText.length / currentText.length;
-                        gsap.to(textContainerRef.current, {
-                            scale: 1 + progress * 0.2,
-                            y: -progress * 30,
-                            duration: 0.1,
-                            ease: "power2.out"
-                        });
-                    }
-                } else {
-                    clearInterval(backspaceInterval);
-                    setIsBackspacing(false);
-                    setDisplayText('');
-
-                    if (textContainerRef.current) {
-                        gsap.to(textContainerRef.current, {
-                            scale: 1,
-                            y: 0,
-                            duration: 0.3,
-                            ease: "power2.out",
-                            onComplete: () => {
-                                setTimeout(() => {
-                                    showLogoAndText();
-                                }, 500);
-                            }
-                        });
-                    } else {
-                        setTimeout(() => {
-                            showLogoAndText();
-                        }, 500);
-                    }
-                }
-            }, deleteSpeed);
-        }, 500);
-    };
-
-    const showLogoAndText = () => {
-        console.log('로고와 SETA 텍스트 표시 시작');
-
-        // 로고와 SETA 텍스트 동시 등장
-        if (logoContainerRef.current) {
-            gsap.to(logoContainerRef.current, {
-                opacity: 1,
-                scale: 1,
-                rotation: 360,
-                duration: 1.5,
-                ease: "back.out(1.5)"
-            });
-        }
-
-        if (setaTextRef.current) {
-            gsap.to(setaTextRef.current, {
-                opacity: 1,
-                y: 0,
-                duration: 1.5,
-                delay: 0.3,
-                ease: "back.out(1.5)",
-                onComplete: () => {
-                    console.log('로고와 텍스트 등장 완료');
-                    setTimeout(() => {
-                        gsap.to(containerRef.current, {
-                            opacity: 0,
-                            duration: 0.7,
-                            ease: "power2.inOut",
-                            onComplete: () => {
-                                navigate('/home');
-                            }
-                        });
-                    }, 1000);
-                }
-            });
-        }
-    };
-
-    return (
-        <div
-            className="landing-container"
-            ref={containerRef}
-            style={{backgroundImage: `url(${ChatBackground})`}}
-        >
-
-            {/* 배경 어둠 오버레이 */}
-            <div className="background-overlay"></div>
-
-            {/* 해킹 스타일 텍스트 */}
-            <div
-                ref={textContainerRef}
-                className="hacking-text"
-                style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    maxWidth: '85%',
-                    textAlign: 'center',
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: 'clamp(14px, 2.5vw, 22px)',
-                    lineHeight: '1.6',
-                    wordBreak: 'keep-all',
-                    fontFamily: '"Space Mono", monospace',
-                    fontWeight: '400',
-                    zIndex: 100,
-                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
-                    letterSpacing: '1px',
-                }}
-            >
-                {displayText}
-                {(displayText.length > 0 && !isBackspacing) && (
-                    <span
-                        style={{
-                            animation: 'hackingBlink 1s infinite',
-                            marginLeft: '3px',
-                            color: '#00ffdb',
-                            textShadow: '0 0 8px #00ffdb'
-                        }}
-                    >
-            |
-          </span>
-                )}
-                {isBackspacing && (
-                    <span
-                        style={{
-                            animation: 'hackingBlink 0.3s infinite',
-                            marginLeft: '3px',
-                            color: '#00ff41',
-                            textShadow: '0 0 12px #00ff41'
-                        }}
-                    >
-            █
-          </span>
-                )}
-            </div>
-
-            {/* SETA 로고 */}
-            <div className="logo-center" ref={logoContainerRef}>
-                <img
-                    ref={logoRef}
-                    src="/seta.ico"
-                    alt="SETA Logo"
-                    className="seta-logo-img"
-                />
-            </div>
-
-            {/* SETA 텍스트 - 원형 배치 */}
-            <div
-                ref={setaTextRef}
-                className="seta-text-container"
-                style={{
-                    position: 'absolute',
-                    top: '45%',
-                    left: '51%',
-                    transform: 'translate(-50%, -50%)',
-                    textAlign: 'center',
-                    opacity: 0,
-                    zIndex: 600,
-                    width: '200px',
-                    height: '200px'
-                }}
-            >
-                <div className="circular-text">
-                    <span className="letter letter-s" style={{transform: 'rotate(-45deg) translateY(-80px)'}}>S</span>
-                    <span className="letter letter-e" style={{transform: 'rotate(-15deg) translateY(-80px)'}}>E</span>
-                    <span className="letter letter-t" style={{transform: 'rotate(15deg) translateY(-80px)'}}>T</span>
-                    <span className="letter letter-a" style={{transform: 'rotate(45deg) translateY(-80px)'}}>A</span>
-                </div>
-            </div>
-
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        // 순차적 등장 (별이 하나씩 나타나는 효과)
+        const appearDelay = (index / totalWords) * 4; // 4초에 걸쳐 모든 별이 등장
         
-        @keyframes hackingBlink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0.3; }
-        }
-        
-        .hacking-text {
-          font-variant-ligatures: none;
-          -webkit-font-feature-settings: "liga" 0;
-          font-feature-settings: "liga" 0;
-        }
+        gsap.to(particle, {
+          opacity: 0.6 + Math.random() * 0.4,
+          scale: 0.8 + Math.random() * 0.4,
+          duration: 0.8,
+          delay: appearDelay,
+          ease: "power2.out",
+          onComplete: () => {
+            // 등장 후 반짝이는 애니메이션
+            startTwinkleAnimation(particle);
+          }
+        });
+      }
+    });
+  };
 
-        .circular-text {
-          position: relative;
-          width: 100%;
-          height: 100%;
-        }
+  const startTwinkleAnimation = (particle: HTMLDivElement) => {
+    // 별처럼 반짝이는 애니메이션
+    gsap.to(particle, {
+      opacity: 0.2 + Math.random() * 0.6,
+      scale: 0.6 + Math.random() * 0.6,
+      duration: 2 + Math.random() * 2,
+      repeat: -1,
+      yoyo: true,
+      ease: "power1.inOut",
+      delay: Math.random() * 2
+    });
 
-        .letter {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform-origin: center;
-          font-size: 48px;
-          font-weight: 900;
-          background: linear-gradient(45deg, #4a9d8e, #7ab8a8, #5eb09f);
-          background-size: 200% 200%;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          filter: drop-shadow(0 0 15px rgba(122, 184, 168, 0.3));
-          animation: gentleGradientShift 4s ease-in-out infinite;
-        }
+    // 미세한 회전 효과
+    gsap.to(particle, {
+      rotation: `+=${(Math.random() - 0.5) * 30}`,
+      duration: 8 + Math.random() * 4,
+      repeat: -1,
+      yoyo: true,
+      ease: "none"
+    });
+  };
 
-        @keyframes gentleGradientShift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-      `}</style>
+  const startMainSequence = (tl: gsap.core.Timeline) => {
+    // 로고의 중심 좌표 계산
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
 
+    tl
+    // 1단계: 로고 등장
+    .to('.logo-center', {
+      opacity: 1,
+      scale: 1,
+      duration: 1,
+      ease: "back.out(1.7)"
+    })
+    
+    // 2단계: 불용어들 색상 변화 (빨간색 = 나쁜 것)
+    .add(() => {
+      particlesRef.current.forEach((particle, index) => {
+        if (particle) {
+          gsap.to(particle, {
+            color: '#dddd', 
+            scale: 1.1,
+            duration: 0.5,
+            delay: index * 0.001,
+            ease: "power2.out"
+          });
+        }
+      });
+    }, 1)
+    
+    // 3단계: 로고 회전 시작 (블랙홀 효과 준비)
+    .to('.logo-center', {
+      rotation: 360,
+      scale: 1.2,
+      duration: 2,
+      ease: "power2.inOut"
+    }, 2)
+    
+    // 4단계 전: 기존 애니메이션 모두 종료
+    .add(() => {
+      particlesRef.current.forEach(particle => {
+        if (particle) {
+          gsap.killTweensOf(particle); // 모든 떠다니는 애니메이션 종료
+        }
+      });
+    }, 3.4) // 흡수 애니메이션 시작 0.1초 전에 종료
+    
+    // 4단계: 깔끔한 흡수 애니메이션
+    .add(() => {
+      particlesRef.current.forEach((particle, index) => {
+        if (particle) {
+          const rect = particle.getBoundingClientRect();
+          const currentX = rect.left + rect.width / 2;
+          const currentY = rect.top + rect.height / 2;
+          const deltaX = centerX - currentX;
+          const deltaY = centerY - currentY;
+
+          gsap.to(particle, {
+            x: deltaX,
+            y: deltaY,
+            scale: 0,
+            opacity: 0,
+            duration: 1.5,
+            delay: index * 0.003,
+            ease: "power2.in"
+          });
+        }
+      });
+    }, 3.5)
+    
+    .add(() => {
+      if (setaTextRef.current && logoRef.current) {
+        const logoRect = logoRef.current.getBoundingClientRect();
+        const centerX = logoRect.left + logoRect.width / 2;
+        const centerY = logoRect.top + logoRect.height / 2 - 80;
+        gsap.set(setaTextRef.current, {
+          position: 'absolute',
+          top: centerY,
+          left: centerX,
+          xPercent: -50,
+          yPercent: -50,
+          opacity: 1, 
+          scale: 1,
+        });
+      }
+    }, 5.0)
+    
+    // 6단계: SETA 글자들 개별 등장 효과
+    .to('.letter', {
+      opacity: 1,
+      y: 0,
+      rotation: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: "back.out(2)",
+      stagger: 0.15 // stagger를 옵션으로 추가
+    }, 5.2)
+    
+    // 7단계: Green AI 부제목 등장
+    .to('.subtitle', {
+      opacity: 1,
+      y: 0,
+      duration: 1,
+      ease: "power2.out"
+    }, 6.2)
+    
+    // 8단계: 완료 후 페이지 전환
+    .add(() => {
+      setTimeout(() => {
+        gsap.to(containerRef.current, {
+          opacity: 0,
+          duration: 0.6,
+          ease: "power2.inOut",
+          onComplete: () => {
+            navigate('/home');
+          }
+        });
+      }, 1000);
+    }, 7.5);
+  };
+
+  const addParticleRef = (el: HTMLDivElement | null) => {
+    if (el && !particlesRef.current.includes(el)) {
+      particlesRef.current.push(el);
+    }
+  };
+
+  return (
+    <div 
+      className="landing-container" 
+      ref={containerRef}
+      style={{ backgroundImage: `url(${ChatBackground})` }}
+    >
+      <div className="background-overlay"></div>
+      
+      {/* 불용어 파티클들 */}
+      <div className="particles-container">
+        {[...Array(3)].map((_, groupIndex) => 
+          stopwords.map((word, index) => (
+            <div
+              key={`${groupIndex}-${index}`}
+              ref={addParticleRef}
+              className="stopword"
+              style={{
+                position: 'absolute', // 반드시 absolute 위치 지정
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                fontSize: `${10 + Math.random() * 8}px`,
+              }}
+            >
+              {word}
+            </div>
+          ))
+        )}
+      </div>
+      
+      {/* SETA 로고 */}
+      <div className="logo-center">
+        <img 
+          ref={logoRef}
+          src="/seta.ico" 
+          alt="SETA Logo" 
+          className="seta-logo-img"
+        />
+      </div>
+      
+      <div ref={setaTextRef} className="seta-text-container">
+        <div className="circular-text" style={{ width: 250, height: 250 }}>
+          <span className="letter" style={{ transform: 'rotate(-60deg) translateY(-100px)' }}>S</span>
+          <span className="letter" style={{ transform: 'rotate(-20deg) translateY(-100px)' }}>E</span>
+          <span className="letter" style={{ transform: 'rotate(20deg) translateY(-100px)' }}>T</span>
+          <span className="letter" style={{ transform: 'rotate(60deg) translateY(-100px)' }}>A</span>
         </div>
-    );
-};
+
+      </div>
+          </div>
+        );
+      };
 
 export default Landing;
