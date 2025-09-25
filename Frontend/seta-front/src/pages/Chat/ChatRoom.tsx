@@ -170,7 +170,7 @@ export default function ChatRoom() {
             });
         });
 
-        es.addEventListener("done", (ev) => {
+        es.addEventListener("done", () => {
             resetIdleWatchdog();
             // 필요하면 message_id 확인: const d = safeJSON<{ message_id?: string }>((ev as MessageEvent).data);
             setStatus("done");
