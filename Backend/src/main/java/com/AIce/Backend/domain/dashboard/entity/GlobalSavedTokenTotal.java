@@ -14,7 +14,7 @@ import java.time.*;
 @Table(name = "global_saved_token_total")
 public class GlobalSavedTokenTotal {
     @Id
-    private LocalDate statDate;
+    private OffsetDateTime statDate;
 
     private Long requestCount;
     private Long savedTokens;
