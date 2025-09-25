@@ -40,26 +40,26 @@ variables:
 # ----------------
 # 2. Frontend Build (React + Node)
 # ----------------
-frontend-build:
-  stage: build
-  image:
-    name: node:20-alpine
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - Frontend/seta-front/node_modules/
-  script:
-    - cd Frontend/seta-front
-    - npm ci
-    - npm run build
-  artifacts:
-    paths:
-      - Frontend/seta-front/dist
-    expire_in: 1 hour
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
-      when: always
-    - when: never
+# frontend-build:
+#   stage: build
+#   image:
+#     name: node:20-alpine
+#   cache:
+#     key: ${CI_COMMIT_REF_SLUG}
+#     paths:
+#       - Frontend/seta-front/node_modules/
+#   script:
+#     - cd Frontend/seta-front
+#     - npm ci
+#     - npm run build
+#   artifacts:
+#     paths:
+#       - Frontend/seta-front/dist
+#     expire_in: 1 hour
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+#       when: always
+#     - when: never
 
 # ----------------
 # 3. Backend Docker Image & Push to Registry.
@@ -115,8 +115,8 @@ frontend-build-docker:
     - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
       when: always
     - when: never
-  dependencies:
-    - frontend-build
+  # dependencies:
+  #   - frontend-build
 
 # ----------------
 # 5. Deploy backend
