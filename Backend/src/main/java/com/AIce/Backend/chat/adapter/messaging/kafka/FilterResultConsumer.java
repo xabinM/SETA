@@ -19,6 +19,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -42,18 +43,6 @@ public class FilterResultConsumer {
                          @Headers Map<String, Object> headers) throws JsonProcessingException {
         try {
             final FilterResultV1 msg = objectMapper.readValue(payload, FilterResultV1.class);
-            final String roomId = msg.getRoom_id();
-
-            String traceId =
-                    coalesce(
-                            headerAsString(headers, "trace_id"),
-                            msg.getTrace_id(),
-                            Optional.ofNullable(tracer)
-                                    .map(Tracer::currentSpan)
-                                    .map(span -> span.context().traceId())
-                                    .orElse(null),
-                            ""
-                    );
 
             // DROP이면
             if (msg.getDecision() != null && "DROP".equalsIgnoreCase(msg.getDecision().getAction())) {
@@ -66,39 +55,39 @@ public class FilterResultConsumer {
 
                 for (int i = 0; i < text.length(); i++) {
                     String delta = String.valueOf(text.charAt(i));
-                    hub.push(roomId, "delta", Map.of(
-                            "trace_id", traceId,
+                    hub.push(msg.getRoom_id(), "delta", Map.of(
+                            "trace_id", msg.getTrace_id(),
                             "message_id", msg.getMessage_id(),
-                            "content", Map.of(
-                                    "delta", delta,
-                                    "index", i
-                            ),
-                            "status", "streaming"
+                            "room_id", msg.getRoom_id(),
+                            "delta", delta,
+                            "timestamp", LocalDateTime.now().toString()
                     ));
                 }
 
                 // SSE로 브로드캐스트
                 log.info("DROP→synthetic llm_answer saved & streamed; traceId={} room={}",
-                        traceId, roomId);
+                        msg.getTrace_id(), msg.getRoom_id());
 
                 // done event 전송: 응답 처리 끝 신호
-                hub.push(roomId, "done", Map.of(
-                        "trace_id", traceId,
+                hub.push(msg.getRoom_id(), "done", Map.of(
+                        "trace_id", msg.getTrace_id(),
                         "message_id", msg.getMessage_id(),
-                        "content", Map.of(
-                                "final_text", text,
-                                "finish_reason", "stop"
+                        "room_id", msg.getRoom_id(),
+                        "response", Map.of(
+                                "text", text
                         ),
                         "usage", Map.of(
                                 "prompt_tokens", 0,
                                 "completion_tokens", 0,
                                 "total_tokens", 0
                         ),
-                        "status", "done"
+                        "latency_ms", 0,
+                        "schema_version", msg.getSchema_version(),
+                        "timestamp", LocalDateTime.now()
                 ));
             }
 
-            log.info("consume filter_result traceId={} topic={} room={}", traceId, topic, msg.getRoom_id());
+            log.info("consume filter_result traceId={} topic={} room={}", msg.getTrace_id(), topic, msg.getRoom_id());
 
         } catch (Exception e) {
             log.warn("filter_result consume failed; payload={} cause={}", safeCut(payload), e.toString());
