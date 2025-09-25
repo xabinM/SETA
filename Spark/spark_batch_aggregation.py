@@ -129,7 +129,7 @@ if not five_min_source_df.rdd.isEmpty():
     # Global Total
     try:
         prev_global_total_df = spark.read.jdbc(url=JDBC_URL, table=GLOBAL_TOTAL_TABLE, properties=CONNECTION_PROPERTIES)
-        latest_global_total = prev_global_total_df.orderBy(F.desc("stat_time")).limit(1)
+        latest_global_total = prev_global_total_df.orderBy(F.desc("stat_date")).limit(1)
 
         if latest_global_total.rdd.isEmpty():
             new_global_total = five_min_global_agg.select(
@@ -146,7 +146,7 @@ if not five_min_source_df.rdd.isEmpty():
                 (F.col("cost_sum_usd") + F.col("new_cost_sum_usd")).alias("cost_sum_usd")
             )
         
-        global_total_to_insert = new_global_total.withColumn("stat_time", F.lit(now))
+        global_total_to_insert = new_global_total.withColumn("stat_date", F.lit(now))
         insert_batch_results(global_total_to_insert, GLOBAL_TOTAL_TABLE)
 
     except Exception as e:
@@ -156,13 +156,13 @@ if not five_min_source_df.rdd.isEmpty():
             F.col("new_saved_tokens").alias("saved_tokens"),
             F.col("new_token_sum").alias("token_sum"),
             F.col("new_cost_sum_usd").alias("cost_sum_usd")
-        ).withColumn("stat_time", F.lit(now))
+        ).withColumn("stat_date", F.lit(now))
         insert_batch_results(first_global_total, GLOBAL_TOTAL_TABLE)
 
     # User Total
     try:
         prev_user_total_df = spark.read.jdbc(url=JDBC_URL, table=USER_TOTAL_TABLE, properties=CONNECTION_PROPERTIES)
-        window = Window.partitionBy("user_id").orderBy(F.desc("stat_time"))
+        window = Window.partitionBy("user_id").orderBy(F.desc("stat_date"))
         latest_user_total = prev_user_total_df.withColumn("rank", F.row_number().over(window)).filter(F.col("rank") == 1).drop("rank")
 
         new_user_total = latest_user_total.join(five_min_user_agg, "user_id", "full_outer").select(
@@ -173,7 +173,7 @@ if not five_min_source_df.rdd.isEmpty():
             (F.coalesce(F.col("cost_sum_usd"), F.lit(0)) + F.coalesce(F.col("new_cost_sum_usd"), F.lit(0))).alias("cost_sum_usd")
         )
         
-        user_total_to_insert = new_user_total.withColumn("stat_time", F.lit(now))
+        user_total_to_insert = new_user_total.withColumn("stat_date", F.lit(now))
         insert_batch_results(user_total_to_insert, USER_TOTAL_TABLE)
 
     except Exception as e:
@@ -184,7 +184,7 @@ if not five_min_source_df.rdd.isEmpty():
             F.col("new_saved_tokens").alias("saved_tokens"),
             F.col("new_token_sum").alias("token_sum"),
             F.col("new_cost_sum_usd").alias("cost_sum_usd")
-        ).withColumn("stat_time", F.lit(now))
+        ).withColumn("stat_date", F.lit(now))
         insert_batch_results(first_user_total, USER_TOTAL_TABLE)
 else:
     print("No new data in the last 5 minutes to update total tables.")
