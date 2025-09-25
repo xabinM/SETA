@@ -25,7 +25,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> WHITELIST = List.of(
-            "/auth/signup", "/auth/login", "/auth/reissue"
+            "/api/auth/signup", "/api/auth/login", "/api/auth/reissue"
     );
 
     private final JwtTokenProvider jwtTokenProvider;
