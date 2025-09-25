@@ -71,7 +71,6 @@ backend-build-docker:
     - name: docker:dind
       alias: docker
       command: ["--host=tcp://0.0.0.0:2375"]
-      pull_policy: if-not-present
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
@@ -98,14 +97,11 @@ backend-build-docker:
 # ----------------
 frontend-build-docker:
   stage: build-docker
-  image:
-    name: node:20-alpine
-    pull_policy: if-not-present
+  image: docker:25
   services:
     - name: docker:dind
       alias: docker
       command: ["--host=tcp://0.0.0.0:2375"]
-      pull_policy: if-not-present
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
@@ -127,9 +123,7 @@ frontend-build-docker:
 # ----------------
 deploy-backend:
   stage: deploy
-  image:
-    name: node:20-alpine
-    pull_policy: if-not-present
+  image: alpine:3.22
   needs:
     - job: backend-build-docker
   rules:
@@ -182,7 +176,7 @@ deploy-backend:
 # ----------------
 deploy-frontend:
   stage: deploy
-  image: alpine:latest
+  image: alpine:3.22
   needs:
     - job: frontend-build-docker
   rules:
