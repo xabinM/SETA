@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,5 +39,13 @@ public class LlmAnswerDoneV1 {
         private int prompt_tokens;
         private int completion_tokens;
         private int total_tokens;
+    }
+
+    public LocalDateTime getTimestampKST() {
+        if (timestamp == null) return null;
+        return LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(timestamp),
+                ZoneId.of("Asia/Seoul")
+        );
     }
 }
