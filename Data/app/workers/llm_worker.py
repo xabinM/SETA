@@ -64,7 +64,7 @@ def run_worker():
         user_id = int(user_id) if user_id is not None else None
 
         # 입력 텍스트 확보
-        user_input = ev.get("text") or ev.get("cleaned_text") or ev.get("original_text") or ""
+        user_input = ev.get("cleaned_text") or ev.get("original_text")  or ""
 
         logger.info("➡️ Processing trace_id=%s room_id=%s", trace_id, chat_room_id)
 

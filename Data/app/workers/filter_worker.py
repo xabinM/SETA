@@ -129,7 +129,7 @@ def run_filter_worker():
                     "cleaned_text": final_text or text,
                     "original_text": text,
                     "drop_logs": auto_logs,
-                    "reason_type": "filler_removal",
+                    "reason_type": top_category,
                     "explanations": [],
                 }
                 filter_service.save_to_es(raw, es_decision)
@@ -152,7 +152,9 @@ def run_filter_worker():
                     "original_text": text,
                     "cleaned_text": final_text or text,
                     "detected_phrases": ev.get("filtered_words_details", [[], []])[0],
-                    "decision": {"action": "DROP"},
+                    "decision": {"action": "DROP",
+                                 "reason_type": top_category
+                                 },
                     "schema_version": "1.0.0",
                 },
                 headers=[("traceparent", trace_id.encode())] if trace_id else None,
