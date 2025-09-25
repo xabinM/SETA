@@ -1,6 +1,7 @@
 package com.AIce.Backend.global.sse;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -15,7 +16,7 @@ public class SseHub {
     private final Map<String, List<SseEmitter>> byRoom = new ConcurrentHashMap<>();
 
     public SseEmitter subscribe(String roomId) {
-        SseEmitter emitter = new SseEmitter(Duration.ofMinutes(30).toMillis());
+        SseEmitter emitter = new SseEmitter(0L); // 무제한 유지
 
         // 룸별 구독자 리스트에 추가
         byRoom.computeIfAbsent(roomId, k -> Collections.synchronizedList(new ArrayList<>()))
@@ -141,4 +142,11 @@ public class SseHub {
             }
         }
     }
+
+    // SseHub.java
+    public void sendHeartbeat(String roomId) {
+        push(roomId, "ping", "keep-alive");
+    }
+
+
 }

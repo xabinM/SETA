@@ -1,4 +1,4 @@
-import { tokenStore, isJwtExpired } from "@/shared/auth/token";
+import {tokenStore, isJwtExpired} from "@/shared/auth/token";
 
 const RAW_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 const BASE = RAW_BASE.replace(/\/+$/, "");
@@ -18,6 +18,7 @@ export type HttpOptions = {
 export class ApiError extends Error {
     status: number;
     data: unknown;
+
     constructor(message: string, status: number, data: unknown) {
         super(message);
         this.name = "ApiError";
@@ -28,6 +29,7 @@ export class ApiError extends Error {
 
 export type UnauthorizedHandler = () => void;
 let _onUnauthorized: UnauthorizedHandler | null = null;
+
 export function setUnauthorizedHandler(fn: UnauthorizedHandler | null) {
     _onUnauthorized = fn;
 }
@@ -58,7 +60,7 @@ function hasMessage(x: unknown): x is { message: unknown } {
 
 export async function http<T = unknown>(path: string, opts: HttpOptions = {}): Promise<T> {
     const url = buildUrl(path, opts.query);
-    const headers: Record<string, string> = { ...(opts.headers ?? {}) };
+    const headers: Record<string, string> = {...(opts.headers ?? {})};
 
     const useAuth = opts.auth !== false;
     if (useAuth && !headers["Authorization"]) {

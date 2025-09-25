@@ -1,13 +1,13 @@
-import { memo, useState } from "react";
+import {memo, useState} from "react";
 import Header from "@/ui/components/Header/Header";
-import { Icon } from "@iconify/react";
+import {Icon} from "@iconify/react";
 import ChatBg from "@/assets/ChatBackground.png";
 
 /* ===== Modals ===== */
 import TreeModal from "@/ui/components/Modal/TreeModal/TreeModal";
-import { treeModalDataByScope } from "@/ui/components/Modal/TreeModal/data";
+import {treeModalDataByScope} from "@/ui/components/Modal/TreeModal/data";
 import CarModal from "@/ui/components/Modal/CarModal/CarModal";
-import { mockCarModalData } from "@/ui/components/Modal/CarModal/data";
+import {mockCarModalData} from "@/ui/components/Modal/CarModal/data";
 
 /* ===== Styles ===== */
 import "./Dashboard.css";
@@ -22,7 +22,7 @@ function ScopeChipGroup({
 }) {
     return (
         <div className="seg" role="tablist" aria-label="범위 전환" data-active={value}>
-            <div className="seg-thumb" aria-hidden="true" />
+            <div className="seg-thumb" aria-hidden="true"/>
             <button
                 type="button"
                 role="tab"
@@ -53,7 +53,7 @@ function Dashboard() {
     const [scope, setScope] = useState<"me" | "all">("me");
 
     // ✅ 현재 scope에 맞는 TreeModal 데이터 선택
-    const { tokens, trees, kpis, timeline } = treeModalDataByScope[scope];
+    const {tokens, trees, kpis, timeline} = treeModalDataByScope[scope];
 
     return (
         <div
@@ -66,19 +66,19 @@ function Dashboard() {
                 backgroundAttachment: "fixed",
             }}
         >
-            <Header />
+            <Header/>
 
             <main className="dash-main">
                 {/* ✅ Scope Toggle: lg-page 바깥에 위치 (overflow clipping 영향 X) */}
                 <div className="scope-dock--tr">
-                    <ScopeChipGroup value={scope} onChange={setScope} />
+                    <ScopeChipGroup value={scope} onChange={setScope}/>
                 </div>
 
                 <div className="lg-page">
                     {/* floating blobs */}
-                    <div className="lg-blob lg-a" />
-                    <div className="lg-blob lg-b" />
-                    <div className="lg-blob lg-c" />
+                    <div className="lg-blob lg-a"/>
+                    <div className="lg-blob lg-b"/>
+                    <div className="lg-blob lg-c"/>
 
                     <div className="lg-container">
                         {/* ===== Stats ===== */}
@@ -97,9 +97,9 @@ function Dashboard() {
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                     >
-                                        <circle cx="12" cy="12" r="9" />
-                                        <circle cx="12" cy="12" r="5" />
-                                        <circle cx="12" cy="12" r="1.5" />
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <circle cx="12" cy="12" r="5"/>
+                                        <circle cx="12" cy="12" r="1.5"/>
                                     </svg>
                                 </div>
                                 <div className="lg-stat-title">절약한 토큰 수</div>
@@ -125,9 +125,9 @@ function Dashboard() {
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                     >
-                                        <ellipse cx="12" cy="5" rx="7" ry="3" />
-                                        <path d="M19 5v6c0 1.66-3.13 3-7 3s-7-1.34-7-3V5" />
-                                        <path d="M19 11v6c0 1.66-3.13 3-7 3s-7-1.34-7-3v-6" />
+                                        <ellipse cx="12" cy="5" rx="7" ry="3"/>
+                                        <path d="M19 5v6c0 1.66-3.13 3-7 3s-7-1.34-7-3V5"/>
+                                        <path d="M19 11v6c0 1.66-3.13 3-7 3s-7-1.34-7-3v-6"/>
                                     </svg>
                                 </div>
                                 <div className="lg-stat-title">절감된 비용</div>
@@ -153,8 +153,8 @@ function Dashboard() {
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                     >
-                                        <path d="M11 4c2.5 0 7-1 9 1 2 2-1 6-3 8-2 2-6 5-8 3S7 10 9 8s1-4 2-4Z" />
-                                        <path d="M2 22s3-3 7-7 7-7 7-7" />
+                                        <path d="M11 4c2.5 0 7-1 9 1 2 2-1 6-3 8-2 2-6 5-8 3S7 10 9 8s1-4 2-4Z"/>
+                                        <path d="M2 22s3-3 7-7 7-7 7-7"/>
                                     </svg>
                                 </div>
                                 <div className="lg-stat-title">CO₂ 절감량</div>
@@ -195,10 +195,10 @@ function Dashboard() {
                                             fill="none"
                                             stroke="currentColor"
                                             strokeWidth="2"
-                                            style={{ marginLeft: 6 }}
+                                            style={{marginLeft: 6}}
                                         >
-                                            <path d="M5 12h14" />
-                                            <path d="m12 5 7 7-7 7" />
+                                            <path d="M5 12h14"/>
+                                            <path d="m12 5 7 7-7 7"/>
                                         </svg>
                                     </button>
                                 </div>
@@ -221,10 +221,10 @@ function Dashboard() {
                                             : "다음 나무까지 1,122토큰 남았습니다."}
                                     </div>
                                     <div className="lg-dot-row" aria-hidden="true">
-                                        <span className="lg-dot" />
-                                        <span className="lg-dot" />
-                                        <span className="lg-dot" />
-                                        <span className="lg-dot lg-dim-dot" />
+                                        <span className="lg-dot"/>
+                                        <span className="lg-dot"/>
+                                        <span className="lg-dot"/>
+                                        <span className="lg-dot lg-dim-dot"/>
                                     </div>
                                 </div>
                             </article>
@@ -255,10 +255,10 @@ function Dashboard() {
                                             fill="none"
                                             stroke="currentColor"
                                             strokeWidth="2"
-                                            style={{ marginLeft: 6 }}
+                                            style={{marginLeft: 6}}
                                         >
-                                            <path d="M5 12h14" />
-                                            <path d="m12 5 7 7-7 7" />
+                                            <path d="M5 12h14"/>
+                                            <path d="m12 5 7 7-7 7"/>
                                         </svg>
                                     </button>
                                 </div>
@@ -270,7 +270,7 @@ function Dashboard() {
                                         width="72"
                                         height="72"
                                     />
-                                    <div style={{ lineHeight: 1.65 }}>
+                                    <div style={{lineHeight: 1.65}}>
                                         <div className="lg-strong">전기를 아껴서</div>
                                         <div className="lg-em">
                                             {scope === "me" ? "서울 → 대전" : "서울 → 부산"}
@@ -288,7 +288,7 @@ function Dashboard() {
                         <section className="lg-card lg-ranking" aria-label="불용어 절약 TOP 5">
                             <div className="lg-ranking-head">
                                 <div className="lg-ranking-title">
-                                    <Icon icon="fluent-emoji:trophy" width={28} height={28} />
+                                    <Icon icon="fluent-emoji:trophy" width={28} height={28}/>
                                     <h2>불용어 절약 TOP 5</h2>
                                 </div>
                                 <span className="lg-pill">
@@ -300,7 +300,7 @@ function Dashboard() {
                                 {/* 1 */}
                                 <article className="lg-card lg-rank-card">
                                     <div className="lg-badge" title="1위">
-                                        <Icon icon="fluent-emoji:1st-place-medal" width={24} height={24} />
+                                        <Icon icon="fluent-emoji:1st-place-medal" width={24} height={24}/>
                                     </div>
                                     <h4>그런데</h4>
                                     <p>{scope === "me" ? "47회 절약" : "512회 절약"}</p>
@@ -308,7 +308,7 @@ function Dashboard() {
                                 {/* 2 */}
                                 <article className="lg-card lg-rank-card">
                                     <div className="lg-badge" title="2위">
-                                        <Icon icon="fluent-emoji:2nd-place-medal" width={24} height={24} />
+                                        <Icon icon="fluent-emoji:2nd-place-medal" width={24} height={24}/>
                                     </div>
                                     <h4>그리고</h4>
                                     <p>{scope === "me" ? "38회 절약" : "403회 절약"}</p>
@@ -316,7 +316,7 @@ function Dashboard() {
                                 {/* 3 */}
                                 <article className="lg-card lg-rank-card">
                                     <div className="lg-badge" title="3위">
-                                        <Icon icon="fluent-emoji:3rd-place-medal" width={24} height={24} />
+                                        <Icon icon="fluent-emoji:3rd-place-medal" width={24} height={24}/>
                                     </div>
                                     <h4>그래서</h4>
                                     <p>{scope === "me" ? "31회 절약" : "376회 절약"}</p>

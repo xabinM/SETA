@@ -10,6 +10,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20  # 기존 10에서 증가
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000  # 연결 누수 탐지
 
   jpa:
     hibernate:
@@ -19,6 +25,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    open-in-view: false
 
   sql:
     init:
@@ -53,6 +60,9 @@ springdoc:
 logging:
   pattern:
     level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"
+  level:
+    com.zaxxer.hikari: DEBUG
+    org.springframework.transaction: DEBUG
 
 gms:
   openai:

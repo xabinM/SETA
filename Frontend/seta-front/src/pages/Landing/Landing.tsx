@@ -19,11 +19,11 @@ const Landing: React.FC = () => {
     'however', 'therefore', 'furthermore', 'nevertheless', 'nonetheless', 'consequently', 'accordingly', 'specifically', 'particularly', 'especially', 'obviously', 'certainly', 'definitely', 'absolutely', 'completely', 'essentially', 'basically', 'fundamentally', 'generally', 'typically', 'normally', 'usually', 'frequently', 'occasionally', 'sometimes', 'meanwhile', 'otherwise', 'moreover', 'additionally', 'similarly', 'likewise', 'conversely', 'alternatively', 'subsequently', 'previously', 'ultimately', 'eventually', 'immediately', 'simultaneously', 'temporarily', 'permanently', 'approximately', 'relatively', 'significantly'
   ];
 
-  useEffect(() => {
-    gsap.config({ 
-      force3D: true,
-      nullTargetWarn: false 
-    });
+    useEffect(() => {
+        gsap.config({
+            force3D: true,
+            nullTargetWarn: false
+        });
 
     // 별 반짝임 애니메이션 (점점 많아지는 효과)
     animateStarfield();
@@ -32,10 +32,10 @@ const Landing: React.FC = () => {
     const mainTimeline = gsap.timeline({ delay: 5 });
     startMainSequence(mainTimeline);
 
-    return () => {
-      mainTimeline.kill();
-    };
-  }, [navigate]);
+        return () => {
+            mainTimeline.kill();
+        };
+    }, [navigate]);
 
   const animateStarfield = () => {
     // 불용어들을 3개 그룹으로 나누어 순차적으로 등장

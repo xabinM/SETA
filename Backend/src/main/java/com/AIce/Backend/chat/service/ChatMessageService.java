@@ -109,7 +109,9 @@ public class ChatMessageService {
                 .orElseThrow(() -> new IllegalArgumentException("user message not found: " + userMsgId));
         int turnIndex = userMessage.getTurnIndex();
 
-        String content = out.getContent() != null ? out.getContent().getFinal_text() : "";
+        String content = Optional.ofNullable(out.getResponse())
+                .map(LlmAnswerDoneV1.Response::getText)
+                .orElse("");
 
         chatMessagerepo.save(ChatMessage.builder()
             .chatRoom(room)

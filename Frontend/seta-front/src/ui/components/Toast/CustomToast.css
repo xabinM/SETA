@@ -30,6 +30,7 @@
     align-items: center;
     justify-content: center;
 }
+
 .toast-logo img {
     width: 22px;
     height: 23px;
@@ -40,12 +41,14 @@
     display: flex;
     flex-direction: column;
 }
+
 .toast-title {
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: 13px;
     line-height: 18px;
 }
+
 .toast-description {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
@@ -54,9 +57,19 @@
 
 /* 애니메이션 */
 @keyframes slideIn {
-    from { transform: translateX(120%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
+
 @keyframes fadeOut {
-    to { opacity: 0; transform: translateX(120%); }
+    to {
+        opacity: 0;
+        transform: translateX(120%);
+    }
 }

@@ -1,5 +1,5 @@
 ﻿/* ==== Layout vars ==== */
-:root{
+:root {
     --header-total: 103px;
     --container: min(1200px, 100vw);
 
@@ -16,9 +16,9 @@
     --card-radius: 18px;
 
     /* liquid gradients */
-    --grad-1: radial-gradient(60% 60% at 20% 10%, rgba(14,165,233,0.25), transparent 60%);
-    --grad-2: radial-gradient(50% 50% at 80% 20%, rgba(96,165,250,0.25), transparent 60%);
-    --grad-3: radial-gradient(40% 40% at 60% 70%, rgba(34,197,94,0.22), transparent 60%);
+    --grad-1: radial-gradient(60% 60% at 20% 10%, rgba(14, 165, 233, 0.25), transparent 60%);
+    --grad-2: radial-gradient(50% 50% at 80% 20%, rgba(96, 165, 250, 0.25), transparent 60%);
+    --grad-3: radial-gradient(40% 40% at 60% 70%, rgba(34, 197, 94, 0.22), transparent 60%);
 }
 
 *{ box-sizing: border-box; }
@@ -217,8 +217,8 @@ body{
     background: rgba(255,255,255,0.05);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0px 25px 50px -12px rgba(0,0,0,0.25);
-    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: clip;
     transition: transform .26s ease, box-shadow .26s ease, background .26s ease;
 }
@@ -432,8 +432,10 @@ body{
 }
 
 /* 반응형 보정 */
-@media (max-width:1280px){
-    .scope-dock--tr{ right: 20px; }
+@media (max-width: 1280px) {
+    .scope-dock--tr {
+        right: 20px;
+    }
 }
 
 @media (max-width:768px){
@@ -446,7 +448,7 @@ body{
 }
 
 /* === Glass Segmented Control ================================= */
-.seg{
+.seg {
     position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -458,49 +460,52 @@ body{
     margin-right: 8px;
 
     /* 유리감 배경/보더 */
-    background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
-    border: 1px solid rgba(255,255,255,0.18);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.35),
-            0 20px 40px -18px rgba(0,0,0,0.45);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 20px 40px -18px rgba(0, 0, 0, 0.45);
     overflow: hidden;
 }
 
 /* 움직이는 썸 */
-.seg-thumb{
+.seg-thumb {
     position: absolute;
     top: 2px;
     left: 2px;
     width: calc(50% - 2px);
     height: calc(100% - 4px);
     border-radius: 999px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.10));
-    box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.55),
-            0 6px 18px rgba(0,0,0,0.35);
-    transition: transform .28s cubic-bezier(.25,1,.5,1);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.10));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 6px 18px rgba(0, 0, 0, 0.35);
+    transition: transform .28s cubic-bezier(.25, 1, .5, 1);
     will-change: transform;
 }
 
 /* 상태에 따라 썸 이동 */
-.seg[data-active="me"]  .seg-thumb{ transform: translateX(0%); }
-.seg[data-active="all"] .seg-thumb{ transform: translateX(100%); }
+.seg[data-active="me"] .seg-thumb {
+    transform: translateX(0%);
+}
 
-.seg-btn{
+.seg[data-active="all"] .seg-thumb {
+    transform: translateX(100%);
+}
+
+.seg-btn {
     all: unset;
     position: relative;
     z-index: 1; /* 썸 위 텍스트 */
     display: grid;
     place-items: center;
-    color: rgba(233,236,242,0.9);
+    color: rgba(233, 236, 242, 0.9);
     font-weight: 800;
     font-size: 12px;
     letter-spacing: -0.01em;
     cursor: pointer;
     user-select: none;
-    text-shadow: 0 .25em .05em rgba(0,0,0,.12);
+    text-shadow: 0 .25em .05em rgba(0, 0, 0, .12);
     padding-inline: 6px;
     border-radius: 999px;
     transition: color .18s ease, transform .18s ease;

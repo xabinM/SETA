@@ -1,6 +1,6 @@
 import type React from "react";
 import {useEffect, useRef, useState, Children, isValidElement} from "react";
-import { createPortal } from "react-dom";
+import {createPortal} from "react-dom";
 import "./UserPersonalize.css";
 
 export type PersonalizeValues = {
@@ -18,7 +18,7 @@ type Props = {
     onSave: (values: PersonalizeValues) => void;
 };
 
-type ToneValue = "기본" | "친근한" | "정중한" | "유쾌한" | "차분한";
+type ToneValue = "기본" | "친근한" | "정중한" | "유쾌한" | "차분한"| "냉소적인";
 type ToneProps = React.PropsWithChildren<{ value: ToneValue }>;
 
 function hasValueProp(
@@ -203,7 +203,7 @@ export default function UserPersonalize({
                     </button>
                 </div>
 
-                <div className="pmodal-divider" />
+                <div className="pmodal-divider"/>
 
                 <div className="pmodal-body">
                     <label className="pfield">
@@ -223,7 +223,8 @@ export default function UserPersonalize({
                     <label className="pfield">
                         <div className="pfield-top">
                             <span className="pfield-label">역할/직무 설명</span>
-                            <span className="pfield-hint">예: 프론트엔드 개발자 · PM · 데이터 엔지니어 (최대 {LIMITS.roleDescription}자)</span>
+                            <span
+                                className="pfield-hint">예: 프론트엔드 개발자 · PM · 데이터 엔지니어 (최대 {LIMITS.roleDescription}자)</span>
                         </div>
                         <input
                             className="pinput"
@@ -282,6 +283,15 @@ export default function UserPersonalize({
                                 <img
                                     src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Dove.png"
                                     alt="Dove"
+                                    width="25"
+                                    height="25"
+                                />
+                            </Tone>
+
+                            <Tone value="냉소적인">
+                                <img
+                                    src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Cold%20Face.png"
+                                    alt="Cold Face"
                                     width="25"
                                     height="25"
                                 />
@@ -348,7 +358,7 @@ export default function UserPersonalize({
                     </label>
                 </div>
 
-                <div className="pmodal-divider" />
+                <div className="pmodal-divider"/>
 
                 <div className="pmodal-footer">
                     <div className="preview">

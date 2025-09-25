@@ -1,4 +1,4 @@
-import type { ChatRoom } from "./api";
+import type {ChatRoom} from "./api";
 
 const CHAT_ROOMS_KEY = "cache:chatRooms";
 

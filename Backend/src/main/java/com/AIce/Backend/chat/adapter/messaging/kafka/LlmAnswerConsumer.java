@@ -18,11 +18,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import static org.hibernate.internal.util.NullnessHelper.coalesce;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -43,22 +39,17 @@ public class LlmAnswerConsumer {
         try {
             LlmAnswerDeltaV1 msg = objectMapper.readValue(payload, LlmAnswerDeltaV1.class);
 
-            String traceId =
-                    coalesce(
-                            headerAsString(headers, "trace_id"),
-                            msg.getTrace_id(),
-                            Optional.ofNullable(tracer)
-                                    .map(Tracer::currentSpan)
-                                    .map(span -> span.context().traceId())
-                                    .orElse(null),
-                            ""
-                    );
-
             log.info("consume llm_answer.delta traceId={} topic={} roomId={} messageId={}",
-                    traceId, topic, msg.getRoom_id(), msg.getMessage_id());
+                    msg.getTrace_id(), topic, msg.getRoom_id(), msg.getMessage_id());
 
             // 프론트로 delta 이벤트 전송
-            hub.push(msg.getRoom_id(), "delta", msg);
+            hub.push(msg.getRoom_id(), "delta", Map.of(
+                    "trace_id", msg.getTrace_id(),
+                    "message_id", msg.getMessage_id(),
+                    "room_id", msg.getRoom_id(),
+                    "delta", msg.getDelta(),
+                    "timestamp", msg.getTimestampKST().toString()
+            ));
 
         } catch (Exception e) {
             log.warn("llm_answer.delta consume failed; payload={} cause={}", safeCut(payload), e.toString());
@@ -75,25 +66,23 @@ public class LlmAnswerConsumer {
         try {
             LlmAnswerDoneV1 msg = objectMapper.readValue(payload, LlmAnswerDoneV1.class);
 
-            String traceId =
-                    coalesce(
-                            headerAsString(headers, "trace_id"),
-                            msg.getTrace_id(),
-                            Optional.ofNullable(tracer)
-                                    .map(Tracer::currentSpan)
-                                    .map(span -> span.context().traceId())
-                                    .orElse(null),
-                            ""
-                    );
-
             log.info("consume llm_answer.done traceId={} topic={} roomId={} messageId={}",
-                    traceId, topic, msg.getRoom_id(), msg.getMessage_id());
+                    msg.getTrace_id(), topic, msg.getRoom_id(), msg.getMessage_id());
 
             // DB 저장
             chatMessageService.persistAssistantFromLlm(msg);
 
             // 프론트로 done 이벤트 전송
-            hub.push(msg.getRoom_id(), "done", msg);
+            hub.push(msg.getRoom_id(), "done", Map.of(
+                    "trace_id", msg.getTrace_id(),
+                    "message_id", msg.getMessage_id(),
+                    "room_id", msg.getRoom_id(),
+                    "response", msg.getResponse(),
+                    "usage", msg.getUsage(),
+                    "latency_ms", msg.getLatency_ms(),
+                    "schema_version", msg.getSchema_version(),
+                    "timestamp", msg.getTimestampKST().toString()
+            ));
 
         } catch (Exception e) {
             log.warn("llm_answer.done consume failed; payload={} cause={}", safeCut(payload), e.toString());

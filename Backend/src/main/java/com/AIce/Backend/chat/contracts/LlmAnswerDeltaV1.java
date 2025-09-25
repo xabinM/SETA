@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.*;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,15 +15,14 @@ public class LlmAnswerDeltaV1 {
     private String trace_id;
     private String message_id;
     private String room_id;
-    private Content content;
-    private String status;
+    private String delta;
+    private Long timestamp;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Content {
-        private String delta;
-        private int index;
+    public LocalDateTime getTimestampKST() {
+        if (timestamp == null) return null;
+        return LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(timestamp),
+                ZoneId.of("Asia/Seoul")
+        );
     }
 }

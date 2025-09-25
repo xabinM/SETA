@@ -24,7 +24,8 @@ public class SseController {
     @GetMapping(value = "/chat/{roomId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> subscribe(@PathVariable String roomId, @AuthenticationPrincipal Long userId) {
 
-        if (!chatRoomService.hasAccessToRoom(userId, roomId)) {
+        boolean hasAccess = chatRoomService.hasAccessToRoom(userId, roomId);
+        if (!hasAccess) {
             log.warn("SSE 접근 권한 없음 - userId: {}, roomId: {}", userId, roomId);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
        }
