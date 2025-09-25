@@ -119,7 +119,7 @@ frontend-build-docker:
     - frontend-build
 
 # ----------------
-# 5. Deploy backend
+# Deploy Backend
 # ----------------
 deploy-backend:
   stage: deploy
@@ -135,16 +135,14 @@ deploy-backend:
     - mkdir -p ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - eval "$(ssh-agent -s)"
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   script:
     # 파일 전송
-    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy-backend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
-    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.backend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    - rsync -avz -e "ssh -i <(echo \"$SSH_PRIVATE_KEY\") -o StrictHostKeyChecking=no" Devops/deploy-backend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    - rsync -avz -e "ssh -i <(echo \"$SSH_PRIVATE_KEY\") -o StrictHostKeyChecking=no" Devops/docker-compose.backend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
 
-    # .env 파일 생성 (모든 Backend 환경변수 포함)
+    # .env 파일 생성
     - |
-      ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
+      ssh -i <(echo "$SSH_PRIVATE_KEY") -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
       DB_USER=${DB_USER}
       DB_PASSWORD=${DB_PASSWORD}
       DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
@@ -167,12 +165,12 @@ deploy-backend:
       GMS_OPENAI_MODEL=${GMS_OPENAI_MODEL}
       GMS_OPENAI_TIMEOUT_MS=${GMS_OPENAI_TIMEOUT_MS}
       EOF"
-      
-      # 파일 실행
-    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-backend.sh && ./deploy-backend.sh '${DEPLOY_USER}'"
+
+    # 파일 실행
+    - ssh -i <(echo "$SSH_PRIVATE_KEY") -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-backend.sh && ./deploy-backend.sh '${DEPLOY_USER}'"
 
 # ----------------
-# 6. Deploy frontend
+# Deploy Frontend
 # ----------------
 deploy-frontend:
   stage: deploy
@@ -188,12 +186,10 @@ deploy-frontend:
     - mkdir -p ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - eval "$(ssh-agent -s)"
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   script:
-      # 파일 전송
-    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy-frontend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
-    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.frontend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    # 파일 전송
+    - rsync -avz -e "ssh -i <(echo \"$SSH_PRIVATE_KEY\") -o StrictHostKeyChecking=no" Devops/deploy-frontend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    - rsync -avz -e "ssh -i <(echo \"$SSH_PRIVATE_KEY\") -o StrictHostKeyChecking=no" Devops/docker-compose.frontend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
 
-      # 파일 실행
-    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-frontend.sh && ./deploy-frontend.sh '${FRONTEND_IMAGE}' '${DEPLOY_USER}'"
+    # 파일 실행
+    - ssh -i <(echo "$SSH_PRIVATE_KEY") -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-frontend.sh && ./deploy-frontend.sh '${FRONTEND_IMAGE}' '${DEPLOY_USER}'"
