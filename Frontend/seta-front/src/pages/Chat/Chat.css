@@ -672,3 +672,57 @@
         transform: translateY(0) scale(1);
     }
 }
+/* --- 채팅 리스트 전용: 스크롤은 되지만 스크롤바는 숨김 --- */
+.messages {
+    overflow-y: auto;
+    overscroll-behavior: contain;  /* 바디로 스크롤 전파 방지 */
+    -ms-overflow-style: none;      /* IE/old Edge */
+    scrollbar-width: none;         /* Firefox */
+    -webkit-overflow-scrolling: touch; /* iOS 관성 */
+}
+.messages::-webkit-scrollbar {
+    display: none;                 /* Chrome/Safari/new Edge */
+}
+
+/* --- 3 dots 로더 (skeleton 때만) --- */
+@keyframes dot-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: .5; }
+    30%           { transform: translateY(-3px); opacity: 1; }
+}
+.bubble .three-dots {
+    display: inline-flex;
+    align-items: center;
+    height: 1.25rem;
+}
+.bubble .three-dots > span {
+    display: inline-block;
+    width: .35rem; height: .35rem;
+    margin-right: .25rem;
+    border-radius: 9999px;
+    background: rgba(255,255,255,.85);
+    animation: dot-bounce 1.2s infinite ease-in-out;
+}
+.bubble .three-dots > span:nth-child(2) { animation-delay: .15s; }
+.bubble .three-dots > span:nth-child(3) { animation-delay: .30s; }
+
+/* --- 코드블록 Copy 버튼 (react-markdown 커스텀 pre 사용) --- */
+.codewrap { position: relative; }
+.copybtn {
+    position: absolute; top: 6px; right: 6px;
+    padding: 4px 8px; font-size: 12px;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,.2);
+    background: rgba(255,255,255,.08);
+    color: #e5e7eb; cursor: pointer;
+    backdrop-filter: blur(6px);
+    opacity: 0; transition: opacity .15s ease;
+}
+.codewrap:hover .copybtn { opacity: 1; }
+.bubble pre {
+    overflow-x: auto;
+    padding: 12px; border-radius: 12px;
+    background: rgba(0,0,0,.35);
+}
+.bubble code:not(pre code) {
+    padding: 0 4px; border-radius: 6px;
+    background: rgba(255,255,255,.10);
+}
