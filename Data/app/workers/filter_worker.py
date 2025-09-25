@@ -68,6 +68,7 @@ def run_filter_worker():
         room_id = ev.get("room_id") or (msg.key().decode() if msg.key() else None)
         message_id = ev.get("message_id")
         user_id = ev.get("user_id")
+        user_id = int(user_id) if user_id is not None else None
         text = ev.get("text", "")
         final_text = ev.get("final_text", "")
         mode = ev.get("mode", "pass")

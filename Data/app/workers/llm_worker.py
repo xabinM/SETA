@@ -62,6 +62,7 @@ def run_worker():
         chat_room_id = ev.get("room_id")
         message_id = ev.get("message_id")
         user_id = ev.get("user_id")
+        user_id = int(user_id) if user_id is not None else None
 
         # 입력 텍스트 확보: text → cleaned_text → original_text
         user_input = ev.get("text") or ev.get("cleaned_text") or ev.get("original_text") or ""
