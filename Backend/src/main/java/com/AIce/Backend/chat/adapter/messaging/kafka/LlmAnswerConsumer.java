@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import static org.hibernate.internal.util.NullnessHelper.coalesce;
 
 @Slf4j
 @Component
@@ -40,19 +39,8 @@ public class LlmAnswerConsumer {
         try {
             LlmAnswerDeltaV1 msg = objectMapper.readValue(payload, LlmAnswerDeltaV1.class);
 
-            String traceId =
-                    coalesce(
-                            headerAsString(headers, "trace_id"),
-                            msg.getTrace_id(),
-                            Optional.ofNullable(tracer)
-                                    .map(Tracer::currentSpan)
-                                    .map(span -> span.context().traceId())
-                                    .orElse(null),
-                            ""
-                    );
-
             log.info("consume llm_answer.delta traceId={} topic={} roomId={} messageId={}",
-                    traceId, topic, msg.getRoom_id(), msg.getMessage_id());
+                    msg.getTrace_id(), topic, msg.getRoom_id(), msg.getMessage_id());
 
             // 프론트로 delta 이벤트 전송
             hub.push(msg.getRoom_id(), "delta", Map.of(
@@ -78,19 +66,8 @@ public class LlmAnswerConsumer {
         try {
             LlmAnswerDoneV1 msg = objectMapper.readValue(payload, LlmAnswerDoneV1.class);
 
-            String traceId =
-                    coalesce(
-                            headerAsString(headers, "trace_id"),
-                            msg.getTrace_id(),
-                            Optional.ofNullable(tracer)
-                                    .map(Tracer::currentSpan)
-                                    .map(span -> span.context().traceId())
-                                    .orElse(null),
-                            ""
-                    );
-
             log.info("consume llm_answer.done traceId={} topic={} roomId={} messageId={}",
-                    traceId, topic, msg.getRoom_id(), msg.getMessage_id());
+                    msg.getTrace_id(), topic, msg.getRoom_id(), msg.getMessage_id());
 
             // DB 저장
             chatMessageService.persistAssistantFromLlm(msg);
