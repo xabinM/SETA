@@ -36,6 +36,10 @@ export type UIMsg = {
     turnIndex?: number;
 };
 
+export type SendMessageResponse = {
+    traceId: string
+};
+
 export async function getRoomMessages(roomId: string): Promise<UIMsg[]> {
     const raw = await http<ChatMessage[]>(
         `/chat/rooms/${roomId}/messages`,
@@ -54,4 +58,12 @@ export async function getRoomMessages(roomId: string): Promise<UIMsg[]> {
         createdAt: m.createdAt,
         turnIndex: m.turnIndex,
     }));
+}
+
+export async function sendMessageToServer(roomId: string, text: string) {
+    return http<SendMessageResponse>(`/chat/rooms/${roomId}/messages`, {
+        method: "POST",
+        body: { text },
+        auth: true,
+    });
 }

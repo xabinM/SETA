@@ -2,12 +2,14 @@ package com.AIce.Backend.dashboard.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import com.AIce.Backend.dashboard.dto.TokenStatsResponse;
 import com.AIce.Backend.dashboard.dto.TopDroppedTextDto;
 import com.AIce.Backend.dashboard.dto.TopReasonDto;
 import com.AIce.Backend.domain.dashboard.entity.*;
 import com.AIce.Backend.domain.dashboard.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
@@ -22,35 +24,33 @@ public class TokenStatsService {
     private final GlobalSavedTokenTotalRepository globalSavedTokenTotalRepository;
     private final ElasticsearchClient esClient;
 
-    // 로그인한 유저의 최신 daily 통계
-    public UserSavedTokenDaily getUserDaily(Long userId) {
-        return userSavedTokenDailyRepository
-                .findTopByUserIdOrderByWindowStartDesc(userId.toString())
-                .orElse(null);
-    }
-
-    // 로그인한 유저의 최신 total 통계
-    public UserSavedTokenTotal getUserTotal(Long userId) {
-        return userSavedTokenTotalRepository
+    @Transactional(readOnly = true)
+    public TokenStatsResponse getTokenStats(Long userId) throws IOException {
+        var userTotal = userSavedTokenTotalRepository
                 .findTopByUserIdOrderByStatDateDesc(userId.toString())
                 .orElse(null);
-    }
 
-    // 최신 글로벌 daily
-    public GlobalSavedTokenDaily getGlobalDaily() {
-        return globalSavedTokenDailyRepository
+        var userDaily = userSavedTokenDailyRepository
+                .findTopByUserIdOrderByWindowStartDesc(userId.toString())
+                .orElse(null);
+
+        var globalDaily = globalSavedTokenDailyRepository
                 .findTopByOrderByWindowStartDesc()
                 .orElse(null);
-    }
 
-    // 최신 글로벌 total
-    public GlobalSavedTokenTotal getGlobalTotal() {
-        return globalSavedTokenTotalRepository
+        var globalTotal = globalSavedTokenTotalRepository
                 .findTopByOrderByStatDateDesc()
                 .orElse(null);
+
+        var topDroppedTexts = getTopDroppedTexts(userId);
+        var topReasons = getTopReasons();
+
+        return TokenStatsResponse.from(
+                userTotal, userDaily, globalDaily, globalTotal,
+                topDroppedTexts, topReasons
+        );
     }
 
-    // 특정 유저의 top dropped_text 5개
     public List<TopDroppedTextDto> getTopDroppedTexts(Long userId) throws IOException {
         SearchResponse<Void> response = esClient.search(s -> s
                         .index("filter-logs")
@@ -72,7 +72,6 @@ public class TokenStatsService {
                 .toList();
     }
 
-    // 전체 기준 top reason_type 5개
     public List<TopReasonDto> getTopReasons() throws IOException {
         SearchResponse<Void> response = esClient.search(s -> s
                         .index("filter-logs")

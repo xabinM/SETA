@@ -18,14 +18,7 @@ public class TokenStatsController {
 
     @GetMapping
     @Operation(summary = "대시보드 KPI 조회", description = "로그인한 유저와 전체 유저의 Daily/Total 통계를 반환")
-    public Object getStats(@AuthenticationPrincipal Long userId) throws IOException {
-        return TokenStatsResponse.from(
-                tokenStatsService.getUserTotal(userId),
-                tokenStatsService.getUserDaily(userId),
-                tokenStatsService.getGlobalDaily(),
-                tokenStatsService.getGlobalTotal(),
-                tokenStatsService.getTopDroppedTexts(userId),
-                tokenStatsService.getTopReasons()
-                );
+    public TokenStatsResponse getStats(@AuthenticationPrincipal Long userId) throws IOException {
+        return tokenStatsService.getTokenStats(userId);
     }
 }
