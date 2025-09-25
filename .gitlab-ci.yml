@@ -66,8 +66,7 @@ frontend-build:
 # ----------------
 backend-build-docker:
   stage: build-docker
-  image:
-    name: docker:25
+  image: docker:25
   services:
     - name: docker:dind
       alias: docker
@@ -76,7 +75,8 @@ backend-build-docker:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
   before_script:
-    - apk add --no-cache openjdk17
+    - apk add --no-cache openjdk17 bash curl
+    - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
     # 1. JAR 빌드
@@ -97,8 +97,7 @@ backend-build-docker:
 # ----------------
 frontend-build-docker:
   stage: build-docker
-  image:
-    name: docker:25
+  image: docker:25
   services:
     - name: docker:dind
       alias: docker
@@ -107,6 +106,7 @@ frontend-build-docker:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
   before_script:
+    - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
     - docker build --build-arg VITE_API_BASE_URL="$VITE_API_BASE_URL" -t $FRONTEND_IMAGE ./Frontend/seta-front
