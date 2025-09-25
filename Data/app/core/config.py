@@ -6,7 +6,6 @@ from typing import Optional
 class Settings(BaseSettings):
     API_TITLE: str = "SETA ML API"
     API_VERSION: str = "1.0.0"
-    LLM_MODEL: str = "gpt-4o"
 
     # FastAPI 서버 설정
     API_HOST: str = Field("0.0.0.0", env="API_HOST")
@@ -21,7 +20,6 @@ class Settings(BaseSettings):
     KAFKA_TOPIC_OUT_LLM_DONE: str = "chat.llm.answer.done.v1"
 
     FILTER_MODEL_PATH: str = Field("/app/models/filter", env="FILTER_MODEL_PATH")
-    
     
     # Elasticsearch
     ELASTICSEARCH_URL: str = Field("http://elasticsearch:9200", env="ELASTICSEARCH_URL")
@@ -49,7 +47,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        extra = "ignore"
         case_sensitive = True
 
 

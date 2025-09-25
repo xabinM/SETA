@@ -22,7 +22,6 @@ pipeline {
         EMBED_MODEL_PATH  = credentials('embedding-model-path')
         EMBED_DIMS        = credentials('embed-dims')
         FILTER_MODEL_PATH = credentials('filter-model-path')
-        LLM_MODEL         = credentials('llm-model')
         KAFKA_BOOTSTRAP_SERVERS   = credentials('kafka-bootstrap-servers')
         KAFKA_TOPIC_IN_RAW        = credentials('kafka-topic-in-raw')
         KAFKA_TOPIC_FILTER_RESULT = credentials('kafka-topic-filter-result')
@@ -63,9 +62,7 @@ pipeline {
                             echo \"EMBED_MODEL_PATH=${EMBED_MODEL_PATH}\" >> .env &&
                             echo \"EMBED_DIMS=${EMBED_DIMS}\" >> .env &&
                             echo \"FILTER_MODEL_PATH=${FILTER_MODEL_PATH}\" >> .env &&
-                            echo \"LLM_MODEL=${LLM_MODEL}\">> .env &&
                             echo \"LOG_LEVEL=INFO\" >> .env &&
-
 
                             # === Kafka 관련 변수 추가 ===
                             echo \"KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}\" >> .env &&
