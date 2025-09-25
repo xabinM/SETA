@@ -18,10 +18,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
+import java.util.*;
 import static org.hibernate.internal.util.NullnessHelper.coalesce;
 
 @Slf4j
@@ -58,7 +55,13 @@ public class LlmAnswerConsumer {
                     traceId, topic, msg.getRoom_id(), msg.getMessage_id());
 
             // 프론트로 delta 이벤트 전송
-            hub.push(msg.getRoom_id(), "delta", msg);
+            hub.push(msg.getRoom_id(), "delta", Map.of(
+                    "trace_id", msg.getTrace_id(),
+                    "message_id", msg.getMessage_id(),
+                    "room_id", msg.getRoom_id(),
+                    "delta", msg.getDelta(),
+                    "timestamp", msg.getTimestampKST().toString()
+            ));
 
         } catch (Exception e) {
             log.warn("llm_answer.delta consume failed; payload={} cause={}", safeCut(payload), e.toString());
@@ -93,7 +96,16 @@ public class LlmAnswerConsumer {
             chatMessageService.persistAssistantFromLlm(msg);
 
             // 프론트로 done 이벤트 전송
-            hub.push(msg.getRoom_id(), "done", msg);
+            hub.push(msg.getRoom_id(), "done", Map.of(
+                    "trace_id", msg.getTrace_id(),
+                    "message_id", msg.getMessage_id(),
+                    "room_id", msg.getRoom_id(),
+                    "response", msg.getResponse(),
+                    "usage", msg.getUsage(),
+                    "latency_ms", msg.getLatency_ms(),
+                    "schema_version", msg.getSchema_version(),
+                    "timestamp", msg.getTimestampKST().toString()
+            ));
 
         } catch (Exception e) {
             log.warn("llm_answer.done consume failed; payload={} cause={}", safeCut(payload), e.toString());

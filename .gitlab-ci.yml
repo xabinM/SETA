@@ -44,7 +44,6 @@ frontend-build:
   stage: build
   image:
     name: node:20-alpine
-    pull_policy: if-not-present
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -67,9 +66,7 @@ frontend-build:
 # ----------------
 backend-build-docker:
   stage: build-docker
-  image:
-    name: docker:25
-    pull_policy: if-not-present
+  image: docker:25
   services:
     - name: docker:dind
       alias: docker
@@ -78,7 +75,8 @@ backend-build-docker:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
   before_script:
-    - apk add --no-cache openjdk17
+    - apk add --no-cache openjdk17 bash curl
+    - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
     # 1. JAR 빌드
@@ -99,9 +97,7 @@ backend-build-docker:
 # ----------------
 frontend-build-docker:
   stage: build-docker
-  image:
-    name: docker:25
-    pull_policy: if-not-present
+  image: docker:25
   services:
     - name: docker:dind
       alias: docker
@@ -110,6 +106,7 @@ frontend-build-docker:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
   before_script:
+    - docker info
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
     - docker build --build-arg VITE_API_BASE_URL="$VITE_API_BASE_URL" -t $FRONTEND_IMAGE ./Frontend/seta-front
@@ -126,7 +123,7 @@ frontend-build-docker:
 # ----------------
 deploy-backend:
   stage: deploy
-  image: alpine:latest
+  image: ubuntu:22.04
   needs:
     - job: backend-build-docker
   rules:
@@ -134,7 +131,7 @@ deploy-backend:
       when: always
     - when: never
   before_script:
-    - apk add --no-cache openssh-client bash rsync
+    - apt-get update && apt-get install -y openssh-client bash rsync
     - mkdir -p ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
@@ -179,7 +176,7 @@ deploy-backend:
 # ----------------
 deploy-frontend:
   stage: deploy
-  image: alpine:latest
+  image: ubuntu:22.04
   needs:
     - job: frontend-build-docker
   rules:
@@ -187,7 +184,7 @@ deploy-frontend:
       when: always
     - when: never
   before_script:
-    - apk add --no-cache openssh-client bash rsync
+    - apt-get update && apt-get install -y openssh-client bash rsync
     - mkdir -p ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
