@@ -4,9 +4,18 @@
     padding: 0;
 }
 
+/* 데스크톱: 페이지 스크롤 완전 제거 */
 .no-scroll-html, body.no-scroll {
-    overflow: hidden;
-    height: 100%;
+    overflow: hidden !important;
+    height: 100vh !important;
+    width: 100vw !important;
+}
+
+/* 모바일: 자연스러운 스크롤 허용 */
+body.mobile-scroll-enabled {
+    overflow: auto !important;
+    height: auto !important;
+    width: 100vw !important;
 }
 
 :root {
@@ -142,6 +151,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden; /* 핵심: 여기서 overflow 제어 */
 }
 
 .main-card {
@@ -153,6 +163,7 @@
     flex-direction: column;
     padding: 1rem;
     min-height: 0;
+    overflow: hidden; /* 핵심: 카드 내부 overflow 제어 */
 }
 
 .new-chat-btn {
@@ -180,10 +191,17 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    overflow: auto;
+    overflow-y: auto; /* 세로 스크롤만 허용 */
+    overflow-x: hidden; /* 가로 스크롤 완전 차단 */
     min-height: 0;
+    /* 스크롤바 숨기기 (데스크톱) */
     scrollbar-width: none;
     -ms-overflow-style: none;
+}
+
+.thread-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .thread-list::-webkit-scrollbar {
@@ -202,6 +220,7 @@
     background: transparent;
     border: none;
     transition: background .15s ease;
+    flex-shrink: 0; /* 핵심: 아이템 크기 고정 */
 }
 
 .thread-item[aria-current="page"] {
@@ -223,6 +242,11 @@
     align-items: center;
     gap: 0.75rem;
     flex-shrink: 0;
+}
+
+.sidebar-footer .sidebar-avatar {
+    width: 3rem;
+    height: 3rem;
 }
 
 .sidebar-footer .sidebar-avatar {
@@ -287,6 +311,7 @@
     justify-content: center;
     min-height: 0;
     padding: 1rem;
+    overflow: hidden; /* 핵심: 메인 영역 overflow 제어 */
 }
 
 .welcome-content {
@@ -372,15 +397,49 @@
     color: #A0A0B0;
 }
 
+.feature-card:hover {
+    background: var(--glass-bg-strong);
+    transform: translateY(-2px);
+}
+
+.feature-title {
+    font-family: 'Noto Sans KR';
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: #E0E0E0;
+    margin-bottom: 6px;
+}
+
+.feature-description {
+    font-family: 'Noto Sans KR';
+    font-weight: 400;
+    font-size: 0.92rem;
+    line-height: 1.3;
+    color: #A0A0B0;
+}
+
+/* 핵심 수정: messages 스크롤 제어 */
 .messages {
     flex: 1;
     min-height: 0;
     padding: 1rem;
-    overflow: auto;
+    overflow-y: auto; /* 세로 스크롤만 허용 */
+    overflow-x: hidden; /* 가로 스크롤 완전 차단 */
     display: flex;
     flex-direction: column;
     gap: 12px;
-    scrollbar-width: thin;
+
+    /* 스크롤은 되지만 스크롤바 숨김 */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -ms-overflow-style: none; /* IE/old Edge */
+    scrollbar-width: none; /* Firefox */
+    -webkit-overflow-scrolling: touch;
+}
+
+.messages::-webkit-scrollbar {
+    display: none;
 }
 
 .msg {
@@ -395,6 +454,9 @@
     justify-content: flex-start;
 }
 
+/*==========================
+=       BUBBLE BASE        =
+==========================*/
 .bubble {
     max-width: min(70ch, 75%);
     padding: 12px 14px;
@@ -403,9 +465,12 @@
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
     line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-word;
     color: #e5e7eb;
+
+    /* 마크다운 문단/리스트 마진 문제 해결 */
+    display: flow-root;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .msg.user .bubble {
@@ -413,6 +478,42 @@
     border-color: var(--glass-border-strong);
 }
 
+/* 마크다운 컨테이너 */
+.bubble .md {
+    line-height: 1.6;
+    font-size: .95rem;
+}
+
+.bubble .md > :first-child {
+    margin-top: 0;
+}
+
+.bubble .md > :last-child {
+    margin-bottom: 0;
+}
+
+.bubble .md p {
+    margin: .25rem 0 .75rem;
+}
+
+.bubble .md h1, .bubble .md h2, .bubble .md h3,
+.bubble .md h4, .bubble .md h5, .bubble .md h6 {
+    margin: .6rem 0 .4rem;
+    line-height: 1.25;
+}
+
+.bubble .md ul, .bubble .md ol {
+    margin: .5rem 0 .75rem;
+    padding-left: 1.2rem;
+}
+
+.bubble .md li {
+    margin: .2rem 0;
+}
+
+/*==========================
+=   INPUT / FOOTER AREA    =
+==========================*/
 .chat-footer {
     padding: 1rem;
     display: flex;
@@ -490,6 +591,9 @@
     justify-content: center;
 }
 
+/*==========================
+=       RESPONSIVE         =
+==========================*/
 @media (max-width: 1024px) {
     .container {
         grid-template-columns: clamp(280px, 30vw, 340px) minmax(0, 1fr);
@@ -515,33 +619,147 @@
 }
 
 @media (max-width: 768px) {
+    /* 모바일에서만 chat-stage를 relative로 변경 */
+    body.mobile-scroll-enabled .chat-stage {
+        position: relative !important;
+        top: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding-top: var(--header-total) !important; /* 추가 */
+    }
+
+    body.mobile-scroll-enabled .chat-canvas {
+        height: auto !important;
+        min-height: calc(100vh - var(--header-total)) !important;
+    }
+
     .container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        gap: .5rem;
-        padding: .5rem;
+        grid-template-columns: 1fr !important;
+        grid-template-rows: 1fr !important;
+        position: relative;
     }
 
     .sidebar {
-        height: auto;
-        max-height: 42vh;
-        order: 2;
+        position: fixed !important;
+        top: var(--header-total) !important; /* 0 → var(--header-total)로 변경 */
+        left: 0;
+        width: 85vw;
+        max-width: 320px;
+        height: calc(100vh - var(--header-total)) !important; /* 헤더 높이만큼 빼기 */
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        order: unset !important;
+        min-height: unset !important;
+        max-height: unset !important;
+        overflow: hidden !important;
     }
 
+    .sidebar.sidebar-open {
+        transform: translateX(0);
+    }
+
+    .sidebar-backdrop {
+        position: fixed;
+        top: var(--header-total) !important; /* 0 → var(--header-total)로 변경 */
+        left: 0;
+        width: 100vw;
+        height: calc(100vh - var(--header-total)) !important; /* 헤더 높이만큼 빼기 */
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-backdrop.sidebar-open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+
     .main-chat {
-        order: 1;
-        min-height: 58vh;
+        order: unset !important;
+        grid-column: 1;
+        grid-row: 1;
+        width: 100%;
     }
 
     .sidebar-main {
-        max-height: 24vh;
+        flex: 1;
+        min-height: 180px;
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .main-card {
+        min-height: 180px;
+        height: auto !important;
+        overflow: visible !important;
+        flex: none !important; /* flex 해제 */
+    }
+
+    .thread-list {
+        flex: none !important; /* flex 해제 */
+        overflow: visible !important; /* 스크롤 해제 */
+        min-height: auto !important;
+        max-height: none !important;
+        height: auto !important;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        /* 스크롤바 설정 제거 */
     }
 
     .feature-cards {
         grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto auto;
+        grid-template-rows: repeat(4, auto);
         gap: .5rem;
         max-width: 100%;
+    }
+
+    .feature-card {
+        width: 100%;
+        height: 80px;
+        padding: 1rem 1.25rem;
+    }
+
+    .welcome-title {
+        font-size: clamp(1.1rem, 4vw, 1.5rem);
+    }
+
+    .welcome-subtitle {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        margin-bottom: 1.5rem;
+    }
+
+    .chat-input {
+        font-size: 16px;
+    }
+
+    /* 채팅 영역도 스크롤 해제 */
+    .chat-main {
+        overflow: visible !important;
+        height: auto !important;
+        flex: none !important;
+        min-height: auto !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    .messages {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        flex: none !important;
+        min-height: auto !important;
+        padding: 1rem;
+    }
+
+    /* welcome-content도 자연스럽게 확장 */
+    .welcome-content {
+        max-width: 100%;
+        width: 100%;
     }
 
     .feature-card {
@@ -568,6 +786,7 @@
     .container {
         padding: .25rem;
         gap: .25rem;
+        min-height: calc(100vh - var(--header-total) - 0.5rem);
     }
 
     .sidebar-header, .chat-header {
@@ -585,21 +804,35 @@
     .feature-card {
         height: 74px;
     }
+
+    .sidebar {
+        min-height: 250px;
+        max-height: 50vh; /* 작은 화면에서 더 작게 */
+    }
+
+    .thread-list {
+        min-height: 120px;
+        max-height: 25vh; /* 작은 화면에서 더 작게 */
+    }
+
+    .messages {
+        max-height: 35vh; /* 작은 화면에서 더 작게 */
+    }
 }
 
-.sidebar-avatar .avatar-img,
-.chat-avatar .avatar-img {
+.sidebar-avatar .avatar-img, .chat-avatar .avatar-img {
     width: 80%;
     height: 80%;
 }
 
-/* Context menu (dark card) */
+/*==========================
+=     CONTEXT MENU UI      =
+==========================*/
 .ctxmenu {
     background: rgba(24, 24, 28, 0.95);
     border: 1px solid var(--glass-border);
     border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
     min-width: 220px;
     padding: 8px;
     backdrop-filter: blur(10px);
@@ -607,7 +840,6 @@
     animation: ctx-fade-in 120ms ease-out;
 }
 
-/* Single menu item */
 .ctxitem {
     width: 100%;
     display: flex;
@@ -633,7 +865,6 @@
     transform: translateY(1px);
 }
 
-/* Icon */
 .ctxitem__icon {
     width: 22px;
     height: 22px;
@@ -647,7 +878,6 @@
     color: #e5e7eb;
 }
 
-/* Danger variant */
 .ctxitem.danger {
     color: #fca5a5;
 }
@@ -661,7 +891,6 @@
     color: #fecaca;
 }
 
-/* small entrance anim */
 @keyframes ctx-fade-in {
     from {
         opacity: 0;
@@ -671,4 +900,86 @@
         opacity: 1;
         transform: translateY(0) scale(1);
     }
+}
+
+/*==========================
+=   3 dots typing loader   =
+==========================*/
+@keyframes dot-bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: .5;
+    }
+    30% {
+        transform: translateY(-3px);
+        opacity: 1;
+    }
+}
+
+.bubble .three-dots {
+    display: inline-flex;
+    align-items: center;
+    height: 1.25rem;
+}
+
+.bubble .three-dots > span {
+    display: inline-block;
+    width: .35rem;
+    height: .35rem;
+    margin-right: .25rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, .85);
+    animation: dot-bounce 1.2s infinite ease-in-out;
+}
+
+.bubble .three-dots > span:nth-child(2) {
+    animation-delay: .15s;
+}
+
+.bubble .three-dots > span:nth-child(3) {
+    animation-delay: .30s;
+}
+
+/*==========================
+=   Code block & Copy BTN  =
+==========================*/
+.codewrap {
+    position: relative;
+}
+
+.copybtn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, .2);
+    background: rgba(255, 255, 255, .08);
+    color: #e5e7eb;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+
+.codewrap:hover .copybtn {
+    opacity: 1;
+}
+
+.bubble pre {
+    overflow-x: auto;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, .35);
+}
+
+.bubble pre code.hljs {
+    background: transparent !important;
+}
+
+.bubble code:not(pre code) {
+    padding: 0 4px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .10);
 }
