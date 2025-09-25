@@ -161,21 +161,23 @@ const Landing: React.FC = () => {
     }, 3.5)
     
     .add(() => {
-      if (setaTextRef.current && logoRef.current) {
-        const logoRect = logoRef.current.getBoundingClientRect();
-        const centerX = logoRect.left + logoRect.width / 2;
-        const centerY = logoRect.top + logoRect.height / 2 - 80;
-        gsap.set(setaTextRef.current, {
-          position: 'absolute',
-          top: centerY,
-          left: centerX,
-          xPercent: -50,
-          yPercent: -50,
-          opacity: 1, 
-          scale: 1,
-        });
-      }
-    }, 5.0)
+  if (setaTextRef.current && logoRef.current) {
+    // 로고의 현재 위치를 기준으로 텍스트 위치 설정
+    const logoRect = logoRef.current.getBoundingClientRect();
+    const centerX = logoRect.left + logoRect.width / 2;
+    const centerY = logoRect.top + logoRect.height / 2 - 120; // -80을 -120으로 수정 (더 위로)
+    
+    gsap.set(setaTextRef.current, {
+      position: 'absolute',
+      top: centerY,
+      left: centerX,
+      xPercent: -50,
+      yPercent: -50,
+      opacity: 1, 
+      scale: 1,
+    });
+  }
+}, 5.0)
     
     // 6단계: SETA 글자들 개별 등장 효과
     .to('.letter', {
