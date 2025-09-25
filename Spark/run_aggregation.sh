@@ -9,7 +9,7 @@ cd "$(dirname "$0")" || exit
 echo "--- Running Spark batch aggregation at $(date) ---" >> cron.log
 
 # 3. 스파크 집계 작업을 실행하고, 그 과정과 결과를 모두 업무 일지에 자세히 기록
-/usr/local/bin/docker-compose run --rm spark-batch-processor \
+/usr/bin/docker-compose run --rm spark-batch-processor \
   /opt/bitnami/spark/bin/spark-submit \
   --master local[*] \
   --packages org.postgresql:postgresql:42.7.3 \
