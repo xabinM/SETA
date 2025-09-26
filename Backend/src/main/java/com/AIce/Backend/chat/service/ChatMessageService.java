@@ -71,7 +71,7 @@ public class ChatMessageService {
         if (turnIdx == 1) {
             log.info("[HandleMessage] trigger title update for roomId={}", roomId);
             // 요약 비동기 + 타임아웃 + 폴백 처리
-//            chatRoomTitleService.tryUpdateTitleAsync(roomUuid, text);
+            chatRoomTitleService.tryUpdateTitleAsync(roomUuid, text);
         }
 
         // raw 발행
