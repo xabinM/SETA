@@ -1,4 +1,4 @@
-import { http } from "@/shared/api/http";
+import {http} from "@/shared/api/http";
 
 export type UserStats = {
     userId: string;

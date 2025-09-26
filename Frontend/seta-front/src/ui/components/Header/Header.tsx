@@ -8,7 +8,7 @@ export default function Header() {
             aria-label="Main navigation"
             className="
         fixed left-1/2 -translate-x-1/2 z-[64]
-        flex items-center justify-between     /* 좌/우 정렬 + 세로 중앙 */
+        flex items-center justify-between
         text-white
         [&_a]:!text-white [&_a:visited]:!text-white
         [&_a]:!no-underline [&_a:hover]:!no-underline
@@ -16,7 +16,7 @@ export default function Header() {
       "
             style={{
                 top: "20px",
-                width: "457px",                 // 사이즈 그대로
+                width: "457px",
                 height: "66px",
                 padding: "0 24px",
                 background: "rgba(255, 255, 255, 0.05)",
@@ -26,12 +26,10 @@ export default function Header() {
                 boxShadow: "0px 25px 50px -12px rgba(0, 0, 0, 0.25)",
             }}
         >
-            {/* 왼쪽: 로고 */}
-            <Link
-                to="/home"
-                aria-label="SETA Home"
-                className="flex items-center gap-3 !text-white !no-underline"
-                style={{ textDecoration: "none", color: "#fff" }}
+            {/* 로고 영역: 클릭/포커스 불가(탭 이동도 없음) */}
+            <div
+                className="flex items-center gap-3 select-none cursor-default"
+                aria-label="SETA"
             >
         <span
             aria-hidden="true"
@@ -56,29 +54,47 @@ export default function Header() {
                 <span
                     className="font-bold"
                     style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        fontSize: "24px",
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "1.5rem",
+                        color: "#e5e7eb",
                         lineHeight: "32px",
-                        marginLeft: "10px"
+                        marginLeft: "15px",
                     }}
                 >
           SETA
         </span>
-            </Link>
+            </div>
 
-            {/* 오른쪽: 메뉴 (항상 분리되도록 space-x 사용) */}
+            {/* 네비게이션: 이 링크들만 이동 */}
             <div className="h-full flex items-center whitespace-nowrap space-x-6">
                 <Link
                     to="/chat"
                     className="transition-opacity opacity-90 hover:opacity-100"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "20px", lineHeight: "24px", marginRight: "70px", marginTop: "3px" }}
+                    style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "1.25rem",  // 20px
+                        lineHeight: "1.75rem",
+                        color: "#e5e7eb",
+                        marginRight: "70px",
+                        marginTop: "3px",
+                    }}
                 >
                     Chat
                 </Link>
                 <Link
                     to="/dashboard"
                     className="transition-opacity opacity-90 hover:opacity-100"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "20px", lineHeight: "24px", marginRight: "45px", marginTop: "3px" }}
+                    style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "1.25rem",
+                        lineHeight: "1.75rem",
+                        color: "#e5e7eb",
+                        marginRight: "30px",
+                        marginTop: "3px",
+                    }}
                 >
                     Dashboard
                 </Link>

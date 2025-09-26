@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { getDashboardKpi, type DashboardKpiResponse } from "./api";
+import {useState, useEffect} from "react";
+import {getDashboardKpi, type DashboardKpiResponse} from "./api";
 
 // 1토큰당 CO2 그램 단위 환산값 (백엔드 usage.py 상수와 동일)
 const CO2_G_PER_TOKEN = 0.0003; // 0.03 / 100
