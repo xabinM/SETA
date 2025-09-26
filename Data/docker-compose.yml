@@ -37,7 +37,6 @@ services:
       - CONSUMER_GROUP=filter-group
     depends_on:
       - elasticsearch
-      - kafka
     volumes:
       - .:/app
       - /home/ubuntu/models:/app/models
@@ -54,7 +53,6 @@ services:
       - CONSUMER_GROUP=filter-group
     depends_on:
       - elasticsearch
-      - kafka
     volumes:
       - .:/app
       - /home/ubuntu/models:/app/models
@@ -71,7 +69,6 @@ services:
       - CONSUMER_GROUP=filter-group
     depends_on:
       - elasticsearch
-      - kafka
     volumes:
       - .:/app
       - /home/ubuntu/models:/app/models
