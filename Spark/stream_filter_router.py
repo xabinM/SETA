@@ -54,7 +54,7 @@ def get_tracer():
         tracer = trace.get_tracer(__name__)
     return tracer
 
-BIT_INDEX = {"goodbye": 0, "apology": 1, "gratitude": 2, "greeting": 3, "call_only": 4, "reaction_only": 5, "no_meaning": 6}
+BIT_INDEX = {"goodbye": 0, "apology": 1, "thank": 2, "greeting": 3, "call_only": 4, "reaction_only": 5, "no_meaning": 6}
 CATEGORY_PRIORITY = {f["category"]: f.get("priority", 9999) for f in FILTER_CFG.get("filters", [])}
 MEANINGFUL_RE = re.compile(r"[0-9A-Za-z가-힣]")
 
@@ -148,7 +148,7 @@ def filter_once(text: str) -> Tuple[str, int, List[Tuple[str, str]]]:
     return filtered_text, mask, matched_word_details
 
 def top_category_from_mask(mask: int) -> str:
-    order = ["goodbye","apology","gratitude","greeting","call_only","reaction_only","no_meaning"]
+    order = ["goodbye","apology","thank","greeting","call_only","reaction_only","no_meaning"]
     for i, cat in enumerate(order):
         if mask & (1 << i):
             return cat
