@@ -2,9 +2,10 @@ from openai import OpenAI
 import os
 import tiktoken
 
+
 client = OpenAI(
-    api_key=os.getenv("GMS_API_KEY"),
-    base_url=os.getenv("GMS_API_URL", "https://gms.ssafy.io/gmsapi/api.openai.com/v1")
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("API_BASE", "https://gms.ssafy.io/gmsapi/api.openai.com/v1")
 )
 
 def count_tokens(model: str, messages: list[str]) -> int:

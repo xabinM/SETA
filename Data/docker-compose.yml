@@ -27,7 +27,7 @@ services:
       - esdata:/usr/share/elasticsearch/data
     restart: unless-stopped
 
-  filter-worker:
+  filter-worker-1:
     build: .
     command: python -m app.workers.filter_worker
     env_file:
@@ -40,11 +40,52 @@ services:
       - ./logs:/app/logs
     restart: unless-stopped
 
-  llm-worker:
+  filter-worker-2:
+    <<: *filter-worker-1
+
+  filter-worker-3:
+    <<: *filter-worker-1
+
+  llm-worker-gms:
     build: .
     command: python -m app.workers.llm_worker
     env_file:
       - .env
+    environment:
+      - API_BASE=https://gms.ssafy.io/gmsapi/api.openai.com/v1
+      - OPENAI_API_KEY=${GMS_API_KEY}
+    depends_on:
+      - elasticsearch
+    volumes:
+      - .:/app
+      - /home/ubuntu/models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  llm-worker-openai-1:
+    build: .
+    command: python -m app.workers.llm_worker
+    env_file:
+      - .env
+    environment:
+      - API_BASE=https://api.openai.com/v1
+      - OPENAI_API_KEY=${OPENAI_KEY_1}
+    depends_on:
+      - elasticsearch
+    volumes:
+      - .:/app
+      - /home/ubuntu/models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  llm-worker-openai-2:
+    build: .
+    command: python -m app.workers.llm_worker
+    env_file:
+      - .env
+    environment:
+      - API_BASE=https://api.openai.com/v1
+      - OPENAI_API_KEY=${OPENAI_KEY_2}
     depends_on:
       - elasticsearch
     volumes:
@@ -74,7 +115,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
-
 
 volumes:
   esdata:

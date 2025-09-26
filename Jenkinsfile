@@ -28,6 +28,8 @@ pipeline {
         KAFKA_TOPIC_IN_LLM        = credentials('kafka-topic-in-llm')
         KAFKA_TOPIC_OUT_LLM_DELTA = credentials('kafka-topic-out-llm-delta')
         KAFKA_TOPIC_OUT_LLM_DONE  = credentials('kafka-topic-out-llm-done')
+        OPENAI_KEY_1 = credentials('openai-key-1')
+        OPENAI_KEY_2 = credentials('openai-key-2')
     }
     
     stages {
@@ -57,6 +59,8 @@ pipeline {
                             echo \"REDIS_PORT=6379\" >> .env &&
                             echo \"GMS_API_KEY=${GMS_API_KEY}\" >> .env &&
                             echo \"GMS_API_URL=${GMS_API_URL}\" >> .env &&
+                            echo \"OPENAI_KEY_1=${OPENAI_KEY_1}\" >> .env &&
+                            echo \"OPENAI_KEY_2=${OPENAI_KEY_2}\" >> .env &&
                             echo \"ENVIRONMENT=${ENVIRONMENT}\" >> .env &&
                             echo \"EMBED_INDEX_NAME=${EMBED_INDEX_NAME}\" >> .env &&
                             echo \"EMBED_MODEL_PATH=${EMBED_MODEL_PATH}\" >> .env &&
