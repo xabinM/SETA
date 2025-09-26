@@ -2,11 +2,12 @@ import {memo, useState, useMemo} from "react";
 import Header from "@/ui/components/Header/Header";
 import {Icon} from "@iconify/react";
 import ChatBg from "@/assets/ChatBackground.png";
-import {useDashboardKpi, formatNumber, formatCost, formatCO2} from "@/features/dashboard/hooks";
+import {useDashboardKpi} from "@/features/dashboard/hooks";
+import {formatNumber, formatNumberRaw, formatCost, formatCO2} from "@/features/dashboard/utils";
 import TreeModal from "@/ui/components/Modal/TreeModal/TreeModal";
 import {treeModalDataByScope, calculateTreeStatus, calculateNextGoal, calculateCurrentStep, TREE_LEVELS} from "@/ui/components/Modal/TreeModal/data";
 import CarModal from "@/ui/components/Modal/CarModal/CarModal";
-import {createCarModalData} from "@/ui/components/Modal/CarModal/data";
+import {createCarModalData, getDestinationByTokens} from "@/ui/components/Modal/CarModal/data";
 import "./Dashboard.css";
 
 function ScopeChipGroup({
@@ -56,18 +57,48 @@ function Dashboard() {
     const [isCarModalOpen, setIsCarModalOpen] = useState(false);
     const [scope, setScope] = useState<"me" | "all">("me");
     const {data, loading, error, refetch} = useDashboardKpi();
-    const carModalData = useMemo(() => {
-        if (!data) return null;
-        try {
-            const currentStats = scope === "me"
-                ? (data.userTotal || getDefaultStats())
-                : (data.globalTotal || getDefaultStats());
-            return createCarModalData(currentStats.savedTokens || 0, scope);
-        } catch (error) {
-            console.warn('CarModal 데이터 생성 실패:', error);
-            return null;
-        }
-    }, [data, scope]);
+
+    const currentStats = scope === "me"
+    ? (data?.userTotal || getDefaultStats())
+    : (data?.globalTotal || getDefaultStats());
+const currentDaily = scope === "me"
+    ? (data?.userDaily || getDefaultDaily())
+    : (data?.globalDaily || getDefaultDaily());
+const currentSavedTokens = currentStats.savedTokens || 0;
+
+console.log('Dashboard currentStats 계산:', {
+    scope,
+    currentSavedTokens,
+    userTotal: data?.userTotal?.savedTokens,
+    globalTotal: data?.globalTotal?.savedTokens,
+    currentStats: currentStats.savedTokens,
+});
+
+    // 동적으로 목적지 정보 불러오기 (scope에 따른 currentSavedTokens 기반)
+    const destinationInfo = useMemo(() => {
+    console.log('destinationInfo 계산:', { scope, currentSavedTokens });
+    return getDestinationByTokens(currentSavedTokens, scope); // scope 파라미터 추가
+}, [currentSavedTokens, scope]);
+
+const carModalData = useMemo(() => {
+    if (!data) return null;
+    
+    console.log('carModalData 생성:', { 
+        scope, 
+        currentSavedTokens, 
+        userTotal: data.userTotal?.savedTokens,
+        globalTotal: data.globalTotal?.savedTokens 
+    });
+    
+    try {
+        const result = createCarModalData(currentSavedTokens, scope);
+        console.log('생성된 carModalData:', result);
+        return result;
+    } catch (error) {
+        console.warn('CarModal 데이터 생성 실패:', error);
+        return null;
+    }
+}, [currentSavedTokens, scope, data]);
 
     if (loading) {
         return (
@@ -151,28 +182,14 @@ function Dashboard() {
         );
     }
 
-    const currentStats = scope === "me"
-        ? (data.userTotal || getDefaultStats())
-        : (data.globalTotal || getDefaultStats());
-    const currentDaily = scope === "me"
-        ? (data.userDaily || getDefaultDaily())
-        : (data.globalDaily || getDefaultDaily());
-
-    console.log("Current scope:", scope);
-    console.log("Current stats:", currentStats);
-    console.log("Cost sum USD:", currentStats.costSumUsd);
 
     const baseData = treeModalDataByScope[scope];
-    const currentSavedTokens = currentStats.savedTokens || 0;
-
     const tokens = {
         current: currentSavedTokens,
         goal: calculateNextGoal(currentSavedTokens),
         step: calculateCurrentStep(currentSavedTokens)
     };
-
     const trees = calculateTreeStatus(currentSavedTokens);
-
     const kpis = baseData.kpis.map((kpi) => {
         if (kpi.label === "누적 비용 절약") {
             return {...kpi, value: formatCost(currentStats.costSumUsd || 0)};
@@ -182,21 +199,7 @@ function Dashboard() {
         }
         return kpi;
     });
-
     const timeline = baseData.timeline;
-    const getDestinationByTokens = (savedTokens: number = 0) => {
-        const powerKwh = savedTokens / 1000;
-        const maxKm = Math.round(powerKwh * 5.2);
-
-        if (maxKm < 150) return {destination: "대전", distance: "140km"};
-        if (maxKm < 320) return {destination: "대구", distance: "290km"};
-        if (maxKm < 500) return {destination: "부산", distance: "325km"};
-        if (maxKm < 1000) return {destination: "제주", distance: "470km"};
-        if (maxKm < 1200) return {destination: "상하이", distance: "950km"};
-        return {destination: "도쿄", distance: "1160km"};
-    };
-
-    const destinationInfo = getDestinationByTokens(currentSavedTokens);
 
     return (
         <div
@@ -241,11 +244,9 @@ function Dashboard() {
                                     </svg>
                                 </div>
                                 <div className="lg-stat-title">절약한 토큰 수</div>
-                                <div className="lg-stat-value">
-                                    {formatNumber(currentStats.savedTokens || 0)}
-                                </div>
+                                <div className="lg-stat-value">{formatNumber(currentStats.savedTokens || 0)}</div>
                                 <div className="lg-stat-delta">
-                                    +{formatNumber(currentDaily.savedTokens || 0)}개 (오늘)
+                                    +{formatNumberRaw(currentDaily.savedTokens || 0)}개 (오늘)
                                 </div>
                             </article>
 
@@ -293,7 +294,7 @@ function Dashboard() {
                                 </div>
                                 <div className="lg-stat-title">CO₂ 절감량</div>
                                 <div className="lg-stat-value">
-                                    {formatCO2(currentStats.savedTokens || 0)}
+                                    {formatCO2(currentSavedTokens)}
                                 </div>
                                 <div className="lg-stat-delta">
                                     +{formatCO2(currentDaily.savedTokens || 0)} (오늘)
@@ -343,8 +344,7 @@ function Dashboard() {
                                         height="72"
                                     />
                                     <div className="lg-strong">
-                                        절약한 토큰으로 {TREE_LEVELS.filter(level => currentSavedTokens >= level).length}그루의
-                                        나무를 심었어요!
+                                        절약한 토큰으로 {TREE_LEVELS.filter(level => currentSavedTokens >= level).length}그루의 나무를 심었어요!
                                     </div>
                                     <div className="lg-dim">
                                         다음 나무까지 {Math.max(0, tokens.goal - tokens.current)}토큰 남았습니다.
@@ -413,7 +413,6 @@ function Dashboard() {
                                 </div>
                             </article>
                         </section>
-
                         <section className="lg-card lg-ranking"
                                  aria-label={scope === "me" ? "개인 불용어 절약 TOP 5" : "전체 절약 이유 TOP 5"}>
                             <div className="lg-ranking-head">
@@ -485,6 +484,7 @@ function Dashboard() {
                     </div>
                 </div>
             </main>
+
 
             <TreeModal
                 open={isTreeModalOpen}

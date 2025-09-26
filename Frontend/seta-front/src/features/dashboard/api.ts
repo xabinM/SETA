@@ -7,6 +7,7 @@ export type UserStats = {
     savedTokens: number;
     tokenSum: number;
     costSumUsd: number;
+    co2?: number;  
 };
 
 export type DailyStats = {
@@ -15,6 +16,7 @@ export type DailyStats = {
     savedTokens: number;
     tokenSum: number;
     costSumUsd: number;
+    co2?: number;  
 };
 
 export type UserDailyStats = DailyStats & {
@@ -27,7 +29,9 @@ export type GlobalStats = {
     savedTokens: number;
     tokenSum: number;
     costSumUsd: number | null;
+    co2?: number;  
 };
+
 
 export type DroppedText = {
     droppedText: string;
@@ -55,3 +59,4 @@ export async function getDashboardKpi(signal?: AbortSignal): Promise<DashboardKp
         signal,
     });
 }
+
