@@ -1,10 +1,17 @@
-import {useEffect, useRef} from "react";
-import {createPortal} from "react-dom";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import "./TreeModal.css";
 import type {TreeModalProps, TimelineItem} from "./types"; 
 import { TREE_LEVELS } from "./data";
 
-export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}: TreeModalProps) {
+export default function TreeModal({
+                                      open,
+                                      onClose,
+                                      tokens,
+                                      trees,
+                                      kpis,
+                                      timeline,
+                                  }: TreeModalProps) {
     const shellRef = useRef<HTMLDivElement>(null);
 
     // 공유 기능
@@ -97,12 +104,9 @@ export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}
         document.body.removeChild(textArea);
     };
 
-    // ESC 닫기 + 스크롤락
     useEffect(() => {
         if (!open) return;
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
+        const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
         document.addEventListener("keydown", onKey);
         const prev = document.body.style.overflow;
         document.body.style.overflow = "hidden";
@@ -159,20 +163,48 @@ export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}
         }
     };
 
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText("https://www.seta.ai.kr");
+            setToast({
+                msg: "주소가 복사되었습니다!",
+                desc: "친구에게 바로 붙여넣기 해보세요 🚀",
+            });
+        } catch (err) {
+            console.error("Clipboard copy failed", err);
+            setToast({
+                msg: "복사 실패",
+                desc: "브라우저 보안 설정을 확인해주세요",
+            });
+        }
+    };
+
+    // 포털로 모달과 토스트를 함께 렌더
     return createPortal(
-        <div className="treemodal-backdrop" onMouseDown={(e) => {
-            if (e.target === e.currentTarget) onClose();
-        }}>
-            <div ref={shellRef} className="treemodal-shell" role="dialog" aria-modal="true"
-                 aria-labelledby="lgm-hero-title">
-                <main className="lgm-container">
-                    {/* X 버튼 */}
-                    <button type="button" className="lgm-close" aria-label="닫기" onClick={onClose}>
-                        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                            <path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" strokeWidth="2"
-                                  strokeLinecap="round"/>
-                        </svg>
-                    </button>
+        <>
+            <div
+                className="treemodal-backdrop"
+                onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+            >
+                <div
+                    ref={shellRef}
+                    className="treemodal-shell"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="lgm-hero-title"
+                >
+                    <main className="lgm-container">
+                        {/* X 버튼 */}
+                        <button type="button" className="lgm-close" aria-label="닫기" onClick={onClose}>
+                            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                                <path
+                                    d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                        </button>
 
                     {/* Hero */}
                     <section className="lgm-card" aria-labelledby="lgm-hero-title">
@@ -221,40 +253,53 @@ export default function TreeModal({open, onClose, tokens, trees, kpis, timeline}
                         </div>
                     </section>
 
-                    {/* Progress */}
-                    <section className="lgm-card" aria-labelledby="lgm-progress-title">
-                        <h2 id="lgm-progress-title" className="lgm-section-title">
-                            <img
-                                src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Maracas.png"
-                                alt="Maracas" width="25" height="25"/> 다음 나무까지의 진행상황
-                        </h2>
-                        <div className="lgm-progress">
-                            <div className="lgm-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100}
-                                 aria-valuenow={pct}>
-                                <div className="lgm-fill" style={{width: `${pct}%`}}/>
-                                <div className="lgm-pct">{pct}%</div>
-                            </div>
-                            <div className="lgm-meta">
-                                <div className="lgm-chip lgm-chip--green">현재: {fmt(tokens.current)}토큰</div>
-                                <div className="lgm-chip">목표: {fmt(tokens.goal)}토큰 ({fmt(remaining)}토큰 남음)</div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* KPIs */}
-                    <section className="lgm-kpis" aria-labelledby="lgm-kpi-title">
-                        <h2 id="lgm-kpi-title" className="lgm-section-title">절약 지표</h2>
-                        <div className="lgm-kpis-grid">
-                            {kpis.map((k, i) => (
-                                <div key={i} className="lgm-kpi" role="group" aria-label={k.ariaLabel || k.label}>
-                                    <div className="lgm-kpi__icon" aria-hidden="true">{k.icon}</div>
-                                    <div className="lgm-kpi__value">{k.value}</div>
-                                    <div className="lgm-kpi__label">{k.label}</div>
-                                    {k.hint && <div className="lgm-kpi__hint">{k.hint}</div>}
+                        {/* Progress */}
+                        <section className="lgm-card" aria-labelledby="lgm-progress-title">
+                            <h2 id="lgm-progress-title" className="lgm-section-title">
+                                <img
+                                    src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Maracas.png"
+                                    alt="Maracas"
+                                    width="25"
+                                    height="25"
+                                />{" "}
+                                다음 나무까지의 진행상황
+                            </h2>
+                            <div className="lgm-progress">
+                                <div
+                                    className="lgm-bar"
+                                    role="progressbar"
+                                    aria-valuemin={0}
+                                    aria-valuemax={100}
+                                    aria-valuenow={pct}
+                                >
+                                    <div className="lgm-fill" style={{ width: `${pct}%` }} />
+                                    <div className="lgm-pct">{pct}%</div>
                                 </div>
-                            ))}
-                        </div>
-                    </section>
+                                <div className="lgm-meta">
+                                    <div className="lgm-chip lgm-chip--green">현재: {fmt(tokens.current)}토큰</div>
+                                    <div className="lgm-chip">목표: {fmt(tokens.goal)}토큰 ({fmt(remaining)}토큰 남음)</div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* KPIs */}
+                        <section className="lgm-kpis" aria-labelledby="lgm-kpi-title">
+                            <h2 id="lgm-kpi-title" className="lgm-section-title">
+                                절약 지표
+                            </h2>
+                            <div className="lgm-kpis-grid">
+                                {kpis.map((k, i) => (
+                                    <div key={i} className="lgm-kpi" role="group" aria-label={k.ariaLabel || k.label}>
+                                        <div className="lgm-kpi__icon" aria-hidden="true">
+                                            {k.icon}
+                                        </div>
+                                        <div className="lgm-kpi__value">{k.value}</div>
+                                        <div className="lgm-kpi__label">{k.label}</div>
+                                        {k.hint && <div className="lgm-kpi__hint">{k.hint}</div>}
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
 
                     {/* Timeline */}
                     <section className="lgm-card" aria-labelledby="lgm-timeline-title">

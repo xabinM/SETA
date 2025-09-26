@@ -39,37 +39,110 @@ function AddIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
-type CtxMenu = { open: boolean; x: number; y: number; roomId: string | null };
-
 export default function Chat() {
     const navigate = useNavigate();
-    const { threadId } = useParams<{ threadId?: string }>(); // /chat 에선 undefined
+    const { threadId } = useParams<{ threadId?: string }>();
     const activeId = threadId ?? null;
-
-    // 사용자 정보
     const [me, setMe] = useState<Me | null>(null);
     const [meLoading, setMeLoading] = useState(false);
-
-    // 방 목록/에러/로딩/생성/삭제
     const [rooms, setRooms] = useState<ChatRoom[]>(() => loadCachedRooms());
     const [loadingRooms, setLoadingRooms] = useState(false);
     const [roomsError, setRoomsError] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
-
-    // 컨텍스트 메뉴
-    const [ctx, setCtx] = useState<CtxMenu>({ open: false, x: 0, y: 0, roomId: null });
-
-    // 유저 메뉴/개인화 모달
     const footerRef = useRef<HTMLDivElement>(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [personalizeOpen, setPersonalizeOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    
-    // /chat 입력창 상태 (시드)
     const [seed, setSeed] = useState("");
     const [ime, setIme] = useState(false);
+    const titleCheckTimersRef = useRef<Record<string, number[]>>({});
+    const titleCheckInFlightRef = useRef<Record<string, boolean>>({});
+    const cancelTitleChecks = useCallback((roomId?: string) => {
+        if (!roomId) return;
+        const arr = titleCheckTimersRef.current[roomId] ?? [];
+        arr.forEach((t) => clearTimeout(t));
+        delete titleCheckTimersRef.current[roomId];
+        delete titleCheckInFlightRef.current[roomId];
+    }, []);
+
+    const applyRoomsIfChanged = useCallback(
+        (fresh: ChatRoom[], targetRoomId: string) => {
+            const freshMap = new Map(fresh.map((r) => [r.chatRoomId, r]));
+            const oldMap = new Map(rooms.map((r) => [r.chatRoomId, r]));
+
+            const freshTarget = freshMap.get(targetRoomId);
+            const oldTarget = oldMap.get(targetRoomId);
+
+            if (!freshTarget || !oldTarget) return false;
+
+            const freshTitle = freshTarget.title?.trim() ?? "";
+            const oldTitle = oldTarget.title?.trim() ?? "";
+            if (freshTitle && freshTitle !== oldTitle) {
+                const next = rooms.map((r) => (r.chatRoomId === targetRoomId ? { ...r, title: freshTarget.title } : r));
+                setRooms(next);
+                saveCachedRooms(next);
+                return true;
+            }
+            return false;
+        },
+        [rooms]
+    );
+
+    const fetchOnceAndMaybeUpdate = useCallback(
+        async (roomId: string) => {
+            if (titleCheckInFlightRef.current[roomId]) return false;
+            titleCheckInFlightRef.current[roomId] = true;
+            try {
+                const fresh = await getChatRooms();
+                return applyRoomsIfChanged(fresh, roomId);
+            } catch {
+                return false;
+            } finally {
+                titleCheckInFlightRef.current[roomId] = false;
+            }
+        },
+        [applyRoomsIfChanged]
+    );
+
+    const scheduleTitleChecks = useCallback(
+        (roomId: string) => {
+            cancelTitleChecks(roomId);
+
+            const delays = [10_000, 20_000, 30_000];
+            const timeouts: number[] = [];
+
+            delays.forEach((delay, idx) => {
+                const tid = window.setTimeout(async () => {
+                    const updated = await fetchOnceAndMaybeUpdate(roomId);
+                    if (updated) {
+                        cancelTitleChecks(roomId);
+                    } else {
+                        if (idx === delays.length - 1) cancelTitleChecks(roomId);
+                    }
+                }, delay);
+                timeouts.push(tid);
+            });
+
+            titleCheckTimersRef.current[roomId] = timeouts;
+        },
+        [cancelTitleChecks, fetchOnceAndMaybeUpdate]
+    );
+
+    useEffect(() => {
+        const onTitleCheck = (e: Event) => {
+            const detail = (e as CustomEvent<{ roomId?: string }>).detail;
+            const roomId = detail?.roomId;
+            if (!roomId) return;
+            scheduleTitleChecks(roomId);
+        };
+        window.addEventListener("seta:title:check", onTitleCheck as EventListener);
+        return () => {
+            window.removeEventListener("seta:title:check", onTitleCheck as EventListener);
+            Object.keys(titleCheckTimersRef.current).forEach((rid) => cancelTitleChecks(rid));
+        };
+    }, [scheduleTitleChecks, cancelTitleChecks]);
 
     const onOpenPersonalize = useCallback(() => {
         setMenuOpen(false);
@@ -80,7 +153,6 @@ export default function Chat() {
         navigate("/home", { replace: true });
     }, [navigate]);
 
-    // /api/auth/me
     useEffect(() => {
         const ac = new AbortController();
         (async () => {
@@ -98,7 +170,6 @@ export default function Chat() {
         return () => ac.abort();
     }, []);
 
-    // 새 방 생성
     const onCreateRoom = useCallback(async () => {
         if (creating) return;
         try {
@@ -118,7 +189,6 @@ export default function Chat() {
         }
     }, [creating, navigate]);
 
-    // 새 방 생성 + 시드 전송
     const onCreateRoomAndSeed = useCallback(
         async (text: string) => {
             const trimmed = text.trim();
@@ -144,50 +214,39 @@ export default function Chat() {
         [creating, navigate]
     );
 
-    // 스크롤 처리 - 하나의 useEffect로 통합 및 mobile-scroll-enabled 클래스 추가
     useEffect(() => {
         const updateScrollBehavior = () => {
             const isMobile = window.innerWidth <= 768;
-            
             if (isMobile) {
-                // 모바일: 스크롤 허용
                 document.body.classList.remove("no-scroll");
                 document.documentElement.classList.remove("no-scroll-html");
                 document.body.classList.add("mobile-scroll-enabled");
             } else {
-                // 데스크톱: 스크롤 잠금
                 document.body.classList.remove("mobile-scroll-enabled");
                 document.body.classList.add("no-scroll");
                 document.documentElement.classList.add("no-scroll-html");
             }
         };
 
-        // 초기 설정
         updateScrollBehavior();
-        
-        // 리사이즈 이벤트 리스너
-        window.addEventListener('resize', updateScrollBehavior);
-        
+        window.addEventListener("resize", updateScrollBehavior);
+
         return () => {
             document.body.classList.remove("no-scroll", "mobile-scroll-enabled");
             document.documentElement.classList.remove("no-scroll-html");
-                     window.removeEventListener('resize', updateScrollBehavior);
+            window.removeEventListener("resize", updateScrollBehavior);
         };
     }, []);
 
-
     useEffect(() => {
-    const checkMobile = () => {
-        setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-}, []);
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
 
-    // 서버에서 방 목록 최신화
     useEffect(() => {
         let mounted = true;
         (async () => {
@@ -206,58 +265,34 @@ export default function Chat() {
         return () => {
             mounted = false;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // 방 이동
     const openThread = (id: string) => {
         if (activeId === id) return;
         navigate(`/chat/${id}`);
     };
 
-    // 우클릭 컨텍스트 메뉴
-    const onRightClickRoom = (e: React.MouseEvent, id: string) => {
-        e.preventDefault();
-        const MENU_W = 132;
-        const MENU_H = 36;
-        const pad = 8;
-        const x = Math.min(e.clientX, window.innerWidth - MENU_W - pad);
-        const y = Math.min(e.clientY, window.innerHeight - MENU_H - pad);
-        setCtx({ open: true, x, y, roomId: id });
-    };
-
-    // ESC로 컨텍스트 메뉴 닫기
-    useEffect(() => {
-        if (!ctx.open) return;
-        const onEsc = (e: KeyboardEvent) => {
-            if (e.key === "Escape") setCtx({ open: false, x: 0, y: 0, roomId: null });
-        };
-        window.addEventListener("keydown", onEsc);
-        return () => window.removeEventListener("keydown", onEsc);
-    }, [ctx.open]);
-
-    // 방 삭제
-    const onDeleteRoom = useCallback(async () => {
-        if (!ctx.roomId) return;
-        const roomId = ctx.roomId;
-        setCtx({ open: false, x: 0, y: 0, roomId: null });
-
-        try {
-            setDeletingId(roomId);
-            await deleteChatRoom(roomId);
-            setRooms((prev) => {
-                const next = prev.filter((r) => r.chatRoomId !== roomId);
-                saveCachedRooms(next);
-                return next;
-            });
-            if (activeId === roomId) navigate("/chat", { replace: true });
-        } catch (e) {
-            console.error(e);
-            alert("채팅방 삭제에 실패했습니다.");
-        } finally {
-            setDeletingId(null);
-        }
-    }, [ctx.roomId, navigate, activeId]);
+    const deleteRoomById = useCallback(
+        async (roomId: string) => {
+            if (!window.confirm("이 채팅방을 삭제하시겠어요?")) return;
+            try {
+                setDeletingId(roomId);
+                await deleteChatRoom(roomId);
+                setRooms((prev) => {
+                    const next = prev.filter((r) => r.chatRoomId !== roomId);
+                    saveCachedRooms(next);
+                    return next;
+                });
+                if (activeId === roomId) navigate("/chat", { replace: true });
+            } catch (e) {
+                console.error(e);
+                alert("채팅방 삭제에 실패했습니다.");
+            } finally {
+                setDeletingId(null);
+            }
+        },
+        [activeId, navigate]
+    );
 
     return (
         <div
@@ -275,28 +310,20 @@ export default function Chat() {
             <div className="chat-stage">
                 <div className="chat-canvas">
                     <div className="container">
-                        {/* 모바일용 백드롭 */}
                         {isMobile && (
-                            <div 
-                                className={`sidebar-backdrop ${sidebarOpen ? 'sidebar-open' : ''}`}
-                                onClick={() => setSidebarOpen(false)}
-                            />
+                            <div className={`sidebar-backdrop ${sidebarOpen ? "sidebar-open" : ""}`} onClick={() => setSidebarOpen(false)} />
                         )}
-                        
-                        {/* Sidebar */}
-                        <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
+
+                        <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
                             <div className="sidebar-header">
                                 <div className="sidebar-user">
-                                    <div className="sidebar-avatar">
-                                        <img src={Logo} alt="SETA" className="avatar-img" />
-                                    </div>
-                                    <div className="sidebar-user-info">
-                                        <h3>SETA</h3>
+                                    <div className="sidebar-user-info-sidebar">
+                                        <h3>CHAT</h3>
                                     </div>
                                 </div>
-                                <button 
-                                    className="sidebar-menu-btn" 
-                                    onClick={() => isMobile ? setSidebarOpen(false) : undefined}
+                                <button
+                                    className="sidebar-menu-btn"
+                                    onClick={() => (isMobile ? setSidebarOpen(false) : undefined)}
                                     aria-label={isMobile ? "사이드바 닫기" : "sidebar menu"}
                                 >
                                     <span className="material-icons">{isMobile ? "close" : "more_horiz"}</span>
@@ -317,7 +344,6 @@ export default function Chat() {
                                         {creating ? "생성 중…" : "새로운 채팅 시작하기"}
                                     </button>
 
-                                    {/* 서버 채팅방 목록 */}
                                     <div className="thread-list">
                                         {rooms.length === 0 && loadingRooms && (
                                             <div className="thread-item" style={{ opacity: 0.7 }}>
@@ -335,7 +361,6 @@ export default function Chat() {
                                                 key={r.chatRoomId}
                                                 className="thread-item"
                                                 onClick={() => openThread(r.chatRoomId)}
-                                                onContextMenu={(e) => onRightClickRoom(e, r.chatRoomId)}
                                                 aria-current={r.chatRoomId === activeId ? "page" : undefined}
                                                 title={r.title || "(제목 없음)"}
                                                 style={{
@@ -357,6 +382,46 @@ export default function Chat() {
                                                 >
                                                     {r.title || "(제목 없음)"}
                                                 </div>
+
+                                                <button
+                                                    type="button"
+                                                    className="thread-delete-btn"
+                                                    aria-label="채팅방 삭제"
+                                                    title="삭제"
+                                                    disabled={deletingId === r.chatRoomId}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); // 항목 클릭(열기) 방지
+                                                        void deleteRoomById(r.chatRoomId);
+                                                    }}
+                                                >
+                                                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+                                                        <path
+                                                            d="M9 3h6a1 1 0 0 1 1 1v1h4"
+                                                            fill="none"
+                                                            stroke="#E0E0E0"
+                                                            strokeWidth="1.6"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                        />
+                                                        <path
+                                                            d="M4 5h16M6 5l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"
+                                                            fill="none"
+                                                            stroke="#E0E0E0"
+                                                            strokeWidth="1.6"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                        />
+                                                        <path
+                                                            d="M10 9v8M14 9v8"
+                                                            fill="none"
+                                                            stroke="#E0E0E0"
+                                                            strokeWidth="1.6"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                        />
+                                                    </svg>
+                                                </button>
+
                                                 <div style={{ width: 4, flex: "0 0 4px" }} />
                                             </div>
                                         ))}
@@ -396,22 +461,14 @@ export default function Chat() {
                             </div>
                         </aside>
 
-                        {/* ===== Right: threadId 있으면 Outlet(=ChatRoom), 없으면 웰컴 ===== */}
                         <main className="main-chat">
                             <div className="chat-header">
                                 <div className="chat-user">
                                     {isMobile && (
-                                        <button 
-                                            className="chat-menu-btn" 
-                                            onClick={() => setSidebarOpen(true)}
-                                            aria-label="사이드바 열기"
-                                        >
+                                        <button className="chat-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="사이드바 열기">
                                             <span className="material-icons">menu</span>
                                         </button>
                                     )}
-                                    <div className="chat-avatar"><img src={Logo} alt="SETA Assistant"
-                                                                      className="avatar-img"/></div>
-                                    <div className="chat-user-info"><h3>SETA Assistant</h3></div>
                                     <div className="chat-avatar">
                                         <img src={Logo} alt="SETA Assistant" className="avatar-img" />
                                     </div>
@@ -430,9 +487,7 @@ export default function Chat() {
                                 <>
                                     <div className="chat-main">
                                         <div className="welcome-content">
-                                            <div className="welcome-logo">
-                                                <img src={Logo} alt="SETA Logo" />
-                                            </div>
+                                            <div className="welcome-logo"></div>
                                             <div className="welcome-title">안녕하세요!</div>
                                             <div className="welcome-subtitle">SETA Assistant입니다. 무엇을 도와드릴까요?</div>
                                             <div className="feature-cards">
@@ -440,7 +495,7 @@ export default function Chat() {
                                                     <div className="feature-title">💡 프로젝트 아이디어</div>
                                                     <div className="feature-description">새로운 프로젝트 아이디어를 제안해드릴까요?</div>
                                                 </div>
-                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("리액트/타입스크립트 이슈 상담할게요")}>
+                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("기술적인 문제에 대해서 궁금해요")}>
                                                     <div className="feature-title">💻 기술 상담</div>
                                                     <div className="feature-description">기술적인 질문이나 문제해결을 도와드릴게요</div>
                                                 </div>
@@ -456,7 +511,6 @@ export default function Chat() {
                                         </div>
                                     </div>
 
-                                    {/* /chat 하단 입력바: 엔터=새 방 생성 후 시드 전송 */}
                                     <div className="chat-footer">
                                         <div className="chat-input-container">
                                             <input
@@ -472,12 +526,7 @@ export default function Chat() {
                                                 onCompositionStart={() => setIme(true)}
                                                 onCompositionEnd={() => setIme(false)}
                                             />
-                                            <button
-                                                className="send-btn"
-                                                aria-label="send"
-                                                onClick={() => onCreateRoomAndSeed(seed)}
-                                                disabled={!seed.trim() || creating}
-                                            >
+                                            <button className="send-btn" aria-label="send" onClick={() => onCreateRoomAndSeed(seed)} disabled={!seed.trim() || creating}>
                                                 <span className="material-icons">send</span>
                                             </button>
                                         </div>
@@ -489,37 +538,6 @@ export default function Chat() {
                     </div>
                 </div>
             </div>
-
-            {/* Context menu (우클릭) */}
-            {ctx.open && (
-                <div onClick={() => setCtx({ open: false, x: 0, y: 0, roomId: null })} style={{ position: "fixed", inset: 0, zIndex: 9999 }}>
-                    <div
-                        role="menu"
-                        aria-label="채팅방 메뉴"
-                        className="ctxmenu"
-                        style={{ top: ctx.y, left: ctx.x, position: "fixed" }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <button type="button" onClick={onDeleteRoom} disabled={deletingId === ctx.roomId} className="ctxitem danger">
-              <span className="ctxitem__icon" aria-hidden>
-                <svg viewBox="0 0 24 24" width="18" height="18">
-                  <path d="M9 3h6a1 1 0 0 1 1 1v1h4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  <path
-                      d="M4 5h16M6 5l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                  />
-                  <path d="M10 9v8M14 9v8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-                            <span className="ctxitem__label">{deletingId === ctx.roomId ? "Deleting…" : "Delete"}</span>
-                        </button>
-                    </div>
-                </div>
-            )}
 
             <UserPersonalizeContainer open={personalizeOpen} onClose={() => setPersonalizeOpen(false)} />
         </div>

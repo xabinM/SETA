@@ -1,39 +1,14 @@
-import {Link, useNavigate} from "react-router-dom";
+import { Link } from "react-router-dom";
 import logoSrc from "@/assets/seta.png";
-import {logout} from "@/features/auth/api";
-import {tokenStore} from "@/shared/auth/token";
-import {useState} from "react";
-import {ApiError} from "@/shared/api/http";
 
 export default function Header() {
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-
-    const handleLogout = async () => {
-        if (loading) return;
-        setLoading(true);
-        try {
-            await logout();
-        } catch (err) {
-            if (err instanceof ApiError) {
-                console.warn(`logout API failed: ${err.status} ${err.message}`);
-            } else {
-                console.warn("logout error:", err);
-            }
-        } finally {
-            tokenStore.clear();
-            setLoading(false);
-            navigate("/home", {replace: true});
-        }
-    };
-
     return (
         <nav
             role="navigation"
             aria-label="Main navigation"
             className="
         fixed left-1/2 -translate-x-1/2 z-[64]
-        flex items-end justify-between gap-8
+        flex items-center justify-between     /* 좌/우 정렬 + 세로 중앙 */
         text-white
         [&_a]:!text-white [&_a:visited]:!text-white
         [&_a]:!no-underline [&_a:hover]:!no-underline
@@ -41,9 +16,9 @@ export default function Header() {
       "
             style={{
                 top: "20px",
-                width: "457px",
+                width: "457px",                 // 사이즈 그대로
                 height: "66px",
-                padding: "0 33px 17px",
+                padding: "0 24px",
                 background: "rgba(255, 255, 255, 0.05)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
                 borderRadius: "9999px",
@@ -51,11 +26,12 @@ export default function Header() {
                 boxShadow: "0px 25px 50px -12px rgba(0, 0, 0, 0.25)",
             }}
         >
+            {/* 왼쪽: 로고 */}
             <Link
                 to="/home"
                 aria-label="SETA Home"
-                className="flex items-center gap-6 !text-white !no-underline"
-                style={{width: "100px", height: "33px", textDecoration: "none", color: "#fff"}}
+                className="flex items-center gap-3 !text-white !no-underline"
+                style={{ textDecoration: "none", color: "#fff" }}
             >
         <span
             aria-hidden="true"
@@ -74,7 +50,7 @@ export default function Header() {
               alt=""
               className="select-none"
               draggable={false}
-              style={{width: "22px", height: "23px", objectFit: "contain"}}
+              style={{ width: "22px", height: "23px", objectFit: "contain" }}
           />
         </span>
                 <span
@@ -83,47 +59,29 @@ export default function Header() {
                         fontFamily: "'Space Grotesk', sans-serif",
                         fontSize: "24px",
                         lineHeight: "32px",
-                        marginLeft: "10px",
+                        marginLeft: "10px"
                     }}
                 >
           SETA
         </span>
             </Link>
 
-            <div className="flex items-center justify-between" style={{width: "266px", height: "24px"}}>
+            {/* 오른쪽: 메뉴 (항상 분리되도록 space-x 사용) */}
+            <div className="h-full flex items-center whitespace-nowrap space-x-6">
                 <Link
                     to="/chat"
-                    className="!text-white visited:!text-white !no-underline hover:!no-underline transition-opacity opacity-90 hover:opacity-100"
-                    style={{fontFamily: "'Space Grotesk', sans-serif", fontSize: "16px", lineHeight: "24px"}}
+                    className="transition-opacity opacity-90 hover:opacity-100"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "20px", lineHeight: "24px", marginRight: "70px", marginTop: "3px" }}
                 >
                     Chat
                 </Link>
                 <Link
                     to="/dashboard"
-                    className="!text-white visited:!text-white !no-underline hover:!no-underline transition-opacity opacity-90 hover:opacity-100"
-                    style={{fontFamily: "'Space Grotesk', sans-serif", fontSize: "16px", lineHeight: "24px"}}
+                    className="transition-opacity opacity-90 hover:opacity-100"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "20px", lineHeight: "24px", marginRight: "45px", marginTop: "3px" }}
                 >
                     Dashboard
                 </Link>
-
-                <button
-                    type="button"
-                    onClick={handleLogout}
-                    disabled={loading}
-                    aria-busy={loading}
-                    className="transition-opacity opacity-90 hover:opacity-100"
-                    style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        fontSize: "16px",
-                        lineHeight: "24px",
-                        background: "transparent",
-                        border: 0,
-                        color: "#fff",
-                        cursor: loading ? "not-allowed" : "pointer",
-                    }}
-                >
-                    {loading ? "로그아웃…" : "Logout"}
-                </button>
             </div>
         </nav>
     );

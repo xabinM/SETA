@@ -34,7 +34,7 @@ export default function Login() {
             setToast({msg: "로그인 성공!", desc: "환영합니다 🎉"});
             const rawNext = sp.get("next");
             const next = rawNext && rawNext.startsWith("/") ? rawNext : "/chat";
-            setTimeout(() => navigate(next, {replace: true}), 500);
+            setTimeout(() => navigate(next, {replace: true}), 800);
         } catch (err) {
             const msg =
                 err instanceof ApiError

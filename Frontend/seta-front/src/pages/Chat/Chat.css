@@ -5,16 +5,16 @@
 }
 
 /* 데스크톱: 페이지 스크롤 완전 제거 */
-.no-scroll-html, body.no-scroll { 
-    overflow: hidden !important; 
+.no-scroll-html, body.no-scroll {
+    overflow: hidden !important;
     height: 100vh !important;
     width: 100vw !important;
 }
 
 /* 모바일: 자연스러운 스크롤 허용 */
-body.mobile-scroll-enabled { 
-    overflow: auto !important; 
-    height: auto !important; 
+body.mobile-scroll-enabled {
+    overflow: auto !important;
+    height: auto !important;
     width: 100vw !important;
 }
 
@@ -121,6 +121,13 @@ body.mobile-scroll-enabled {
     display: block;
 }
 
+.sidebar-user-info-sidebar h3{
+    margin-left: 10px;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #e5e7eb;
+}
+
 .sidebar-user-info h3 {
     font-weight: 700;
     font-size: 1.25rem;
@@ -145,42 +152,42 @@ body.mobile-scroll-enabled {
     justify-content: center;
 }
 
-.sidebar-main{ 
-    flex: 1; 
-    padding: 1rem; 
-    display: flex; 
-    flex-direction: column; 
-    min-height: 0; 
+.sidebar-main {
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
     overflow: hidden; /* 핵심: 여기서 overflow 제어 */
 }
 
-.main-card{
-    flex: 1; 
-    background: var(--glass-bg); 
+.main-card {
+    flex: 1;
+    background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 1.25rem; 
-    display: flex; 
-    flex-direction: column; 
-    padding: 1rem; 
+    border-radius: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
     min-height: 0;
     overflow: hidden; /* 핵심: 카드 내부 overflow 제어 */
 }
 
 .new-chat-btn {
     flex: 0 0 auto;
-    width: 100%; 
+    width: 100%;
     min-height: 3rem;
-    background: linear-gradient(90deg,#0f0c29 0%,#302b63 50%,#24243e 100%);
-    border: none; 
-    border-radius: 1rem; 
+    background: linear-gradient(90deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    border: none;
+    border-radius: 1rem;
     color: #fff;
-    font-family: 'Inter',sans-serif; 
-    font-weight: 600; 
-    font-size: 1rem; 
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
     cursor: pointer;
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: .5rem;
     margin-bottom: 1rem;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 6px 18px rgba(0, 0, 0, 0.25);
@@ -188,217 +195,258 @@ body.mobile-scroll-enabled {
 
 .thread-list {
     flex: 1 1 auto;
-    display: flex; 
-    flex-direction: column; 
+    display: flex;
+    flex-direction: column;
     gap: 8px;
     overflow-y: auto; /* 세로 스크롤만 허용 */
     overflow-x: hidden; /* 가로 스크롤 완전 차단 */
     min-height: 0;
     /* 스크롤바 숨기기 (데스크톱) */
-    scrollbar-width: none; 
+    scrollbar-width: none;
     -ms-overflow-style: none;
 }
 
-.thread-list::-webkit-scrollbar{ 
-    width: 0; 
-    height: 0; 
+.thread-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
-.thread-item{
-    display: flex; 
+.thread-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.thread-item {
+    display: flex;
     align-items: center;
-    padding: 12px 14px; 
-    border-radius: 12px; 
+    padding: 12px 14px;
+    border-radius: 12px;
     cursor: pointer;
-    color: #e5e7eb; 
+    color: #e5e7eb;
     height: 50px;
-    background: transparent; 
+    background: transparent;
     border: none;
     transition: background .15s ease;
     flex-shrink: 0; /* 핵심: 아이템 크기 고정 */
 }
 
-.thread-item[aria-current="page"]{
+.thread-item[aria-current="page"] {
     background: var(--glass-bg-strong);
     box-shadow: inset 0 0 0 1px var(--glass-border-strong);
 }
 
-.thread-title{
-    font-size: .9rem; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-    white-space: nowrap; 
+.thread-title {
+    font-size: .9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     width: 100%;
 }
 
-.sidebar-footer{ 
-    padding: 1rem; 
-    display: flex; 
-    align-items: center; 
-    gap: 0.75rem; 
-    flex-shrink: 0; 
-}
-
-.sidebar-footer .sidebar-avatar{ 
-    width: 3rem; 
-    height: 3rem; 
-}
-
-.main-chat{
-    width: 100%; 
-    height: 100%;
-    background:
-            radial-gradient(131% 109% at 10% 20%, rgba(188,172,242,.20) 0%, rgba(188,172,242,0) 40%),
-            radial-gradient(116% 96% at 80% 70%, rgba(121,224,211,.20) 0%, rgba(121,224,211,0) 40%),
-            var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(var(--blur));
-    border-radius: 1.5rem;
-    display: flex; 
-    flex-direction: column; 
-    min-width: 0; 
-    min-height: 0; 
-    overflow: hidden;
-}
-
-.chat-header{
-    padding: 1rem; 
-    border-bottom: 1px solid var(--glass-border);
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
+.sidebar-footer {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     flex-shrink: 0;
 }
 
-.chat-user{ 
-    display: flex; 
-    align-items: center; 
-    gap: 0.75rem; 
+.sidebar-footer .sidebar-avatar {
+    width: 3rem;
+    height: 3rem;
 }
 
-.chat-user-info h3{ 
-    font-weight: 700; 
-    font-size: 1.25rem; 
-    color: #e5e7eb; 
+.sidebar-footer .sidebar-avatar {
+    width: 3rem;
+    height: 3rem;
 }
 
-.chat-menu-btn{
-    width: 2.5rem; 
-    height: 2.5rem; 
+.main-chat {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(131% 109% at 10% 20%, rgba(188, 172, 242, .20) 0%, rgba(188, 172, 242, 0) 40%),
+    radial-gradient(116% 96% at 80% 70%, rgba(121, 224, 211, .20) 0%, rgba(121, 224, 211, 0) 40%),
+    var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--blur));
+    border-radius: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.chat-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.chat-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chat-user-info h3 {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #e5e7eb;
+}
+
+.chat-menu-btn {
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 50%;
-    background: transparent; 
-    border: none; 
-    color: #9ca3af; 
-    cursor: pointer; 
-    display: flex; 
-    align-items: center; 
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
-.chat-main{ 
-    flex: 1; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    min-height: 0; 
-    padding: 1rem; 
+.chat-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: 1rem;
     overflow: hidden; /* 핵심: 메인 영역 overflow 제어 */
 }
 
-.welcome-content{ 
-    text-align: center; 
-    color: #a0a0b0; 
-    max-width: 100%; 
-    width: 100%; 
-}
-
-.welcome-logo{ 
-    width: 2.5rem; 
-    height: 2.75rem; 
-    margin: 0 auto 1.25rem; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-}
-
-.welcome-logo img{ 
-    width: 100%; 
-    height: 100%; 
-    object-fit: contain; 
-}
-
-.welcome-title{ 
-    font-size: clamp(1.5rem, 4vw, 2.5rem); 
-    font-weight: 700; 
-    color: #e0e0e0; 
-    margin-bottom: 0.625rem; 
-}
-
-.welcome-subtitle{ 
-    font-size: clamp(0.9rem, 2vw, 1.1rem); 
-    color: #a0a0b0; 
-    margin-bottom: 2.2rem; 
-}
-
-.feature-cards{
-    display: grid; 
-    grid-template-columns: 360px 360px; 
-    grid-template-rows: 99px 99px;
-    gap: 1rem; 
-    max-width: 736px; 
-    margin: 0 auto; 
+.welcome-content {
+    text-align: center;
+    color: #a0a0b0;
+    max-width: 100%;
     width: 100%;
 }
 
-.feature-card{
-    width: 360px; 
+.welcome-logo {
+    width: 2.5rem;
+    height: 2.75rem;
+    margin: 0 auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.welcome-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 700;
+    color: #e0e0e0;
+    margin-bottom: 0.625rem;
+}
+
+.welcome-subtitle {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    color: #a0a0b0;
+    margin-bottom: 2.2rem;
+}
+
+.feature-cards {
+    display: grid;
+    grid-template-columns: 360px 360px;
+    grid-template-rows: 99px 99px;
+    gap: 1rem;
+    max-width: 736px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.feature-card {
+    width: 360px;
     height: 99px;
-    background: var(--glass-bg); 
+    background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 0.75rem; 
+    border-radius: 0.75rem;
     padding: 1.25rem 1.5rem;
-    cursor: pointer; 
+    cursor: pointer;
     transition: background .2s ease, transform .2s ease;
     backdrop-filter: blur(var(--blur));
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: flex-start;
 }
 
-.feature-card:hover{ 
-    background: var(--glass-bg-strong); 
-    transform: translateY(-2px); 
+.feature-card:hover {
+    background: var(--glass-bg-strong);
+    transform: translateY(-2px);
 }
 
-.feature-title{
-    font-family: 'Noto Sans KR'; 
-    font-weight: 700; 
-    font-size: 1rem; 
-    line-height: 1.2; 
-    color: #E0E0E0; 
+.feature-title {
+    font-family: 'Noto Sans KR';
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: #E0E0E0;
     margin-bottom: 6px;
 }
 
-.feature-description{
-    font-family: 'Noto Sans KR'; 
-    font-weight: 400; 
-    font-size: 0.92rem; 
-    line-height: 1.3; 
+.feature-description {
+    font-family: 'Noto Sans KR';
+    font-weight: 400;
+    font-size: 0.92rem;
+    line-height: 1.3;
+    color: #A0A0B0;
+}
+
+.feature-card:hover {
+    background: var(--glass-bg-strong);
+    transform: translateY(-2px);
+}
+
+.feature-title {
+    font-family: 'Noto Sans KR';
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: #E0E0E0;
+    margin-bottom: 6px;
+}
+
+.feature-description {
+    font-family: 'Noto Sans KR';
+    font-weight: 400;
+    font-size: 0.92rem;
+    line-height: 1.3;
     color: #A0A0B0;
 }
 
 /* 핵심 수정: messages 스크롤 제어 */
-.messages{
-    flex: 1; 
-    min-height: 0; 
+.messages {
+    flex: 1;
+    min-height: 0;
     padding: 1rem;
     overflow-y: auto; /* 세로 스크롤만 허용 */
     overflow-x: hidden; /* 가로 스크롤 완전 차단 */
-    display: flex; 
-    flex-direction: column; 
+    display: flex;
+    flex-direction: column;
     gap: 12px;
-    scrollbar-width: thin;
+
+    /* 스크롤은 되지만 스크롤바 숨김 */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -ms-overflow-style: none; /* IE/old Edge */
+    scrollbar-width: none; /* Firefox */
+    -webkit-overflow-scrolling: touch;
+}
+
+.messages::-webkit-scrollbar {
+    display: none;
 }
 
 .msg {
@@ -413,6 +461,9 @@ body.mobile-scroll-enabled {
     justify-content: flex-start;
 }
 
+/*==========================
+=       BUBBLE BASE        =
+==========================*/
 .bubble {
     max-width: min(70ch, 75%);
     padding: 12px 14px;
@@ -421,9 +472,12 @@ body.mobile-scroll-enabled {
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
     line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-word;
     color: #e5e7eb;
+
+    /* 마크다운 문단/리스트 마진 문제 해결 */
+    display: flow-root;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .msg.user .bubble {
@@ -431,6 +485,42 @@ body.mobile-scroll-enabled {
     border-color: var(--glass-border-strong);
 }
 
+/* 마크다운 컨테이너 */
+.bubble .md {
+    line-height: 1.6;
+    font-size: .95rem;
+}
+
+.bubble .md > :first-child {
+    margin-top: 0;
+}
+
+.bubble .md > :last-child {
+    margin-bottom: 0;
+}
+
+.bubble .md p {
+    margin: .25rem 0 .75rem;
+}
+
+.bubble .md h1, .bubble .md h2, .bubble .md h3,
+.bubble .md h4, .bubble .md h5, .bubble .md h6 {
+    margin: .6rem 0 .4rem;
+    line-height: 1.25;
+}
+
+.bubble .md ul, .bubble .md ol {
+    margin: .5rem 0 .75rem;
+    padding-left: 1.2rem;
+}
+
+.bubble .md li {
+    margin: .2rem 0;
+}
+
+/*==========================
+=   INPUT / FOOTER AREA    =
+==========================*/
 .chat-footer {
     padding: 1rem;
     display: flex;
@@ -508,6 +598,9 @@ body.mobile-scroll-enabled {
     justify-content: center;
 }
 
+/*==========================
+=       RESPONSIVE         =
+==========================*/
 @media (max-width: 1024px) {
     .container {
         grid-template-columns: clamp(280px, 30vw, 340px) minmax(0, 1fr);
@@ -536,24 +629,24 @@ body.mobile-scroll-enabled {
     /* 모바일에서만 chat-stage를 relative로 변경 */
     body.mobile-scroll-enabled .chat-stage {
         position: relative !important;
-        top: 0 !important; 
+        top: 0 !important;
         height: auto !important;
         overflow: visible !important;
         padding-top: var(--header-total) !important; /* 추가 */
     }
-    
+
     body.mobile-scroll-enabled .chat-canvas {
         height: auto !important;
         min-height: calc(100vh - var(--header-total)) !important;
     }
-    
-    .container { 
+
+    .container {
         grid-template-columns: 1fr !important;
         grid-template-rows: 1fr !important;
         position: relative;
     }
-    
-    .sidebar { 
+
+    .sidebar {
         position: fixed !important;
         top: var(--header-total) !important; /* 0 → var(--header-total)로 변경 */
         left: 0;
@@ -568,6 +661,7 @@ body.mobile-scroll-enabled {
         max-height: unset !important;
         overflow: hidden !important;
     }
+
     .sidebar.sidebar-open {
         transform: translateX(0);
     }
@@ -578,40 +672,40 @@ body.mobile-scroll-enabled {
         left: 0;
         width: 100vw;
         height: calc(100vh - var(--header-total)) !important; /* 헤더 높이만큼 빼기 */
-        background: rgba(0,0,0,0.5);
+        background: rgba(0, 0, 0, 0.5);
         z-index: 999;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease;
     }
-    
+
     .sidebar-backdrop.sidebar-open {
         opacity: 1;
         pointer-events: auto;
     }
 
-    
+
     .main-chat {
         order: unset !important;
         grid-column: 1;
         grid-row: 1;
         width: 100%;
     }
-    
-    .sidebar-main { 
-        flex: 1; 
+
+    .sidebar-main {
+        flex: 1;
         min-height: 180px;
         overflow: visible !important;
         height: auto !important;
     }
-    
+
     .main-card {
         min-height: 180px;
         height: auto !important;
         overflow: visible !important;
         flex: none !important; /* flex 해제 */
     }
-    
+
     .thread-list {
         flex: none !important; /* flex 해제 */
         overflow: visible !important; /* 스크롤 해제 */
@@ -623,35 +717,35 @@ body.mobile-scroll-enabled {
         gap: 8px;
         /* 스크롤바 설정 제거 */
     }
-    
-    .feature-cards { 
-        grid-template-columns: 1fr; 
-        grid-template-rows: repeat(4, auto); 
-        gap: .5rem; 
-        max-width: 100%; 
+
+    .feature-cards {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, auto);
+        gap: .5rem;
+        max-width: 100%;
     }
-    
-    .feature-card { 
-        width: 100%; 
-        height: 80px; 
-        padding: 1rem 1.25rem; 
+
+    .feature-card {
+        width: 100%;
+        height: 80px;
+        padding: 1rem 1.25rem;
     }
-    
-    .welcome-title { 
-        font-size: clamp(1.1rem, 4vw, 1.5rem); 
+
+    .welcome-title {
+        font-size: clamp(1.1rem, 4vw, 1.5rem);
     }
-    
-    .welcome-subtitle { 
-        font-size: clamp(0.8rem, 2vw, 1rem); 
-        margin-bottom: 1.5rem; 
+
+    .welcome-subtitle {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        margin-bottom: 1.5rem;
     }
-    
-    .chat-input { 
-        font-size: 16px; 
+
+    .chat-input {
+        font-size: 16px;
     }
 
     /* 채팅 영역도 스크롤 해제 */
-    .chat-main { 
+    .chat-main {
         overflow: visible !important;
         height: auto !important;
         flex: none !important;
@@ -659,7 +753,7 @@ body.mobile-scroll-enabled {
         align-items: flex-start !important;
         justify-content: flex-start !important;
     }
-    
+
     .messages {
         overflow: visible !important;
         height: auto !important;
@@ -674,36 +768,55 @@ body.mobile-scroll-enabled {
         max-width: 100%;
         width: 100%;
     }
+
+    .feature-card {
+        width: 100%;
+        height: 80px;
+        padding: 1rem 1.25rem;
+    }
+
+    .welcome-title {
+        font-size: clamp(1.1rem, 4vw, 1.5rem);
+    }
+
+    .welcome-subtitle {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        margin-bottom: 1.5rem;
+    }
+
+    .chat-input {
+        font-size: 16px;
+    }
 }
 
 @media (max-width: 480px) {
-    .container { 
-        padding: .25rem; 
+    .container {
+        padding: .25rem;
         gap: .25rem;
         min-height: calc(100vh - var(--header-total) - 0.5rem);
     }
-    
-    .sidebar-header, .chat-header { 
-        padding: .75rem; 
+
+    .sidebar-header, .chat-header {
+        padding: .75rem;
     }
-    
-    .sidebar-main, .chat-main { 
-        padding: .75rem; 
+
+    .sidebar-main, .chat-main {
+        padding: .75rem;
     }
-    
-    .chat-footer { 
-        padding: .75rem; 
+
+    .chat-footer {
+        padding: .75rem;
     }
-    
-    .feature-card { 
-        height: 74px; 
+
+    .feature-card {
+        height: 74px;
     }
-    
+
     .sidebar {
         min-height: 250px;
         max-height: 50vh; /* 작은 화면에서 더 작게 */
     }
-    
+
     .thread-list {
         min-height: 120px;
         max-height: 25vh; /* 작은 화면에서 더 작게 */
@@ -714,19 +827,19 @@ body.mobile-scroll-enabled {
     }
 }
 
-.sidebar-avatar .avatar-img,
-.chat-avatar .avatar-img {
+.sidebar-avatar .avatar-img, .chat-avatar .avatar-img {
     width: 80%;
     height: 80%;
 }
 
-/* Context menu (dark card) */
+/*==========================
+=     CONTEXT MENU UI      =
+==========================*/
 .ctxmenu {
     background: rgba(24, 24, 28, 0.95);
     border: 1px solid var(--glass-border);
     border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
     min-width: 220px;
     padding: 8px;
     backdrop-filter: blur(10px);
@@ -734,7 +847,6 @@ body.mobile-scroll-enabled {
     animation: ctx-fade-in 120ms ease-out;
 }
 
-/* Single menu item */
 .ctxitem {
     width: 100%;
     display: flex;
@@ -760,7 +872,6 @@ body.mobile-scroll-enabled {
     transform: translateY(1px);
 }
 
-/* Icon */
 .ctxitem__icon {
     width: 22px;
     height: 22px;
@@ -774,7 +885,6 @@ body.mobile-scroll-enabled {
     color: #e5e7eb;
 }
 
-/* Danger variant */
 .ctxitem.danger {
     color: #fca5a5;
 }
@@ -788,7 +898,6 @@ body.mobile-scroll-enabled {
     color: #fecaca;
 }
 
-/* small entrance anim */
 @keyframes ctx-fade-in {
     from {
         opacity: 0;
@@ -799,57 +908,85 @@ body.mobile-scroll-enabled {
         transform: translateY(0) scale(1);
     }
 }
-/* --- 채팅 리스트 전용: 스크롤은 되지만 스크롤바는 숨김 --- */
-.messages {
-    overflow-y: auto;
-    overscroll-behavior: contain;  /* 바디로 스크롤 전파 방지 */
-    -ms-overflow-style: none;      /* IE/old Edge */
-    scrollbar-width: none;         /* Firefox */
-    -webkit-overflow-scrolling: touch; /* iOS 관성 */
-}
-.messages::-webkit-scrollbar {
-    display: none;                 /* Chrome/Safari/new Edge */
+
+/*==========================
+=   3 dots typing loader   =
+==========================*/
+@keyframes dot-bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: .5;
+    }
+    30% {
+        transform: translateY(-3px);
+        opacity: 1;
+    }
 }
 
-/* --- 3 dots 로더 (skeleton 때만) --- */
-@keyframes dot-bounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: .5; }
-    30%           { transform: translateY(-3px); opacity: 1; }
-}
 .bubble .three-dots {
     display: inline-flex;
     align-items: center;
     height: 1.25rem;
 }
+
 .bubble .three-dots > span {
     display: inline-block;
-    width: .35rem; height: .35rem;
+    width: .35rem;
+    height: .35rem;
     margin-right: .25rem;
     border-radius: 9999px;
-    background: rgba(255,255,255,.85);
+    background: rgba(255, 255, 255, .85);
     animation: dot-bounce 1.2s infinite ease-in-out;
 }
-.bubble .three-dots > span:nth-child(2) { animation-delay: .15s; }
-.bubble .three-dots > span:nth-child(3) { animation-delay: .30s; }
 
-/* --- 코드블록 Copy 버튼 (react-markdown 커스텀 pre 사용) --- */
-.codewrap { position: relative; }
-.copybtn {
-    position: absolute; top: 6px; right: 6px;
-    padding: 4px 8px; font-size: 12px;
-    border-radius: 8px; border: 1px solid rgba(255,255,255,.2);
-    background: rgba(255,255,255,.08);
-    color: #e5e7eb; cursor: pointer;
-    backdrop-filter: blur(6px);
-    opacity: 0; transition: opacity .15s ease;
+.bubble .three-dots > span:nth-child(2) {
+    animation-delay: .15s;
 }
-.codewrap:hover .copybtn { opacity: 1; }
+
+.bubble .three-dots > span:nth-child(3) {
+    animation-delay: .30s;
+}
+
+/*==========================
+=   Code block & Copy BTN  =
+==========================*/
+.codewrap {
+    position: relative;
+}
+
+.copybtn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, .2);
+    background: rgba(255, 255, 255, .08);
+    color: #e5e7eb;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+
+.codewrap:hover .copybtn {
+    opacity: 1;
+}
+
 .bubble pre {
     overflow-x: auto;
-    padding: 12px; border-radius: 12px;
-    background: rgba(0,0,0,.35);
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, .35);
 }
+
+.bubble pre code.hljs {
+    background: transparent !important;
+}
+
 .bubble code:not(pre code) {
-    padding: 0 4px; border-radius: 6px;
-    background: rgba(255,255,255,.10);
+    padding: 0 4px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .10);
 }
