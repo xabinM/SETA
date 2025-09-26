@@ -1,10 +1,9 @@
-// src/ui/components/Modal/CarModal/CarModal.tsx
-
 import {useEffect, useMemo, useRef} from "react";
 import {createPortal} from "react-dom";
 import {gsap} from "gsap";
 import "./CarModal.css";
 import type {CarModalProps} from "./types";
+import { useNavigate } from "react-router-dom";
 
 export default function CarModal({
                                      open,
@@ -18,6 +17,7 @@ export default function CarModal({
                                  }: CarModalProps) {
     const shellRef = useRef<HTMLDivElement>(null);
     const fillRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
 
     // 파생값 계산
     const {
@@ -52,14 +52,92 @@ export default function CarModal({
                 {icon: "⚙️", label: "전비", value: `${efficiency.toLocaleString()} km/kWh`},
             ];
 
-    // 구간 상태(단계 기준)
+    // 구간 상태(단계 기준) - 실제 데이터 기반으로 계산
     const getSegmentStatus = (i: number) => {
-        const step = power?.step ?? 20;
-        const cur = power?.current ?? 0;
-        const required = (i + 1) * step;
-        if (cur >= required) return "done";
-        if (cur >= required - step) return "progress";
+        const totalSegments = segments?.length ?? 3;
+        const segmentProgress = progress01 * totalSegments;
+
+        if (segmentProgress > i + 1) return "done";
+        if (segmentProgress > i) return "progress";
         return "upcoming";
+    };
+
+    // 공유 기능
+    const handleShare = async () => {
+        // 구체적인 성과 데이터 생성
+        const costSaving = `${Math.round(currentKwh * 110).toLocaleString()}원`;
+        const co2Reduction = `${Math.round(currentKwh * 0.2).toLocaleString()}kg`;
+        const energySaving = `${currentKwh.toLocaleString()}kWh`;
+
+        const shareText = `🚗 SETA 가상 드라이브\n\nAI 사용 최적화로 절약한 에너지로 가상 여행 중!\n\n📍 ${trip?.origin || "출발지"} → ${trip?.destination || "목적지"}\n🛣️ 총 거리: ${totalKm.toLocaleString()}km\n🏃‍♂️ 현재 진행: ${equivKm.toLocaleString()}km (${pct}%)\n\n⚡ 절약 현황:\n• ${energySaving} 전력 절약\n• ${costSaving} 비용 절감\n• ${co2Reduction} CO₂ 절감\n\n작은 실천이 환경을 바꿉니다! 🌍`;
+
+        const shareData = {
+            title: 'SETA 가상 드라이브 - 에너지 절약 여행',
+            text: shareText,
+            url: window.location.href
+        };
+
+        try {
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                await handleCopyLink(shareText);
+            }
+        } catch (error) {
+            if (error instanceof Error && error.name !== 'AbortError') {
+                await handleCopyLink(shareText);
+            }
+        }
+    };
+
+    const handleCopyLink = async (customText?: string) => {
+        const shareText = customText || `🚗 SETA 가상 드라이브\n\n절약한 에너지로 ${trip?.origin || "출발지"}에서 ${trip?.destination || "목적지"}까지 ${equivKm.toLocaleString()}km 여행 중!\n\n${window.location.href}`;
+
+        try {
+            await navigator.clipboard.writeText(shareText);
+            // 복사 완료 피드백
+            const button = document.querySelector('.cm-btn-primary') as HTMLButtonElement;
+            if (button) {
+                const originalText = button.textContent;
+                button.textContent = '링크 복사됨!';
+                button.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }
+        } catch {
+            fallbackCopyToClipboard(shareText);
+        }
+    };
+
+    const fallbackCopyToClipboard = (text: string) => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            const button = document.querySelector('.cm-btn-primary') as HTMLButtonElement;
+            if (button) {
+                const originalText = button.textContent;
+                button.textContent = '텍스트 복사됨!';
+                button.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }
+        } catch {
+            console.log('복사 기능을 사용할 수 없습니다.');
+        }
+
+        document.body.removeChild(textArea);
     };
 
     // ESC + 스크롤 락
@@ -214,6 +292,8 @@ export default function CarModal({
                         <div className="cm-timeline">
                             {(segments ?? []).map((seg, i) => {
                                 const st = getSegmentStatus(i);
+                                const statusText = st === "done" ? "완료" : st === "progress" ? "진행중" : "예정";
+
                                 return (
                                     <div key={i} className={`cm-item cm-item--${st}`}>
                                         <div className="cm-node" aria-hidden="true">
@@ -236,12 +316,13 @@ export default function CarModal({
                                                 <h3 className="cm-stage">{seg.title}</h3>
                                                 <span
                                                     className={st === "done" ? "cm-st cm-st--done" : st === "progress" ? "cm-st cm-st--progress" : "cm-st"}>
-                          {st === "done" ? "완료" : st === "progress" ? "진행중" : "예정"}
-                        </span>
+                                                    {statusText}
+                                                </span>
                                             </div>
                                             <div className="cm-date">{seg.km}km 구간</div>
-                                            <div
-                                                className="cm-desc">{st === "progress" ? "거의 도착!" : st === "done" ? "구간 완료" : "출발 준비"}</div>
+                                            <div className="cm-desc">
+                                                {st === "progress" ? "거의 도착!" : st === "done" ? "구간 완료" : "출발 준비"}
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -268,8 +349,19 @@ export default function CarModal({
                                 </div>
 
                                 <div className="cm-btns cm-btns--cta">
-                                    <button className="cm-btn cm-btn-primary" type="button">공유하기</button>
-                                    <button className="cm-btn" type="button" onClick={onClose}>대화 계속하기</button>
+                                    <button className="cm-btn cm-btn-primary" type="button" onClick={handleShare}>
+                                        공유하기
+                                    </button>
+                                    <button
+                                        className="cm-btn"
+                                        type="button"
+                                        onClick={() => {
+                                            onClose();
+                                            navigate("/chat");
+                                        }}
+                                    >
+                                        대화 계속하기
+                                    </button>
                                 </div>
                             </div>
                         </section>

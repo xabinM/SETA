@@ -1,5 +1,5 @@
-import { http } from "@/shared/api/http";
-import { tokenStore } from "@/shared/auth/token.ts";
+import {http} from "@/shared/api/http";
+import {tokenStore} from "@/shared/auth/token.ts";
 
 export type SignUpPayload = {
     username: string;
@@ -67,7 +67,7 @@ export async function logout(signal?: AbortSignal) {
 
     await http<void>("/auth/logout", {
         method: "POST",
-        headers: { RefreshToken: refresh },
+        headers: {RefreshToken: refresh},
         auth: false,
         signal,
     });
@@ -91,7 +91,7 @@ export async function issueStreamCookie(signal?: AbortSignal) {
     const res = await fetch(url, {
         method: "POST",
         credentials: "include",
-        headers: { Authorization: `Bearer ${access}` },
+        headers: {Authorization: `Bearer ${access}`},
         signal,
     });
 

@@ -214,7 +214,7 @@ export default function ChatRoom() {
             assistantIdRef.current = null;
 
             if (threadId) {
-                window.dispatchEvent(new CustomEvent("seta:title:check", { detail: { roomId: threadId } }));
+                window.dispatchEvent(new CustomEvent("seta:title:check", {detail: {roomId: threadId}}));
             }
         });
 

@@ -34,7 +34,7 @@ export default function Login() {
             setToast({msg: "로그인 성공!", desc: "환영합니다 🎉"});
             const rawNext = sp.get("next");
             const next = rawNext && rawNext.startsWith("/") ? rawNext : "/chat";
-            setTimeout(() => navigate(next, {replace: true}), 800);
+            setTimeout(() => navigate(next, {replace: true}), 1000);
         } catch (err) {
             const msg =
                 err instanceof ApiError
@@ -123,7 +123,7 @@ export default function Login() {
                 <CustomToast
                     message={toast.msg}
                     description={toast.desc}
-                    duration={500}
+                    duration={1000}
                     onClose={() => setToast(null)}
                 />
             )}

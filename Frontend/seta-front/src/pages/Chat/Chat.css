@@ -4,14 +4,12 @@
     padding: 0;
 }
 
-/* 데스크톱: 페이지 스크롤 완전 제거 */
 .no-scroll-html, body.no-scroll {
     overflow: hidden !important;
     height: 100vh !important;
     width: 100vw !important;
 }
 
-/* 모바일: 자연스러운 스크롤 허용 */
 body.mobile-scroll-enabled {
     overflow: auto !important;
     height: auto !important;
@@ -121,7 +119,7 @@ body.mobile-scroll-enabled {
     display: block;
 }
 
-.sidebar-user-info-sidebar h3{
+.sidebar-user-info-sidebar h3 {
     margin-left: 10px;
     font-weight: 700;
     font-size: 1.25rem;
@@ -158,7 +156,7 @@ body.mobile-scroll-enabled {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    overflow: hidden; /* 핵심: 여기서 overflow 제어 */
+    overflow: hidden;
 }
 
 .main-card {
@@ -170,7 +168,7 @@ body.mobile-scroll-enabled {
     flex-direction: column;
     padding: 1rem;
     min-height: 0;
-    overflow: hidden; /* 핵심: 카드 내부 overflow 제어 */
+    overflow: hidden;
 }
 
 .new-chat-btn {
@@ -198,17 +196,11 @@ body.mobile-scroll-enabled {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    overflow-y: auto; /* 세로 스크롤만 허용 */
-    overflow-x: hidden; /* 가로 스크롤 완전 차단 */
+    overflow-y: auto;
+    overflow-x: hidden;
     min-height: 0;
-    /* 스크롤바 숨기기 (데스크톱) */
     scrollbar-width: none;
     -ms-overflow-style: none;
-}
-
-.thread-list::-webkit-scrollbar {
-    width: 0;
-    height: 0;
 }
 
 .thread-list::-webkit-scrollbar {
@@ -227,7 +219,7 @@ body.mobile-scroll-enabled {
     background: transparent;
     border: none;
     transition: background .15s ease;
-    flex-shrink: 0; /* 핵심: 아이템 크기 고정 */
+    flex-shrink: 0;
 }
 
 .thread-item[aria-current="page"] {
@@ -249,11 +241,6 @@ body.mobile-scroll-enabled {
     align-items: center;
     gap: 0.75rem;
     flex-shrink: 0;
-}
-
-.sidebar-footer .sidebar-avatar {
-    width: 3rem;
-    height: 3rem;
 }
 
 .sidebar-footer .sidebar-avatar {
@@ -318,7 +305,7 @@ body.mobile-scroll-enabled {
     justify-content: center;
     min-height: 0;
     padding: 1rem;
-    overflow: hidden; /* 핵심: 메인 영역 overflow 제어 */
+    overflow: hidden;
 }
 
 .welcome-content {
@@ -404,44 +391,18 @@ body.mobile-scroll-enabled {
     color: #A0A0B0;
 }
 
-.feature-card:hover {
-    background: var(--glass-bg-strong);
-    transform: translateY(-2px);
-}
-
-.feature-title {
-    font-family: 'Noto Sans KR';
-    font-weight: 700;
-    font-size: 1rem;
-    line-height: 1.2;
-    color: #E0E0E0;
-    margin-bottom: 6px;
-}
-
-.feature-description {
-    font-family: 'Noto Sans KR';
-    font-weight: 400;
-    font-size: 0.92rem;
-    line-height: 1.3;
-    color: #A0A0B0;
-}
-
-/* 핵심 수정: messages 스크롤 제어 */
 .messages {
     flex: 1;
     min-height: 0;
     padding: 1rem;
-    overflow-y: auto; /* 세로 스크롤만 허용 */
-    overflow-x: hidden; /* 가로 스크롤 완전 차단 */
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     gap: 12px;
-
-    /* 스크롤은 되지만 스크롤바 숨김 */
-    overflow-y: auto;
     overscroll-behavior: contain;
-    -ms-overflow-style: none; /* IE/old Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -461,9 +422,6 @@ body.mobile-scroll-enabled {
     justify-content: flex-start;
 }
 
-/*==========================
-=       BUBBLE BASE        =
-==========================*/
 .bubble {
     max-width: min(70ch, 75%);
     padding: 12px 14px;
@@ -473,8 +431,6 @@ body.mobile-scroll-enabled {
     backdrop-filter: blur(10px);
     line-height: 1.5;
     color: #e5e7eb;
-
-    /* 마크다운 문단/리스트 마진 문제 해결 */
     display: flow-root;
     white-space: normal;
     overflow-wrap: anywhere;
@@ -485,7 +441,6 @@ body.mobile-scroll-enabled {
     border-color: var(--glass-border-strong);
 }
 
-/* 마크다운 컨테이너 */
 .bubble .md {
     line-height: 1.6;
     font-size: .95rem;
@@ -518,9 +473,6 @@ body.mobile-scroll-enabled {
     margin: .2rem 0;
 }
 
-/*==========================
-=   INPUT / FOOTER AREA    =
-==========================*/
 .chat-footer {
     padding: 1rem;
     display: flex;
@@ -598,9 +550,6 @@ body.mobile-scroll-enabled {
     justify-content: center;
 }
 
-/*==========================
-=       RESPONSIVE         =
-==========================*/
 @media (max-width: 1024px) {
     .container {
         grid-template-columns: clamp(280px, 30vw, 340px) minmax(0, 1fr);
@@ -626,13 +575,12 @@ body.mobile-scroll-enabled {
 }
 
 @media (max-width: 768px) {
-    /* 모바일에서만 chat-stage를 relative로 변경 */
     body.mobile-scroll-enabled .chat-stage {
         position: relative !important;
         top: 0 !important;
         height: auto !important;
         overflow: visible !important;
-        padding-top: var(--header-total) !important; /* 추가 */
+        padding-top: var(--header-total) !important;
     }
 
     body.mobile-scroll-enabled .chat-canvas {
@@ -648,11 +596,11 @@ body.mobile-scroll-enabled {
 
     .sidebar {
         position: fixed !important;
-        top: var(--header-total) !important; /* 0 → var(--header-total)로 변경 */
+        top: var(--header-total) !important;
         left: 0;
         width: 85vw;
         max-width: 320px;
-        height: calc(100vh - var(--header-total)) !important; /* 헤더 높이만큼 빼기 */
+        height: calc(100vh - var(--header-total)) !important;
         z-index: 1000;
         transform: translateX(-100%);
         transition: transform 0.3s ease;
@@ -668,10 +616,10 @@ body.mobile-scroll-enabled {
 
     .sidebar-backdrop {
         position: fixed;
-        top: var(--header-total) !important; /* 0 → var(--header-total)로 변경 */
+        top: var(--header-total) !important;
         left: 0;
         width: 100vw;
-        height: calc(100vh - var(--header-total)) !important; /* 헤더 높이만큼 빼기 */
+        height: calc(100vh - var(--header-total)) !important;
         background: rgba(0, 0, 0, 0.5);
         z-index: 999;
         opacity: 0;
@@ -683,7 +631,6 @@ body.mobile-scroll-enabled {
         opacity: 1;
         pointer-events: auto;
     }
-
 
     .main-chat {
         order: unset !important;
@@ -703,19 +650,18 @@ body.mobile-scroll-enabled {
         min-height: 180px;
         height: auto !important;
         overflow: visible !important;
-        flex: none !important; /* flex 해제 */
+        flex: none !important;
     }
 
     .thread-list {
-        flex: none !important; /* flex 해제 */
-        overflow: visible !important; /* 스크롤 해제 */
+        flex: none !important;
+        overflow: visible !important;
         min-height: auto !important;
         max-height: none !important;
         height: auto !important;
         display: flex;
         flex-direction: column;
         gap: 8px;
-        /* 스크롤바 설정 제거 */
     }
 
     .feature-cards {
@@ -744,7 +690,6 @@ body.mobile-scroll-enabled {
         font-size: 16px;
     }
 
-    /* 채팅 영역도 스크롤 해제 */
     .chat-main {
         overflow: visible !important;
         height: auto !important;
@@ -763,29 +708,9 @@ body.mobile-scroll-enabled {
         padding: 1rem;
     }
 
-    /* welcome-content도 자연스럽게 확장 */
     .welcome-content {
         max-width: 100%;
         width: 100%;
-    }
-
-    .feature-card {
-        width: 100%;
-        height: 80px;
-        padding: 1rem 1.25rem;
-    }
-
-    .welcome-title {
-        font-size: clamp(1.1rem, 4vw, 1.5rem);
-    }
-
-    .welcome-subtitle {
-        font-size: clamp(0.8rem, 2vw, 1rem);
-        margin-bottom: 1.5rem;
-    }
-
-    .chat-input {
-        font-size: 16px;
     }
 }
 
@@ -814,16 +739,16 @@ body.mobile-scroll-enabled {
 
     .sidebar {
         min-height: 250px;
-        max-height: 50vh; /* 작은 화면에서 더 작게 */
+        max-height: 50vh;
     }
 
     .thread-list {
         min-height: 120px;
-        max-height: 25vh; /* 작은 화면에서 더 작게 */
+        max-height: 25vh;
     }
 
     .messages {
-        max-height: 35vh; /* 작은 화면에서 더 작게 */
+        max-height: 35vh;
     }
 }
 
@@ -832,9 +757,6 @@ body.mobile-scroll-enabled {
     height: 80%;
 }
 
-/*==========================
-=     CONTEXT MENU UI      =
-==========================*/
 .ctxmenu {
     background: rgba(24, 24, 28, 0.95);
     border: 1px solid var(--glass-border);
@@ -909,9 +831,6 @@ body.mobile-scroll-enabled {
     }
 }
 
-/*==========================
-=   3 dots typing loader   =
-==========================*/
 @keyframes dot-bounce {
     0%, 60%, 100% {
         transform: translateY(0);
@@ -947,9 +866,6 @@ body.mobile-scroll-enabled {
     animation-delay: .30s;
 }
 
-/*==========================
-=   Code block & Copy BTN  =
-==========================*/
 .codewrap {
     position: relative;
 }
@@ -974,19 +890,41 @@ body.mobile-scroll-enabled {
     opacity: 1;
 }
 
+.bubble code:not(pre code) {
+    padding: 0 4px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .10);
+}
+
 .bubble pre {
-    overflow-x: auto;
+    overflow: auto;
     padding: 12px;
     border-radius: 12px;
     background: rgba(0, 0, 0, .35);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, .25) transparent;
+    scrollbar-gutter: auto;
 }
 
 .bubble pre code.hljs {
     background: transparent !important;
 }
 
-.bubble code:not(pre code) {
-    padding: 0 4px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, .10);
+.bubble pre::-webkit-scrollbar {
+    height: 1px;
+    width: 1px;
+}
+
+.bubble pre::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.bubble pre::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.25);
+    transition: background .2s ease;
+}
+
+.bubble pre::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.45);
 }
