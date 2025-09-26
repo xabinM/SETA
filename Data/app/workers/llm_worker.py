@@ -205,7 +205,8 @@ def run_worker():
                             state = session.query(RoomSummaryState).filter_by(chat_room_id=chat_room_id).first()
                             if state:
                                 state.unsummarized_count = (state.unsummarized_count or 0) + 1
-                                session.add(state)
+                                if state.last_summary_at is None:
+                                    state.last_summary_at = datetime.now(timezone.utc)
                                 session.commit()
                         logger.info("🔄 Updated unsummarized_count")
                     except Exception as e:

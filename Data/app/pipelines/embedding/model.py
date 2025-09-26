@@ -9,9 +9,6 @@ _model: Optional[SentenceTransformer] = None
 
 
 def _fallback_hash_embedding(text: str) -> list[float]:
-    """
-    모델 로딩 실패 시 해시 기반 임시 임베딩 생성 (디버깅용)
-    """
     dims = _settings.EMBED_DIMS
     if not text:
         return [0.0] * dims

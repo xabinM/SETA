@@ -40,7 +40,6 @@ def run_summary_trigger_loop():
                         and_(
                             RoomSummaryState.unsummarized_count > 0,
                             or_(
-                                RoomSummaryState.last_summary_at == None,
                                 RoomSummaryState.last_summary_at < (now - timedelta(seconds=IDLE_SECONDS))
                             )
                         )
