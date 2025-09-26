@@ -2,8 +2,6 @@ import {memo, useState, useMemo} from "react";
 import Header from "@/ui/components/Header/Header";
 import {Icon} from "@iconify/react";
 import ChatBg from "@/assets/ChatBackground.png";
-
-// hooks와 유틸리티 함수들 import
 import { useDashboardKpi, formatNumber, formatCost, formatCO2 } from "@/features/dashboard/hooks";
 
 /* ===== Modals ===== */
@@ -54,6 +52,17 @@ function ScopeChipGroup({
     );
 }
 
+// 기본값을 위한 더미 데이터
+const getDefaultStats = () => ({
+    savedTokens: 0,
+    costSumUsd: 0,
+});
+
+const getDefaultDaily = () => ({
+    savedTokens: 0,
+    costSumUsd: 0,
+});
+
 function Dashboard() {
     const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
     const [isCarModalOpen, setIsCarModalOpen] = useState(false);
@@ -64,11 +73,18 @@ function Dashboard() {
     // API 데이터 가져오기
     const { data, loading, error, refetch } = useDashboardKpi();
 
-    // CarModal 데이터 생성 (API 데이터 기반)
+    // CarModal 데이터 생성 (API 데이터 기반) - null 안전성 추가
     const carModalData = useMemo(() => {
         if (!data) return null;
-        const currentStats = scope === "me" ? data.userTotal : data.globalTotal;
-        return createCarModalData(currentStats.savedTokens, scope);
+        try {
+            const currentStats = scope === "me" 
+                ? (data.userTotal || getDefaultStats()) 
+                : (data.globalTotal || getDefaultStats());
+            return createCarModalData(currentStats.savedTokens || 0, scope);
+        } catch (error) {
+            console.warn('CarModal 데이터 생성 실패:', error);
+            return null;
+        }
     }, [data, scope]);
 
     // 로딩 상태
@@ -96,7 +112,7 @@ function Dashboard() {
     }
 
     // 에러 상태
-    if (error || !data) {
+    if (error) {
         return (
             <div className="dash-root" style={{
                 backgroundImage: `url(${ChatBg})`,
@@ -123,17 +139,54 @@ function Dashboard() {
         );
     }
 
-    // scope에 따른 데이터 선택
-    const currentStats = scope === "me" ? data.userTotal : data.globalTotal;
-    const currentDaily = scope === "me" ? data.userDaily : data.globalDaily;
+    // 데이터가 없는 경우 기본값 사용 (새 회원)
+    if (!data) {
+        return (
+            <div className="dash-root" style={{
+                backgroundImage: `url(${ChatBg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundAttachment: "fixed",
+            }}>
+                <Header/>
+                <main className="dash-main">
+                    <div className="lg-page">
+                        <div className="lg-container">
+                            <div className="lg-center" style={{ marginTop: "100px" }}>
+                                <div className="lg-strong">환영합니다!</div>
+                                <div className="lg-dim">SETA를 사용해서 첫 절약을 시작해보세요.</div>
+                                <div style={{ marginTop: "20px" }}>
+                                    <img
+                                        src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Christmas%20Tree.png"
+                                        alt="Christmas Tree"
+                                        width="64"
+                                        height="64"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
+    // scope에 따른 데이터 선택 - null 안전성 추가
+    const currentStats = scope === "me" 
+        ? (data.userTotal || getDefaultStats()) 
+        : (data.globalTotal || getDefaultStats());
+    const currentDaily = scope === "me" 
+        ? (data.userDaily || getDefaultDaily()) 
+        : (data.globalDaily || getDefaultDaily());
+
     console.log("Current scope:", scope);
     console.log("Current stats:", currentStats);
     console.log("Cost sum USD:", currentStats.costSumUsd);
-    
 
-    // TreeModal용 데이터 준비 (API 데이터 기반)
+    // TreeModal용 데이터 준비 (API 데이터 기반) - null 안전성 추가
     const baseData = treeModalDataByScope[scope];
-    const currentSavedTokens = currentStats.savedTokens;
+    const currentSavedTokens = currentStats.savedTokens || 0;
     
     // API 데이터로 TreeModal 데이터 업데이트
     const tokens = {
@@ -146,7 +199,7 @@ function Dashboard() {
     
     const kpis = baseData.kpis.map((kpi) => {
         if (kpi.label === "누적 비용 절약") {
-            return { ...kpi, value: formatCost(currentStats.costSumUsd) };
+            return { ...kpi, value: formatCost(currentStats.costSumUsd || 0) };
         }
         if (kpi.label === "CO₂ 절감량") {
             return { ...kpi, value: formatCO2(currentSavedTokens) };
@@ -156,8 +209,8 @@ function Dashboard() {
     
     const timeline = baseData.timeline;
 
-    // 교통수단 카드의 목적지 계산
-    const getDestinationByTokens = (savedTokens: number) => {
+    // 교통수단 카드의 목적지 계산 - null 안전성 추가
+    const getDestinationByTokens = (savedTokens: number = 0) => {
         const powerKwh = savedTokens / 1000;
         const maxKm = Math.round(powerKwh * 5.2);
         
@@ -219,10 +272,10 @@ function Dashboard() {
                                 </div>
                                 <div className="lg-stat-title">절약한 토큰 수</div>
                                 <div className="lg-stat-value">
-                                    {formatNumber(currentStats.savedTokens)}
+                                    {formatNumber(currentStats.savedTokens || 0)}
                                 </div>
                                 <div className="lg-stat-delta">
-                                    +{formatNumber(currentDaily.savedTokens)}개 (오늘)
+                                    +{formatNumber(currentDaily.savedTokens || 0)}개 (오늘)
                                 </div>
                             </article>
 
@@ -246,10 +299,10 @@ function Dashboard() {
                                 </div>
                                 <div className="lg-stat-title">절감된 비용</div>
                                 <div className="lg-stat-value">
-                                    {formatCost(currentStats.costSumUsd)}
+                                    {formatCost(currentStats.costSumUsd || 0)}
                                 </div>
                                 <div className="lg-stat-delta">
-                                    +{formatCost(currentDaily.costSumUsd)} (오늘)
+                                    +{formatCost(currentDaily.costSumUsd || 0)} (오늘)
                                 </div>
                             </article>
 
@@ -272,10 +325,10 @@ function Dashboard() {
                                 </div>
                                 <div className="lg-stat-title">CO₂ 절감량</div>
                                 <div className="lg-stat-value">
-                                    {formatCO2(currentStats.savedTokens)}
+                                    {formatCO2(currentStats.savedTokens || 0)}
                                 </div>
                                 <div className="lg-stat-delta">
-                                    +{formatCO2(currentDaily.savedTokens)} (오늘)
+                                    +{formatCO2(currentDaily.savedTokens || 0)} (오늘)
                                 </div>
                             </article>
                         </section>
@@ -400,7 +453,7 @@ function Dashboard() {
                             <div className="lg-ranking-head">
                                 <div className="lg-ranking-title">
                                     <Icon icon="fluent-emoji:trophy" width={28} height={28}/>
-                                    <h2>{scope === "me" ? "불용어 절약 TOP 5" : "절약 이유 TOP 5"}</h2>
+                                    <h2>{scope === "me" ? "불용어 절약 TOP 5" : " 불용어 절약 TOP 5"}</h2>
                                 </div>
                                 <span className="lg-pill">
                                     {scope === "me" ? "개인 기준" : "전체 기준"}
@@ -410,8 +463,8 @@ function Dashboard() {
                             <div className="lg-ranking-inner">
                                 {scope === "me" ? (
                                     // 개인 모드: topDroppedTexts 사용
-                                    data.topDroppedTexts.slice(0, 5).map((item, index) => (
-                                        <article key={item.droppedText} className="lg-card lg-rank-card">
+                                    (data.topDroppedTexts || []).slice(0, 5).map((item, index) => (
+                                        <article key={item.droppedText || `empty-${index}`} className="lg-card lg-rank-card">
                                             <div className="lg-badge" title={`${index + 1}위`}>
                                                 {index < 3 ? (
                                                     <Icon
@@ -425,14 +478,14 @@ function Dashboard() {
                                                     <span className="lg-keycap">{index + 1}️⃣</span>
                                                 )}
                                             </div>
-                                            <h4>{item.droppedText}</h4>
-                                            <p>{item.count}회 절약</p>
+                                            <h4>{item.droppedText || '데이터 없음'}</h4>
+                                            <p>{item.count || 0}회 절약</p>
                                         </article>
                                     ))
                                 ) : (
                                     // 전체 모드: topReasons 사용  
-                                    data.topReasons.slice(0, 5).map((item, index) => (
-                                        <article key={item.reasonType} className="lg-card lg-rank-card">
+                                    (data.topReasons || []).slice(0, 5).map((item, index) => (
+                                        <article key={item.reasonType || `empty-${index}`} className="lg-card lg-rank-card">
                                             <div className="lg-badge" title={`${index + 1}위`}>
                                                 {index < 3 ? (
                                                     <Icon
@@ -446,11 +499,22 @@ function Dashboard() {
                                                     <span className="lg-keycap">{index + 1}️⃣</span>
                                                 )}
                                             </div>
-                                            <h4>{item.reasonType}</h4>
-                                            <p>{item.count}회</p>
+                                            <h4>{item.reasonType || '데이터 없음'}</h4>
+                                            <p>{item.count || 0}회 절약</p>
                                         </article>
                                     ))
                                 )}
+                                
+                                {/* 데이터가 없는 경우 빈 카드들로 채우기 */}
+                                {Array.from({ length: Math.max(0, 5 - (scope === "me" ? (data.topDroppedTexts || []).length : (data.topReasons || []).length)) }, (_, index) => (
+                                    <article key={`empty-${index}`} className="lg-card lg-rank-card">
+                                        <div className="lg-badge">
+                                            <span className="lg-keycap">-</span>
+                                        </div>
+                                        <h4>데이터 없음</h4>
+                                        <p>0회 절약</p>
+                                    </article>
+                                ))}
                             </div>
                         </section>
                     </div>
