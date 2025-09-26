@@ -128,6 +128,9 @@ services:
     command: python -m app.workers.summary_worker
     env_file:
       - .env
+    environment:
+      - API_BASE=https://gms.ssafy.io/gmsapi/api.openai.com/v1
+      - OPENAI_API_KEY=${GMS_API_KEY}
     depends_on:
       - elasticsearch
     volumes:

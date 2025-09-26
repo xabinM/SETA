@@ -121,7 +121,6 @@ def run_filter_worker():
                 error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
             # ES 저장
-            # ES 저장
             try:
                 raw = type("RawObj", (), ev)()
                 details = ev.get("filtered_words_details", [[], []])

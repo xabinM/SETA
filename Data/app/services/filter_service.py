@@ -92,10 +92,10 @@ def save_to_es(raw: RawFilteredMessage, decision: Dict[str, Any]) -> None:
         logs = getattr(decision, "drop_logs", [])
         if isinstance(logs, list) and len(logs) > 0:
             for log in logs:
-                dropped_list = _as_list(log.get("필터된 내용") or log.get("dropped_text"))
+                dropped_list = _as_list(log.get("text") or log.get("원문") or log.get("dropped_text"))
                 if not dropped_list:
                     continue
-                reason = log.get("라벨") or decision.get("label")
+                reason = log.get("label") or decision.get("라벨")
                 for dropped in dropped_list:
                     docs.append({
                         "trace_id": raw.trace_id,
