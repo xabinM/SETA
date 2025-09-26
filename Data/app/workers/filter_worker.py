@@ -121,22 +121,28 @@ def run_filter_worker():
                 error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
             # ES 저장
+            # ES 저장
             try:
                 raw = type("RawObj", (), ev)()
-                auto_logs = ev.get("filtered_words_details", [[], []])[0]
-                es_decision = {
-                    "action": "DROP",
-                    "cleaned_text": "",
-                    "original_text": text,
-                    "drop_logs": auto_logs,
-                    "reason_type": top_category,
-                    "explanations": [],
-                }
-                filter_service.save_to_es(raw, es_decision)
-                logger.info("📤 Saved to Elasticsearch (AUTO)")
+                details = ev.get("filtered_words_details", [[], []])
+                words = details[0] if len(details) > 0 else []
+                labels = details[1] if len(details) > 1 else []
+
+                for w, l in zip(words, labels):
+                    es_decision = {
+                        "action": "DROP",
+                        "cleaned_text": "",
+                        "original_text": text,
+                        "drop_logs": {"word": w, "label": l},
+                        "reason_type": l,
+                        "explanations": [],
+                    }
+                    filter_service.save_to_es(raw, es_decision)
+                    logger.info("📤 Saved to Elasticsearch (AUTO) word=%s, label=%s", w, l)
             except Exception as e:
                 logger.exception("❌ Failed ES save (AUTO)")
                 error_service.save_error(trace_id, "ES_SAVE_ERROR", e)
+
 
             publish(
                 producer,
