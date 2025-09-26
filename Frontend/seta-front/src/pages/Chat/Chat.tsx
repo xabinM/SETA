@@ -47,32 +47,21 @@ export default function Chat() {
     const navigate = useNavigate();
     const {threadId} = useParams<{ threadId?: string }>(); // /chat 에선 undefined
     const activeId = threadId ?? null;
-
-    // 사용자 정보
     const [me, setMe] = useState<Me | null>(null);
     const [meLoading, setMeLoading] = useState(false);
-
-    // 방 목록/에러/로딩/생성/삭제
     const [rooms, setRooms] = useState<ChatRoom[]>(() => loadCachedRooms());
     const [loadingRooms, setLoadingRooms] = useState(false);
     const [roomsError, setRoomsError] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
-
-    // 컨텍스트 메뉴
     const [ctx, setCtx] = useState<CtxMenu>({open: false, x: 0, y: 0, roomId: null});
-
-    // 유저 메뉴/개인화 모달
     const footerRef = useRef<HTMLDivElement>(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [personalizeOpen, setPersonalizeOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-
-    // /chat 입력창 상태 (시드)
     const [seed, setSeed] = useState("");
     const [ime, setIme] = useState(false);
-
     const onOpenPersonalize = useCallback(() => {
         setMenuOpen(false);
         setPersonalizeOpen(true);
@@ -82,7 +71,6 @@ export default function Chat() {
         navigate("/home", {replace: true});
     }, [navigate]);
 
-    // /api/auth/me
     useEffect(() => {
         const ac = new AbortController();
         (async () => {
@@ -100,7 +88,6 @@ export default function Chat() {
         return () => ac.abort();
     }, []);
 
-    // 새 방 생성
     const onCreateRoom = useCallback(async () => {
         if (creating) return;
         try {
@@ -120,7 +107,6 @@ export default function Chat() {
         }
     }, [creating, navigate]);
 
-    // 새 방 생성 + 시드 전송
     const onCreateRoomAndSeed = useCallback(
         async (text: string) => {
             const trimmed = text.trim();
@@ -146,28 +132,22 @@ export default function Chat() {
         [creating, navigate]
     );
 
-    // 스크롤 처리 - 하나의 useEffect로 통합 및 mobile-scroll-enabled 클래스 추가
     useEffect(() => {
         const updateScrollBehavior = () => {
             const isMobile = window.innerWidth <= 768;
 
             if (isMobile) {
-                // 모바일: 스크롤 허용
                 document.body.classList.remove("no-scroll");
                 document.documentElement.classList.remove("no-scroll-html");
                 document.body.classList.add("mobile-scroll-enabled");
             } else {
-                // 데스크톱: 스크롤 잠금
                 document.body.classList.remove("mobile-scroll-enabled");
                 document.body.classList.add("no-scroll");
                 document.documentElement.classList.add("no-scroll-html");
             }
         };
 
-        // 초기 설정
         updateScrollBehavior();
-
-        // 리사이즈 이벤트 리스너
         window.addEventListener('resize', updateScrollBehavior);
 
         return () => {
@@ -189,7 +169,6 @@ export default function Chat() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // 서버에서 방 목록 최신화
     useEffect(() => {
         let mounted = true;
         (async () => {
@@ -208,27 +187,13 @@ export default function Chat() {
         return () => {
             mounted = false;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // 방 이동
     const openThread = (id: string) => {
         if (activeId === id) return;
         navigate(`/chat/${id}`);
     };
 
-    // 우클릭 컨텍스트 메뉴
-    const onRightClickRoom = (e: React.MouseEvent, id: string) => {
-        e.preventDefault();
-        const MENU_W = 132;
-        const MENU_H = 36;
-        const pad = 8;
-        const x = Math.min(e.clientX, window.innerWidth - MENU_W - pad);
-        const y = Math.min(e.clientY, window.innerHeight - MENU_H - pad);
-        setCtx({open: true, x, y, roomId: id});
-    };
-
-    // ESC로 컨텍스트 메뉴 닫기
     useEffect(() => {
         if (!ctx.open) return;
         const onEsc = (e: KeyboardEvent) => {
@@ -238,12 +203,8 @@ export default function Chat() {
         return () => window.removeEventListener("keydown", onEsc);
     }, [ctx.open]);
 
-    // 방 삭제
-    const onDeleteRoom = useCallback(async () => {
-        if (!ctx.roomId) return;
-        const roomId = ctx.roomId;
-        setCtx({open: false, x: 0, y: 0, roomId: null});
-
+    const deleteRoomById = useCallback(async (roomId: string) => {
+        if (!window.confirm("이 채팅방을 삭제하시겠어요?")) return; // ✅ 확인창
         try {
             setDeletingId(roomId);
             await deleteChatRoom(roomId);
@@ -259,7 +220,7 @@ export default function Chat() {
         } finally {
             setDeletingId(null);
         }
-    }, [ctx.roomId, navigate, activeId]);
+    }, [activeId, navigate]);
 
     return (
         <div
@@ -277,7 +238,6 @@ export default function Chat() {
             <div className="chat-stage">
                 <div className="chat-canvas">
                     <div className="container">
-                        {/* 모바일용 백드롭 */}
                         {isMobile && (
                             <div
                                 className={`sidebar-backdrop ${sidebarOpen ? 'sidebar-open' : ''}`}
@@ -285,7 +245,6 @@ export default function Chat() {
                             />
                         )}
 
-                        {/* Sidebar */}
                         <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
                             <div className="sidebar-header">
                                 <div className="sidebar-user">
@@ -316,7 +275,6 @@ export default function Chat() {
                                         {creating ? "생성 중…" : "새로운 채팅 시작하기"}
                                     </button>
 
-                                    {/* 서버 채팅방 목록 */}
                                     <div className="thread-list">
                                         {rooms.length === 0 && loadingRooms && (
                                             <div className="thread-item" style={{opacity: 0.7}}>
@@ -334,7 +292,6 @@ export default function Chat() {
                                                 key={r.chatRoomId}
                                                 className="thread-item"
                                                 onClick={() => openThread(r.chatRoomId)}
-                                                onContextMenu={(e) => onRightClickRoom(e, r.chatRoomId)}
                                                 aria-current={r.chatRoomId === activeId ? "page" : undefined}
                                                 title={r.title || "(제목 없음)"}
                                                 style={{
@@ -356,9 +313,35 @@ export default function Chat() {
                                                 >
                                                     {r.title || "(제목 없음)"}
                                                 </div>
+
+                                                <button
+                                                    type="button"
+                                                    className="thread-delete-btn"
+                                                    aria-label="채팅방 삭제"
+                                                    title="삭제"
+                                                    disabled={deletingId === r.chatRoomId}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();          // 항목 클릭(열기) 방지
+                                                        void deleteRoomById(r.chatRoomId);
+                                                    }}
+                                                >
+                                                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+                                                        <path d="M9 3h6a1 1 0 0 1 1 1v1h4" fill="none" stroke="#E0E0E0"
+                                                              strokeWidth="1.6"
+                                                              strokeLinecap="round" strokeLinejoin="round"/>
+                                                        <path d="M4 5h16M6 5l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"
+                                                              fill="none" stroke="#E0E0E0" strokeWidth="1.6"
+                                                              strokeLinecap="round" strokeLinejoin="round"/>
+                                                        <path d="M10 9v8M14 9v8" fill="none" stroke="#E0E0E0"
+                                                              strokeWidth="1.6"
+                                                              strokeLinecap="round" strokeLinejoin="round"/>
+                                                    </svg>
+                                                </button>
+
                                                 <div style={{width: 4, flex: "0 0 4px"}}/>
                                             </div>
                                         ))}
+
                                     </div>
                                 </div>
                             </div>
@@ -395,7 +378,6 @@ export default function Chat() {
                             </div>
                         </aside>
 
-                        {/* ===== Right: threadId 있으면 Outlet(=ChatRoom), 없으면 웰컴 ===== */}
                         <main className="main-chat">
                             <div className="chat-header">
                                 <div className="chat-user">
@@ -452,7 +434,6 @@ export default function Chat() {
                                         </div>
                                     </div>
 
-                                    {/* /chat 하단 입력바: 엔터=새 방 생성 후 시드 전송 */}
                                     <div className="chat-footer">
                                         <div className="chat-input-container">
                                             <input
@@ -485,42 +466,6 @@ export default function Chat() {
                     </div>
                 </div>
             </div>
-
-            {/* Context menu (우클릭) */}
-            {ctx.open && (
-                <div onClick={() => setCtx({open: false, x: 0, y: 0, roomId: null})}
-                     style={{position: "fixed", inset: 0, zIndex: 9999}}>
-                    <div
-                        role="menu"
-                        aria-label="채팅방 메뉴"
-                        className="ctxmenu"
-                        style={{top: ctx.y, left: ctx.x, position: "fixed"}}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <button type="button" onClick={onDeleteRoom} disabled={deletingId === ctx.roomId}
-                                className="ctxitem danger">
-              <span className="ctxitem__icon" aria-hidden>
-                <svg viewBox="0 0 24 24" width="18" height="18">
-                  <path d="M9 3h6a1 1 0 0 1 1 1v1h4" fill="none" stroke="currentColor" strokeWidth="1.6"
-                        strokeLinecap="round" strokeLinejoin="round"/>
-                  <path
-                      d="M4 5h16M6 5l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                  />
-                  <path d="M10 9v8M14 9v8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"
-                        strokeLinejoin="round"/>
-                </svg>
-              </span>
-                            <span className="ctxitem__label">{deletingId === ctx.roomId ? "Deleting…" : "Delete"}</span>
-                        </button>
-                    </div>
-                </div>
-            )}
-
             <UserPersonalizeContainer open={personalizeOpen} onClose={() => setPersonalizeOpen(false)}/>
         </div>
     );
