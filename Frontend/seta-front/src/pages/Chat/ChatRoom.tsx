@@ -212,6 +212,10 @@ export default function ChatRoom() {
             resetIdleWatchdog();
             setStatus("done");
             assistantIdRef.current = null;
+
+            if (threadId) {
+                window.dispatchEvent(new CustomEvent("seta:title:check", { detail: { roomId: threadId } }));
+            }
         });
 
         for (const name of HEARTBEAT_NAMES) {
