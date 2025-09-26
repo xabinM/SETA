@@ -28,21 +28,21 @@ services:
     restart: unless-stopped
 
   filter-worker-1:
-    build: ./Data
+    build: .
     command: python -m app.workers.filter_worker
     environment:
       - KAFKA_BROKER=kafka:9092
       - CONSUMER_GROUP=filter-group
 
   filter-worker-2:
-    build: ./Data
+    build: .
     command: python -m app.workers.filter_worker
     environment:
       - KAFKA_BROKER=kafka:9092
       - CONSUMER_GROUP=filter-group
 
   filter-worker-3:
-    build: ./Data
+    build: .
     command: python -m app.workers.filter_worker
     environment:
       - KAFKA_BROKER=kafka:9092
