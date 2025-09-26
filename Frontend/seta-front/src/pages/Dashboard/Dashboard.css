@@ -350,10 +350,10 @@ body{
     display: grid; 
     place-items: center; 
     text-align: center; 
-    gap: 10px; 
+    gap: 10px;
 }
 
-.lg-strong{ font-weight: 600; }
+.lg-strong{ font-weight: 600;}
 .lg-em{ color: var(--ok-blue); font-weight: 800; font-size: 18px; }
 .lg-dim{ color: var(--text-dim); font-size: 13px; }
 

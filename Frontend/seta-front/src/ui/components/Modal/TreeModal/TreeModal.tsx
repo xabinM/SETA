@@ -266,7 +266,7 @@ export default function TreeModal({
                     </section>
 
                     {/* KPIs */}
-                    <section className="lgm-kpis" aria-labelledby="lgm-kpi-title">
+                    {/* <section className="lgm-kpis" aria-labelledby="lgm-kpi-title">
                         <h2 id="lgm-kpi-title" className="lgm-section-title">
                             절약 지표
                         </h2>
@@ -282,7 +282,7 @@ export default function TreeModal({
                                 </div>
                             ))}
                         </div>
-                    </section>
+                    </section> */}
 
                     {/* Timeline */}
                     <section className="lgm-card" aria-labelledby="lgm-timeline-title">

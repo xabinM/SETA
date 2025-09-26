@@ -1,78 +1,64 @@
 import { useState, useEffect } from "react";
 import { getDashboardKpi, type DashboardKpiResponse } from "./api";
 
-// 값을 포맷팅하는 유틸리티 함수들
-export function formatNumber(num: number): string {
-    if (num >= 1000000) {
-        return (num / 1000000).toFixed(1) + "M";
-    }
-    if (num >= 1000) {
-        return (num / 1000).toFixed(1) + "K";
-    }
-    return num.toLocaleString();
+// 1토큰당 CO2 그램 단위 환산값 (백엔드 usage.py 상수와 동일)
+const CO2_G_PER_TOKEN = 0.0003; // 0.03 / 100
+
+// 토큰 수로 CO2 절감량 계산 함수 (그램 단위 숫자 반환)
+function calcCO2(tokens: number | undefined | null): number {
+  if (!tokens) return 0;
+  return tokens * CO2_G_PER_TOKEN;
 }
-
-export function formatCost(costUsd: number | null): string {
-    // null이거나 undefined인 경우 0으로 처리
-    if (costUsd === null || costUsd === undefined) {
-        return "₩0";
-    }
-    
-    // USD를 KRW로 변환 (환율: 1 USD = 1400 KRW 가정)
-    const krw = Math.round(costUsd * 1400);
-    return `₩${krw.toLocaleString()}`;
-}
-
-export function formatCO2(savedTokens: number): string {
-  const co2Grams = savedTokens / 1000;
-
-  // 1g 미만일 땐 소수점 한 자리까지 표시해 의미 살리기
-  if (co2Grams < 1) {
-    return `${co2Grams.toFixed(1)}g`;
-  }
-
-  // 1g 이상 1000g 미만은 반올림 처리 (소수점 제거)
-  if (co2Grams < 1000) {
-    return `${Math.round(co2Grams)}g`;
-  }
-
-  // 1kg 이상 10kg 미만은 소수점 둘째 자리까지 표시
-  if (co2Grams < 10000) {
-    return `${(co2Grams / 1000).toFixed(2)}kg`;
-  }
-
-  // 10kg 이상부터는 정수 kg 단위로 표시하며 강조 효과(예: 쉼표 추가)
-  return `${Math.round(co2Grams / 1000).toLocaleString()}kg`;
-}
-
 
 export function useDashboardKpi() {
-    const [data, setData] = useState<DashboardKpiResponse | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<DashboardKpiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const result = await getDashboardKpi();
-            setData(result);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "데이터를 불러오는데 실패했습니다.");
-            console.error("Dashboard KPI fetch error:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await getDashboardKpi();
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+      // CO2 절감량을 계산해 API 결과에 포함시키기
+      const withCo2: DashboardKpiResponse = {
+        ...result,
+        userTotal: {
+          ...result.userTotal,
+          co2: calcCO2(result.userTotal?.savedTokens),
+        },
+        userDaily: {
+          ...result.userDaily,
+          co2: calcCO2(result.userDaily?.savedTokens),
+        },
+        globalTotal: {
+          ...result.globalTotal,
+          co2: calcCO2(result.globalTotal?.savedTokens),
+        },
+        globalDaily: {
+          ...result.globalDaily,
+          co2: calcCO2(result.globalDaily?.savedTokens),
+        },
+      };
 
-    return {
-        data,
-        loading,
-        error,
-        refetch: fetchData,
-    };
+      setData(withCo2);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "데이터를 불러오는데 실패했습니다.");
+      console.error("Dashboard KPI fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  return {
+    data,
+    loading,
+    error,
+    refetch: fetchData,
+  };
 }

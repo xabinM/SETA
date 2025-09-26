@@ -12,7 +12,6 @@ export default function CarModal({
                                      trip,
                                      vehicle,
                                      segments,
-                                     kpis,    // 주어지면 사용, 없으면 내부에서 자동 생성
                                      cta,
                                  }: CarModalProps) {
     const shellRef = useRef<HTMLDivElement>(null);
@@ -21,60 +20,60 @@ export default function CarModal({
 
     // 파생값 계산 - 수정됨
     const {
-        currentKwh, efficiency, totalKm, equivKm, progress01, pct, remainingKm,
-    } = useMemo(() => {
-        const currentKwh = power?.current ?? 0;
-        const efficiency = vehicle?.efficiencyKmPerKwh ?? 5.2;
-        const total = trip?.totalKm ?? 0;
+    currentKwh, efficiency, totalKm, equivKm, progress01, pct, remainingKm,
+} = useMemo(() => {
+    const currentKwh = power?.current ?? 0;
+    const efficiency = vehicle?.efficiencyKmPerKwh ?? 5.2;
+    const total = trip?.totalKm ?? 0;
 
-        const eqKm = Math.max(0, currentKwh * efficiency);
-        const p01 = total > 0 ? Math.max(0, Math.min(1, eqKm / total)) : 0;
+    const eqKm = Math.max(0, currentKwh * efficiency);
+    const p01 = total > 0 ? Math.max(0, Math.min(1, eqKm / total)) : 0;
 
-        console.log('CarModal 파생값 계산:', {
-            currentKwh,
-            efficiency,
-            totalKm: total,
-            equivKm: eqKm, // 반올림 전 값도 확인
-            equivKmRounded: Math.round(eqKm),
-            progress01: p01,
-            pct: Math.round(p01 * 100)
-        });
+    console.log('CarModal 파생값 계산:', {
+        currentKwh,
+        efficiency,
+        totalKm: total,
+        equivKm: eqKm,
+        equivKmRounded: Math.max(0.1, Math.round(eqKm * 10) / 10), // 최소 0.1km 보장
+        progress01: p01,
+        pct: Math.round(p01 * 100)
+    });
 
-        return {
-            currentKwh,
-            efficiency,
-            totalKm: total,
-            equivKm: Math.round(eqKm),
-            progress01: p01,
-            pct: Math.round(p01 * 100),
-            remainingKm: Math.max(0, Math.round(total - eqKm)),
-        };
-    }, [power?.current, vehicle?.efficiencyKmPerKwh, trip?.totalKm]);
+    return {
+        currentKwh,
+        efficiency,
+        totalKm: total,
+        equivKm: Math.max(0.1, Math.round(eqKm * 10) / 10), // 최소 0.1km, 소수점 1자리
+        progress01: p01,
+        pct: Math.round(p01 * 100),
+        remainingKm: Math.max(0, Math.round(total - eqKm)),
+    };
+}, [power?.current, vehicle?.efficiencyKmPerKwh, trip?.totalKm]);
 
     // 포맷팅 함수 개선 - 작은 소수 처리
-    const formatKwh = (kwh: number): string => {
-        if (kwh === 0) return "0.0";
-        if (kwh < 0.1) return kwh.toFixed(3); // 0.003 -> "0.003"
-        if (kwh < 1) return kwh.toFixed(2);   // 0.15 -> "0.15"
-        return kwh.toFixed(1);                // 1.5 -> "1.5"
-    };
-
     const formatDistance = (km: number): string => {
-        if (km === 0) return "0";
-        if (km < 1) return km.toFixed(1);
-        return Math.round(km).toLocaleString();
-    };
+    if (km === 0) return "0.1"; // 0일 때도 0.1로 표시
+    if (km < 0.1) return "0.1";
+    if (km < 1) return km.toFixed(1);
+    return Math.round(km).toLocaleString();
+};
+
+    // const formatDistance = (km: number): string => {
+    //     if (km === 0) return "0";
+    //     if (km < 1) return km.toFixed(1);
+    //     return Math.round(km).toLocaleString();
+    // };
 
     // KPI 자동 생성 - 포맷팅 개선
-    const autoKpis =
-        kpis && kpis.length
-            ? kpis
-            : [
-                {icon: "🔋", label: "누적 전력 절약", value: `${formatKwh(currentKwh)} kWh`},
-                {icon: "🌿", label: "CO₂ 절감", value: `${Math.round(currentKwh * 0.2 * 1000)}g`}, // g 단위로 표시
-                {icon: "💰", label: "비용 절감", value: `${Math.round(currentKwh * 110)} 원`},
-                {icon: "⚙️", label: "전비", value: `${efficiency.toFixed(1)} km/kWh`},
-            ];
+    // const autoKpis =
+    //     kpis && kpis.length
+    //         ? kpis
+    //         : [
+    //             {icon: "🔋", label: "누적 전력 절약", value: `${formatKwh(currentKwh)} kWh`},
+    //             {icon: "🌿", label: "CO₂ 절감", value: `${Math.round(currentKwh * 0.2 * 1000)}g`}, // g 단위로 표시
+    //             {icon: "💰", label: "비용 절감", value: `${Math.round(currentKwh * 110)} 원`},
+    //             {icon: "⚙️", label: "전비", value: `${efficiency.toFixed(1)} km/kWh`},
+    //         ];
 
     // 구간 상태(단계 기준) - 실제 데이터 기반으로 계산
     const getSegmentStatus = (i: number) => {
@@ -252,7 +251,7 @@ export default function CarModal({
                         </div>
                     </section>
 
-                    {/* KPI */}
+                    {/* KPI
                     {autoKpis.length > 0 && (
                         <section className="cm-kpi-wrap" aria-label="핵심 지표">
                             <div className="cm-kpis-grid4">
@@ -265,7 +264,7 @@ export default function CarModal({
                                 ))}
                             </div>
                         </section>
-                    )}
+                    )} */}
 
                     {/* 진행도 */}
                     <section className="cm-card">
