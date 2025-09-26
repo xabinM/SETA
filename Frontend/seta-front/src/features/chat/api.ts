@@ -19,7 +19,6 @@ export async function deleteChatRoom(roomId: string): Promise<void> {
     return http<void>(`/chat/rooms/${roomId}`, {method: "DELETE", auth: true});
 }
 
-
 export type ChatMessage = {
     messageId: string;
     role: "user" | "assistant";
@@ -63,7 +62,7 @@ export async function getRoomMessages(roomId: string): Promise<UIMsg[]> {
 export async function sendMessageToServer(roomId: string, text: string) {
     return http<SendMessageResponse>(`/chat/rooms/${roomId}/messages`, {
         method: "POST",
-        body: { text },
+        body: {text},
         auth: true,
     });
 }
