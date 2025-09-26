@@ -20,21 +20,24 @@ export default function CarModal({
 
     // 파생값 계산 - 수정됨
     const {
-    currentKwh, efficiency, totalKm, equivKm, progress01, pct, remainingKm,
+    currentKwh, efficiency, totalKm, equivKm, progress01, pct, remainingKm, isNewUser
 } = useMemo(() => {
     const currentKwh = power?.current ?? 0;
     const efficiency = vehicle?.efficiencyKmPerKwh ?? 5.2;
     const total = trip?.totalKm ?? 0;
 
-    const eqKm = Math.max(0, currentKwh * efficiency);
-    const p01 = total > 0 ? Math.max(0, Math.min(1, eqKm / total)) : 0;
+    // 신규 회원 체크 (절약한 전력이 실질적으로 0인 경우)
+    const isNewUser = currentKwh < 0.001;
+
+    const eqKm = isNewUser ? 0 : Math.max(0, currentKwh * efficiency);
+    const p01 = total > 0 && !isNewUser ? Math.max(0, Math.min(1, eqKm / total)) : 0;
 
     console.log('CarModal 파생값 계산:', {
         currentKwh,
         efficiency,
         totalKm: total,
         equivKm: eqKm,
-        equivKmRounded: Math.max(0.1, Math.round(eqKm * 10) / 10), // 최소 0.1km 보장
+        isNewUser,
         progress01: p01,
         pct: Math.round(p01 * 100)
     });
@@ -43,16 +46,17 @@ export default function CarModal({
         currentKwh,
         efficiency,
         totalKm: total,
-        equivKm: Math.max(0.1, Math.round(eqKm * 10) / 10), // 최소 0.1km, 소수점 1자리
+        equivKm: isNewUser ? 0 : Math.max(0.1, Math.round(eqKm * 10) / 10),
         progress01: p01,
         pct: Math.round(p01 * 100),
         remainingKm: Math.max(0, Math.round(total - eqKm)),
+        isNewUser
     };
 }, [power?.current, vehicle?.efficiencyKmPerKwh, trip?.totalKm]);
 
     // 포맷팅 함수 개선 - 작은 소수 처리
-    const formatDistance = (km: number): string => {
-    if (km === 0) return "0.1"; // 0일 때도 0.1로 표시
+    const formatDistance = (km: number, isNewUser: boolean = false): string => {
+    if (isNewUser || km === 0) return "0";
     if (km < 0.1) return "0.1";
     if (km < 1) return km.toFixed(1);
     return Math.round(km).toLocaleString();
@@ -243,9 +247,19 @@ export default function CarModal({
                                 <p className="cm-subtitle">
                                     {(trip?.origin ?? "출발지")} → {(trip?.destination ?? "도착지")} 이 {totalKm.toLocaleString()}km 여정.
                                     <br/>
-                                    절약한 에너지로 <b>{formatDistance(equivKm)}km</b> 만큼 달릴 수 있어요.
-                                    <br/>
-                                    <small style={{opacity: 0.8}}>현재 전비: {efficiency.toFixed(1)} km/kWh</small>
+                                    {isNewUser ? (
+                                        <>
+                                            <b>SETA와 채팅해서 첫 절약을 시작해보세요!</b>
+                                            <br/>
+                                            <small style={{opacity: 0.8}}>AI 사용을 최적화하면 전력을 절약할 수 있어요</small>
+                                        </>
+                                    ) : (
+                                        <>
+                                            절약한 에너지로 <b>{formatDistance(equivKm, isNewUser)}km</b> 만큼 달릴 수 있어요.
+                                            <br/>
+                                            <small style={{opacity: 0.8}}>현재 전비: {efficiency.toFixed(1)} km/kWh</small>
+                                        </>
+                                    )}
                                 </p>
                             </div>
                         </div>
@@ -294,9 +308,9 @@ export default function CarModal({
                             </div>
 
                             <div className="cm-meta">
-                                <div className="cm-chip">등가 주행: {formatDistance(equivKm)}km</div>
+                                <div className="cm-chip">등가 주행: {formatDistance(equivKm, isNewUser)}km</div>
                                 <div className="cm-chip">목표: {totalKm.toLocaleString()}km ({remainingKm.toLocaleString()}km 남음)</div>
-                                <div className="cm-chip">전비: {efficiency.toFixed(1)} km/kWh</div>
+                                {!isNewUser && <div className="cm-chip">전비: {efficiency.toFixed(1)} km/kWh</div>}
                             </div>
                         </div>
                     </section>
