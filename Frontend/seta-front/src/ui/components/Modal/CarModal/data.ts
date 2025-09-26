@@ -6,13 +6,26 @@ const EFFICIENCY_KM_PER_KWH = 5.2; // 현대 아이오닉 5 기준
 
 // 절약된 토큰으로 계산되는 전력량 (kWh)
 function calculatePowerFromTokens(savedTokens: number): number {
-    // 1000 토큰당 약 1kWh 절약 가정
-    return savedTokens / 1000;
+    // 1000 토큰당 약 1kWh 절약 가정 (AI 모델 처리 전력 효율성 기반)
+    return Math.max(0, savedTokens) / 1000;
 }
 
 // 절약된 전력으로 갈 수 있는 거리별 목적지 결정
 function getTripByDistance(powerKwh: number): { origin: string; destination: string; totalKm: number; segments: Array<{ title: string; km: number }> } {
     const maxKm = Math.round(powerKwh * EFFICIENCY_KM_PER_KWH);
+    
+    if (maxKm < 50) {
+        return {
+            origin: "강남",
+            destination: "인천공항", 
+            totalKm: 45,
+            segments: [
+                {title: "강남 → 여의도", km: 15},
+                {title: "여의도 → 김포공항", km: 15},
+                {title: "김포공항 → 인천공항", km: 15},
+            ]
+        };
+    }
     
     if (maxKm < 150) {
         return {
@@ -91,59 +104,78 @@ function getTripByDistance(powerKwh: number): { origin: string; destination: str
     };
 }
 
+// 사용자 토큰 데이터 기반으로 동적 KPI 생성
+function generateKPIs(savedTokens: number, powerKwh: number): Array<{ icon: string; label: string; value: string; hint?: string }> {
+    const costSaving = Math.round(powerKwh * 110); // 110원/kWh
+    const co2Reduction = Math.round(powerKwh * 0.2); // 0.2kg CO2/kWh
+    const treesEquivalent = Math.max(1, Math.round(co2Reduction / 22)); // 나무 1그루당 연간 22kg CO2 흡수
+    
+    return [
+        {
+            icon: "🔋", 
+            label: "누적 전력 절약", 
+            value: `${powerKwh.toFixed(1)} kWh`,
+            hint: `${savedTokens.toLocaleString()}토큰 최적화`
+        },
+        {
+            icon: "🌿", 
+            label: "CO₂ 절감", 
+            value: `${co2Reduction.toLocaleString()} kg`,
+            hint: `나무 ${treesEquivalent}그루 흡수량과 동일`
+        },
+        {
+            icon: "💰", 
+            label: "비용 절감", 
+            value: `${costSaving.toLocaleString()} 원`,
+            hint: "전기요금 기준"
+        },
+        {
+            icon: "⚙️", 
+            label: "전비", 
+            value: `${EFFICIENCY_KM_PER_KWH} km/kWh`,
+            hint: "아이오닉 5 기준"
+        },
+    ];
+}
+
 // API 데이터 기반으로 CarModal 데이터 생성
 export function createCarModalData(savedTokens: number, scope: "me" | "all"): CarModalData {
-    const powerKwh = calculatePowerFromTokens(savedTokens);
+    // null 안전성 처리
+    const safeTokens = Math.max(0, savedTokens || 0);
+    const powerKwh = calculatePowerFromTokens(safeTokens);
     const trip = getTripByDistance(powerKwh);
+    const kpis = generateKPIs(safeTokens, powerKwh);
+    
+    // 목표 계산: 목적지까지 가는데 필요한 전력량
+    const goalPowerKwh = Math.max(1, Math.ceil(trip.totalKm / EFFICIENCY_KM_PER_KWH));
     
     return {
         power: { 
             current: powerKwh, 
-            goal: Math.ceil(trip.totalKm / EFFICIENCY_KM_PER_KWH), 
-            step: scope === "me" ? 5 : 20 
+            goal: goalPowerKwh, 
+            step: scope === "me" ? 1 : 5  // 개인은 1kWh씩, 전체는 5kWh씩
         },
         trip,
         vehicle: { efficiencyKmPerKwh: EFFICIENCY_KM_PER_KWH },
         segments: trip.segments,
+        kpis,
         cta: { share: true },
     };
 }
 
-// 기본 더미 데이터 (API 연동 전 사용)
-export const mockCarModalData: CarModalData = {
-    power: {current: 10, goal: 200, step: 20},
-    trip: {origin: "서울", destination: "부산", totalKm: 325},
-    vehicle: {efficiencyKmPerKwh: EFFICIENCY_KM_PER_KWH},
-    segments: [
-        {title: "서울 → 대전", km: 140},
-        {title: "대전 → 대구", km: 130},
-        {title: "대구 → 부산", km: 55},
-    ],
-    cta: {share: true},
-};
+// 범위별 데이터 (실제 토큰 값 기반으로 생성)
+export function getCarModalDataByScope(meTokens: number = 0, allTokens: number = 0) {
+    return {
+        me: createCarModalData(meTokens, "me"),
+        all: createCarModalData(allTokens, "all"),
+    };
+}
 
-// 범위별 더미 데이터 (하위 호환성)
+// 기본 더미 데이터 (API 연동 전 테스트용)
+export const mockCarModalData: CarModalData = createCarModalData(1047, "me");
+
+// 하위 호환성을 위한 정적 데이터 (deprecated)
 export const carModalDataByScope: Record<"me" | "all", CarModalData> = {
-    me: {
-        power: {current: 5, goal: 100, step: 10},
-        trip: {origin: "서울", destination: "대전", totalKm: 140},
-        vehicle: {efficiencyKmPerKwh: EFFICIENCY_KM_PER_KWH},
-        segments: [
-            {title: "서울 → 수원", km: 30},
-            {title: "수원 → 천안", km: 50},
-            {title: "천안 → 대전", km: 60},
-        ],
-        cta: {share: true},
-    },
-    all: {
-        power: {current: 65, goal: 400, step: 50},
-        trip: {origin: "서울", destination: "도쿄", totalKm: 1160},
-        vehicle: {efficiencyKmPerKwh: EFFICIENCY_KM_PER_KWH},
-        segments: [
-            {title: "서울 → 부산", km: 325},
-            {title: "부산 → 후쿠오카 (페리)", km: 235},
-            {title: "후쿠오카 → 도쿄", km: 600},
-        ],
-        cta: {share: true},
-    },
+    me: createCarModalData(1047, "me"),      // 예시: 개인 1047토큰
+    all: createCarModalData(13442, "all"),   // 예시: 전체 13442토큰
 };

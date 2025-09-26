@@ -2,26 +2,13 @@ import {memo, useState, useMemo} from "react";
 import Header from "@/ui/components/Header/Header";
 import {Icon} from "@iconify/react";
 import ChatBg from "@/assets/ChatBackground.png";
-
-// hooks와 유틸리티 함수들 import
-import { useDashboardKpi, formatNumber, formatCost, formatCO2 } from "@/features/dashboard/hooks";
-
-/* ===== Modals ===== */
+import {useDashboardKpi, formatNumber, formatCost, formatCO2} from "@/features/dashboard/hooks";
 import TreeModal from "@/ui/components/Modal/TreeModal/TreeModal";
-import {
-    treeModalDataByScope, 
-    calculateTreeStatus, 
-    calculateNextGoal, 
-    calculateCurrentStep,
-    TREE_LEVELS
-} from "@/ui/components/Modal/TreeModal/data";
+import {treeModalDataByScope, calculateTreeStatus, calculateNextGoal, calculateCurrentStep, TREE_LEVELS} from "@/ui/components/Modal/TreeModal/data";
 import CarModal from "@/ui/components/Modal/CarModal/CarModal";
-import { createCarModalData } from "@/ui/components/Modal/CarModal/data";
-
-/* ===== Styles ===== */
+import {createCarModalData} from "@/ui/components/Modal/CarModal/data";
 import "./Dashboard.css";
 
-/* ================= Scope Toggle (Glass Segmented) ================= */
 function ScopeChipGroup({
                             value,
                             onChange,
@@ -54,24 +41,34 @@ function ScopeChipGroup({
     );
 }
 
+const getDefaultStats = () => ({
+    savedTokens: 0,
+    costSumUsd: 0,
+});
+
+const getDefaultDaily = () => ({
+    savedTokens: 0,
+    costSumUsd: 0,
+});
+
 function Dashboard() {
     const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
     const [isCarModalOpen, setIsCarModalOpen] = useState(false);
-
-    // 개인/전체 전환 상태
     const [scope, setScope] = useState<"me" | "all">("me");
-
-    // API 데이터 가져오기
-    const { data, loading, error, refetch } = useDashboardKpi();
-
-    // CarModal 데이터 생성 (API 데이터 기반)
+    const {data, loading, error, refetch} = useDashboardKpi();
     const carModalData = useMemo(() => {
         if (!data) return null;
-        const currentStats = scope === "me" ? data.userTotal : data.globalTotal;
-        return createCarModalData(currentStats.savedTokens, scope);
+        try {
+            const currentStats = scope === "me"
+                ? (data.userTotal || getDefaultStats())
+                : (data.globalTotal || getDefaultStats());
+            return createCarModalData(currentStats.savedTokens || 0, scope);
+        } catch (error) {
+            console.warn('CarModal 데이터 생성 실패:', error);
+            return null;
+        }
     }, [data, scope]);
 
-    // 로딩 상태
     if (loading) {
         return (
             <div className="dash-root" style={{
@@ -85,7 +82,7 @@ function Dashboard() {
                 <main className="dash-main">
                     <div className="lg-page">
                         <div className="lg-container">
-                            <div className="lg-center" style={{ marginTop: "100px" }}>
+                            <div className="lg-center" style={{marginTop: "100px"}}>
                                 <div className="lg-strong">데이터를 불러오는 중...</div>
                             </div>
                         </div>
@@ -95,8 +92,7 @@ function Dashboard() {
         );
     }
 
-    // 에러 상태
-    if (error || !data) {
+    if (error) {
         return (
             <div className="dash-root" style={{
                 backgroundImage: `url(${ChatBg})`,
@@ -109,10 +105,10 @@ function Dashboard() {
                 <main className="dash-main">
                     <div className="lg-page">
                         <div className="lg-container">
-                            <div className="lg-center" style={{ marginTop: "100px" }}>
+                            <div className="lg-center" style={{marginTop: "100px"}}>
                                 <div className="lg-strong">데이터를 불러오는데 실패했습니다</div>
                                 <div className="lg-dim">{error}</div>
-                                <button className="lg-btn" onClick={refetch} style={{ marginTop: "16px" }}>
+                                <button className="lg-btn" onClick={refetch} style={{marginTop: "16px"}}>
                                     다시 시도
                                 </button>
                             </div>
@@ -123,50 +119,81 @@ function Dashboard() {
         );
     }
 
-    // scope에 따른 데이터 선택
-    const currentStats = scope === "me" ? data.userTotal : data.globalTotal;
-    const currentDaily = scope === "me" ? data.userDaily : data.globalDaily;
+    if (!data) {
+        return (
+            <div className="dash-root" style={{
+                backgroundImage: `url(${ChatBg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundAttachment: "fixed",
+            }}>
+                <Header/>
+                <main className="dash-main">
+                    <div className="lg-page">
+                        <div className="lg-container">
+                            <div className="lg-center" style={{marginTop: "100px"}}>
+                                <div className="lg-strong">환영합니다!</div>
+                                <div className="lg-dim">SETA를 사용해서 첫 절약을 시작해보세요.</div>
+                                <div style={{marginTop: "20px"}}>
+                                    <img
+                                        src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Christmas%20Tree.png"
+                                        alt="Christmas Tree"
+                                        width="64"
+                                        height="64"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
+    const currentStats = scope === "me"
+        ? (data.userTotal || getDefaultStats())
+        : (data.globalTotal || getDefaultStats());
+    const currentDaily = scope === "me"
+        ? (data.userDaily || getDefaultDaily())
+        : (data.globalDaily || getDefaultDaily());
+
     console.log("Current scope:", scope);
     console.log("Current stats:", currentStats);
     console.log("Cost sum USD:", currentStats.costSumUsd);
-    
 
-    // TreeModal용 데이터 준비 (API 데이터 기반)
     const baseData = treeModalDataByScope[scope];
-    const currentSavedTokens = currentStats.savedTokens;
-    
-    // API 데이터로 TreeModal 데이터 업데이트
+    const currentSavedTokens = currentStats.savedTokens || 0;
+
     const tokens = {
         current: currentSavedTokens,
         goal: calculateNextGoal(currentSavedTokens),
         step: calculateCurrentStep(currentSavedTokens)
     };
-    
+
     const trees = calculateTreeStatus(currentSavedTokens);
-    
+
     const kpis = baseData.kpis.map((kpi) => {
         if (kpi.label === "누적 비용 절약") {
-            return { ...kpi, value: formatCost(currentStats.costSumUsd) };
+            return {...kpi, value: formatCost(currentStats.costSumUsd || 0)};
         }
         if (kpi.label === "CO₂ 절감량") {
-            return { ...kpi, value: formatCO2(currentSavedTokens) };
+            return {...kpi, value: formatCO2(currentSavedTokens)};
         }
         return kpi;
     });
-    
-    const timeline = baseData.timeline;
 
-    // 교통수단 카드의 목적지 계산
-    const getDestinationByTokens = (savedTokens: number) => {
+    const timeline = baseData.timeline;
+    const getDestinationByTokens = (savedTokens: number = 0) => {
         const powerKwh = savedTokens / 1000;
         const maxKm = Math.round(powerKwh * 5.2);
-        
-        if (maxKm < 150) return { destination: "대전", distance: "140km" };
-        if (maxKm < 320) return { destination: "대구", distance: "290km" };
-        if (maxKm < 500) return { destination: "부산", distance: "325km" };
-        if (maxKm < 1000) return { destination: "제주", distance: "470km" };
-        if (maxKm < 1200) return { destination: "상하이", distance: "950km" };
-        return { destination: "도쿄", distance: "1160km" };
+
+        if (maxKm < 150) return {destination: "대전", distance: "140km"};
+        if (maxKm < 320) return {destination: "대구", distance: "290km"};
+        if (maxKm < 500) return {destination: "부산", distance: "325km"};
+        if (maxKm < 1000) return {destination: "제주", distance: "470km"};
+        if (maxKm < 1200) return {destination: "상하이", distance: "950km"};
+        return {destination: "도쿄", distance: "1160km"};
     };
 
     const destinationInfo = getDestinationByTokens(currentSavedTokens);
@@ -185,21 +212,17 @@ function Dashboard() {
             <Header/>
 
             <main className="dash-main">
-                {/* Scope Toggle */}
                 <div className="scope-dock--tr">
                     <ScopeChipGroup value={scope} onChange={setScope}/>
                 </div>
 
                 <div className="lg-page">
-                    {/* floating blobs */}
                     <div className="lg-blob lg-a"/>
                     <div className="lg-blob lg-b"/>
                     <div className="lg-blob lg-c"/>
 
                     <div className="lg-container">
-                        {/* ===== Stats ===== */}
                         <section className="lg-grid lg-stats" aria-label="주요 지표">
-                            {/* Stat 1 - 절약한 토큰 수 */}
                             <article className="lg-card lg-stat-card">
                                 <div className="lg-icon lg-i-ink" aria-hidden="true">
                                     <svg
@@ -219,14 +242,13 @@ function Dashboard() {
                                 </div>
                                 <div className="lg-stat-title">절약한 토큰 수</div>
                                 <div className="lg-stat-value">
-                                    {formatNumber(currentStats.savedTokens)}
+                                    {formatNumber(currentStats.savedTokens || 0)}
                                 </div>
                                 <div className="lg-stat-delta">
-                                    +{formatNumber(currentDaily.savedTokens)}개 (오늘)
+                                    +{formatNumber(currentDaily.savedTokens || 0)}개 (오늘)
                                 </div>
                             </article>
 
-                            {/* Stat 2 - 절감된 비용 */}
                             <article className="lg-card lg-stat-card">
                                 <div className="lg-icon lg-i-amber" aria-hidden="true">
                                     <svg
@@ -246,14 +268,13 @@ function Dashboard() {
                                 </div>
                                 <div className="lg-stat-title">절감된 비용</div>
                                 <div className="lg-stat-value">
-                                    {formatCost(currentStats.costSumUsd)}
+                                    {formatCost(currentStats.costSumUsd || 0)}
                                 </div>
                                 <div className="lg-stat-delta">
-                                    +{formatCost(currentDaily.costSumUsd)} (오늘)
+                                    +{formatCost(currentDaily.costSumUsd || 0)} (오늘)
                                 </div>
                             </article>
 
-                            {/* Stat 3 - CO2 절감량 */}
                             <article className="lg-card lg-stat-card">
                                 <div className="lg-icon lg-i-green" aria-hidden="true">
                                     <svg
@@ -272,17 +293,15 @@ function Dashboard() {
                                 </div>
                                 <div className="lg-stat-title">CO₂ 절감량</div>
                                 <div className="lg-stat-value">
-                                    {formatCO2(currentStats.savedTokens)}
+                                    {formatCO2(currentStats.savedTokens || 0)}
                                 </div>
                                 <div className="lg-stat-delta">
-                                    +{formatCO2(currentDaily.savedTokens)} (오늘)
+                                    +{formatCO2(currentDaily.savedTokens || 0)} (오늘)
                                 </div>
                             </article>
                         </section>
 
-                        {/* ===== Details ===== */}
                         <section className="lg-grid lg-details" aria-label="상세 정보">
-                            {/* Trees */}
                             <article className="lg-card lg-detail-card">
                                 <div className="lg-detail-head">
                                     <div className="lg-detail-title">
@@ -324,23 +343,23 @@ function Dashboard() {
                                         height="72"
                                     />
                                     <div className="lg-strong">
-                                        절약한 토큰으로 {TREE_LEVELS.filter(level => currentSavedTokens >= level).length}그루의 나무를 심었어요!
+                                        절약한 토큰으로 {TREE_LEVELS.filter(level => currentSavedTokens >= level).length}그루의
+                                        나무를 심었어요!
                                     </div>
                                     <div className="lg-dim">
                                         다음 나무까지 {Math.max(0, tokens.goal - tokens.current)}토큰 남았습니다.
                                     </div>
                                     <div className="lg-dot-row" aria-hidden="true">
                                         {TREE_LEVELS.map((level, index) => (
-                                            <span 
-                                                key={index} 
-                                                className={`lg-dot ${currentSavedTokens >= level ? '' : 'lg-dim-dot'}`} 
+                                            <span
+                                                key={index}
+                                                className={`lg-dot ${currentSavedTokens >= level ? '' : 'lg-dim-dot'}`}
                                             />
                                         ))}
                                     </div>
                                 </div>
                             </article>
 
-                            {/* Transport */}
                             <article className="lg-card lg-detail-card">
                                 <div className="lg-detail-head">
                                     <div className="lg-detail-title">
@@ -395,12 +414,12 @@ function Dashboard() {
                             </article>
                         </section>
 
-                        {/* ===== Ranking ===== */}
-                        <section className="lg-card lg-ranking" aria-label={scope === "me" ? "개인 불용어 절약 TOP 5" : "전체 절약 이유 TOP 5"}>
+                        <section className="lg-card lg-ranking"
+                                 aria-label={scope === "me" ? "개인 불용어 절약 TOP 5" : "전체 절약 이유 TOP 5"}>
                             <div className="lg-ranking-head">
                                 <div className="lg-ranking-title">
                                     <Icon icon="fluent-emoji:trophy" width={28} height={28}/>
-                                    <h2>{scope === "me" ? "불용어 절약 TOP 5" : "절약 이유 TOP 5"}</h2>
+                                    <h2>{scope === "me" ? "불용어 절약 TOP 5" : " 불용어 절약 TOP 5"}</h2>
                                 </div>
                                 <span className="lg-pill">
                                     {scope === "me" ? "개인 기준" : "전체 기준"}
@@ -409,9 +428,9 @@ function Dashboard() {
 
                             <div className="lg-ranking-inner">
                                 {scope === "me" ? (
-                                    // 개인 모드: topDroppedTexts 사용
-                                    data.topDroppedTexts.slice(0, 5).map((item, index) => (
-                                        <article key={item.droppedText} className="lg-card lg-rank-card">
+                                    (data.topDroppedTexts || []).slice(0, 5).map((item, index) => (
+                                        <article key={item.droppedText || `empty-${index}`}
+                                                 className="lg-card lg-rank-card">
                                             <div className="lg-badge" title={`${index + 1}위`}>
                                                 {index < 3 ? (
                                                     <Icon
@@ -425,14 +444,14 @@ function Dashboard() {
                                                     <span className="lg-keycap">{index + 1}️⃣</span>
                                                 )}
                                             </div>
-                                            <h4>{item.droppedText}</h4>
-                                            <p>{item.count}회 절약</p>
+                                            <h4>{item.droppedText || '데이터 없음'}</h4>
+                                            <p>{item.count || 0}회 절약</p>
                                         </article>
                                     ))
                                 ) : (
-                                    // 전체 모드: topReasons 사용  
-                                    data.topReasons.slice(0, 5).map((item, index) => (
-                                        <article key={item.reasonType} className="lg-card lg-rank-card">
+                                    (data.topReasons || []).slice(0, 5).map((item, index) => (
+                                        <article key={item.reasonType || `empty-${index}`}
+                                                 className="lg-card lg-rank-card">
                                             <div className="lg-badge" title={`${index + 1}위`}>
                                                 {index < 3 ? (
                                                     <Icon
@@ -446,18 +465,27 @@ function Dashboard() {
                                                     <span className="lg-keycap">{index + 1}️⃣</span>
                                                 )}
                                             </div>
-                                            <h4>{item.reasonType}</h4>
-                                            <p>{item.count}회</p>
+                                            <h4>{item.reasonType || '데이터 없음'}</h4>
+                                            <p>{item.count || 0}회 절약</p>
                                         </article>
                                     ))
                                 )}
+
+                                {Array.from({length: Math.max(0, 5 - (scope === "me" ? (data.topDroppedTexts || []).length : (data.topReasons || []).length))}, (_, index) => (
+                                    <article key={`empty-${index}`} className="lg-card lg-rank-card">
+                                        <div className="lg-badge">
+                                            <span className="lg-keycap">-</span>
+                                        </div>
+                                        <h4>데이터 없음</h4>
+                                        <p>0회 절약</p>
+                                    </article>
+                                ))}
                             </div>
                         </section>
                     </div>
                 </div>
             </main>
 
-            {/* ===== TreeModal (API 데이터 연동) ===== */}
             <TreeModal
                 open={isTreeModalOpen}
                 onClose={() => setIsTreeModalOpen(false)}
@@ -467,7 +495,6 @@ function Dashboard() {
                 timeline={timeline}
             />
 
-            {/* ===== CarModal (API 데이터 연동) ===== */}
             {carModalData && (
                 <CarModal
                     open={isCarModalOpen}
