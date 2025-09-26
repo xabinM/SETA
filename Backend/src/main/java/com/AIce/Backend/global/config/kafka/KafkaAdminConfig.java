@@ -30,7 +30,7 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic chatFilterResult() {
         return TopicBuilder.name("chat.filter.result.v1")
-                .partitions(2)
+                .partitions(3)
                 .replicas(1)
                 .config("retention.ms", RETENTION_1D)
                 .config("cleanup.policy", "delete")
