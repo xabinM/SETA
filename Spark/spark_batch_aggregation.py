@@ -95,7 +95,6 @@ if not twenty_four_hour_source_df.rdd.isEmpty():
     twenty_four_hour_source_df.show(5, truncate=False)
 
 
-# ✨ 수정된 로직 1: 24시간 롤링 집계는 항상 수행합니다.
 daily_user_agg = twenty_four_hour_source_df.groupBy(F.col("user_id").cast("string").alias("user_id")).agg(
     F.sum("saved_tokens").alias("saved_tokens"),
     F.sum("total_tokens").alias("token_sum"),
@@ -115,7 +114,6 @@ insert_batch_results(daily_user_agg, USER_DAILY_TABLE)
 insert_batch_results(daily_global_agg, GLOBAL_DAILY_TABLE)
 
 
-# ✨ 수정된 로직 2: 5분 데이터가 있을 때만 누적 합계를 계산합니다.
 if five_min_source_df.rdd.isEmpty():
     print("No new data in the last 5 minutes to update total tables.")
 else:
