@@ -1,17 +1,8 @@
-// src/pages/Chat/ChatRoom.tsx
-import {
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    type HTMLAttributes,
-    type AnchorHTMLAttributes,
-    type MutableRefObject,
-} from "react";
-import { createPortal } from "react-dom";
-import { useParams } from "react-router-dom";
-import { getRoomMessages, sendMessageToServer, type UIMsg } from "@/features/chat/api";
-import { issueStreamCookie } from "@/features/auth/api";
+import {useEffect, useMemo, useRef, useState, type HTMLAttributes, type AnchorHTMLAttributes, type MutableRefObject,} from "react";
+import {createPortal} from "react-dom";
+import {useParams} from "react-router-dom";
+import {getRoomMessages, sendMessageToServer, type UIMsg} from "@/features/chat/api";
+import {issueStreamCookie} from "@/features/auth/api";
 import CustomToast from "@/ui/components/Toast/CustomToast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -66,54 +57,40 @@ const InlineCode = (props: HTMLAttributes<HTMLElement>) => {
 };
 
 const LinkNewTab = (props: AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a {...props} target="_blank" rel="noreferrer" />
+    <a {...props} target="_blank" rel="noreferrer"/>
 );
-
-/* ============================================================ */
 
 type LocalToast = { id: number; message: string; description?: string; duration?: number };
 
 export default function ChatRoom() {
-    const { threadId } = useParams<{ threadId?: string }>();
+    const {threadId} = useParams<{ threadId?: string }>();
 
     const [messages, setMessages] = useState<UIMsg[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
     const [input, setInput] = useState("");
     const [ime, setIme] = useState(false);
     const [status, setStatus] = useState<StreamStatus>("idle");
-
     const scrollRef = useRef<HTMLDivElement | null>(null);
-
-    // toasts (portal)
     const [toasts, setToasts] = useState<LocalToast[]>([]);
     const pushToast = (message: string, description?: string, duration = 2000) => {
         const id = Date.now() + Math.random();
-        setToasts((prev) => [...prev, { id, message, description, duration }]);
+        setToasts((prev) => [...prev, {id, message, description, duration}]);
     };
     const removeToast = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
-
-    // SSE state
     const esRef = useRef<EventSource | null>(null);
     const connectingRef = useRef(false);
     const assistantIdRef = useRef<string | null>(null);
-
     const abortedRef = useRef(false);
     const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastEventAtRef = useRef<number>(Date.now());
     const attemptRef = useRef(0);
-
-    // ✅ cookie ready as state (for seed effect deps)
     const [cookieReady, setCookieReady] = useState(false);
-
-    // seed from /chat
     const [pendingSeed, setPendingSeed] = useState<string | null>(null);
     const seedInjectedRef = useRef(false);
     const seedSentRef = useRef(false);
 
-    /* ------------------ seed pickup ------------------ */
     useEffect(() => {
         if (!threadId) return;
         const key = `seta:seed:${threadId}`;
@@ -130,7 +107,6 @@ export default function ChatRoom() {
         }
     }, [threadId]);
 
-    /* ------------------ history load ------------------ */
     useEffect(() => {
         if (!threadId) return;
         let alive = true;
@@ -168,13 +144,11 @@ export default function ChatRoom() {
         };
     }, [threadId, pendingSeed]);
 
-    /* ------------------ autoscroll ------------------ */
     useEffect(() => {
         const el = scrollRef.current;
         if (el) el.scrollTop = el.scrollHeight;
     }, [messages, loading, status]);
 
-    /* ------------------ utils ------------------ */
     function clearTimer(ref: MutableRefObject<ReturnType<typeof setTimeout> | null>) {
         if (ref.current !== null) {
             clearTimeout(ref.current);
@@ -198,7 +172,6 @@ export default function ChatRoom() {
         return Math.floor(cap * jitter);
     }
 
-    /* ------------------ SSE Handlers ------------------ */
     function attachSseHandlers(es: EventSource) {
         es.onmessage = () => resetIdleWatchdog();
 
@@ -210,7 +183,7 @@ export default function ChatRoom() {
             setStatus("streaming");
             setMessages((prev) => [
                 ...prev,
-                { id: draftId, role: "assistant", content: "", createdAt: new Date().toISOString() },
+                {id: draftId, role: "assistant", content: "", createdAt: new Date().toISOString()},
             ]);
         });
 
@@ -227,10 +200,10 @@ export default function ChatRoom() {
                 if (idx === -1) {
                     const draftId = targetId ?? `a-${Date.now()}`;
                     assistantIdRef.current = draftId;
-                    next.push({ id: draftId, role: "assistant", content: "", createdAt: new Date().toISOString() });
+                    next.push({id: draftId, role: "assistant", content: "", createdAt: new Date().toISOString()});
                     idx = next.length - 1;
                 }
-                next[idx] = { ...next[idx], content: (next[idx].content || "") + chunk };
+                next[idx] = {...next[idx], content: (next[idx].content || "") + chunk};
                 return next;
             });
         });
@@ -239,6 +212,10 @@ export default function ChatRoom() {
             resetIdleWatchdog();
             setStatus("done");
             assistantIdRef.current = null;
+
+            if (threadId) {
+                window.dispatchEvent(new CustomEvent("seta:title:check", { detail: { roomId: threadId } }));
+            }
         });
 
         for (const name of HEARTBEAT_NAMES) {
@@ -259,7 +236,7 @@ export default function ChatRoom() {
         esRef.current = null;
 
         const url = `${BASE}/sse/chat/${encodeURIComponent(roomId)}`;
-        const es = new EventSource(url, { withCredentials: true });
+        const es = new EventSource(url, {withCredentials: true});
         esRef.current = es;
 
         attachSseHandlers(es);
@@ -270,8 +247,8 @@ export default function ChatRoom() {
     }
 
     async function connectWithCookie(roomId: string) {
-        await issueStreamCookie(); // 실패 시 throw
-        setCookieReady(true);      // ✅ cookie ready (state)
+        await issueStreamCookie();
+        setCookieReady(true);
         openRoomStream(roomId);
     }
 
@@ -290,7 +267,7 @@ export default function ChatRoom() {
             try {
                 if (attemptRef.current % 3 === 1) {
                     await issueStreamCookie();
-                    setCookieReady(true); // ✅ refresh ready state on re-issue
+                    setCookieReady(true);
                 }
                 openRoomStream(threadId);
             } catch (e) {
@@ -300,7 +277,6 @@ export default function ChatRoom() {
         }, delay);
     }
 
-    /* ------------------ mount: cookie → SSE ------------------ */
     useEffect(() => {
         if (!threadId) return;
         abortedRef.current = false;
@@ -324,7 +300,7 @@ export default function ChatRoom() {
 
         return () => {
             abortedRef.current = true;
-            setCookieReady(false);          // ✅ cleanup
+            setCookieReady(false);
             window.removeEventListener("online", onOnline);
             document.removeEventListener("visibilitychange", onVisibility);
             clearTimer(reconnectTimerRef);
@@ -334,10 +310,8 @@ export default function ChatRoom() {
             assistantIdRef.current = null;
             setStatus("idle");
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [threadId]);
 
-    /* ------------------ ✅ seed send effect ------------------ */
     useEffect(() => {
         if (!threadId) return;
         if (!pendingSeed) return;
@@ -358,14 +332,13 @@ export default function ChatRoom() {
 
     const sendingLocked = status === "streaming";
 
-    /* ------------------ send ------------------ */
     async function send() {
         const text = input.trim();
         if (!threadId || !text || sendingLocked) return;
 
         setMessages((prev) => [
             ...prev,
-            { id: `u-${Date.now()}`, role: "user", content: text, createdAt: new Date().toISOString() },
+            {id: `u-${Date.now()}`, role: "user", content: text, createdAt: new Date().toISOString()},
         ]);
         setInput("");
         setStatus("streaming");
@@ -377,7 +350,6 @@ export default function ChatRoom() {
         }
     }
 
-    /* ---------- react-markdown: Copy→CustomToast ---------- */
     const PreWithLocalToast = useMemo(
         () =>
             makePreWithCopy((ok) => {
@@ -396,11 +368,11 @@ export default function ChatRoom() {
         <>
             <div className="messages" ref={scrollRef}>
                 {loading ? (
-                    <div style={{ opacity: 0.6, textAlign: "center", marginTop: 24 }}>히스토리 불러오는 중…</div>
+                    <div style={{opacity: 0.6, textAlign: "center", marginTop: 24}}>히스토리 불러오는 중…</div>
                 ) : error ? (
-                    <div style={{ opacity: 0.85, color: "#f66", textAlign: "center", marginTop: 24 }}>{error}</div>
+                    <div style={{opacity: 0.85, color: "#f66", textAlign: "center", marginTop: 24}}>{error}</div>
                 ) : messages.length === 0 ? (
-                    <div style={{ opacity: 0.6, textAlign: "center", marginTop: 24 }}>
+                    <div style={{opacity: 0.6, textAlign: "center", marginTop: 24}}>
                         아직 메시지가 없어요. 아래 입력창에 메시지를 입력해보세요.
                     </div>
                 ) : (
@@ -422,7 +394,11 @@ export default function ChatRoom() {
                                                 <ReactMarkdown
                                                     remarkPlugins={[remarkGfm]}
                                                     rehypePlugins={[rehypeHighlight]}
-                                                    components={{ pre: PreWithLocalToast, code: InlineCode, a: LinkNewTab }}
+                                                    components={{
+                                                        pre: PreWithLocalToast,
+                                                        code: InlineCode,
+                                                        a: LinkNewTab
+                                                    }}
                                                 >
                                                     {m.content || ""}
                                                 </ReactMarkdown>
@@ -474,7 +450,6 @@ export default function ChatRoom() {
     );
 }
 
-/* ------------------ utils ------------------ */
 function safeJSON<T = unknown>(data: unknown): T | null {
     try {
         return typeof data === "string" ? (JSON.parse(data) as T) : (data as T);

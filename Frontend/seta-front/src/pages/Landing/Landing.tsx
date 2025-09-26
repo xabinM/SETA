@@ -165,7 +165,7 @@ const Landing: React.FC = () => {
     // 로고의 현재 위치를 기준으로 텍스트 위치 설정
     const logoRect = logoRef.current.getBoundingClientRect();
     const centerX = logoRect.left + logoRect.width / 2;
-    const centerY = logoRect.top + logoRect.height / 2 - 120; // -80을 -120으로 수정 (더 위로)
+    const centerY = logoRect.top + logoRect.height / 2 - 80; // -80을 -120으로 수정 (더 위로)
     
     gsap.set(setaTextRef.current, {
       position: 'absolute',
@@ -259,13 +259,12 @@ const Landing: React.FC = () => {
       </div>
       
       <div ref={setaTextRef} className="seta-text-container">
-        <div className="circular-text" style={{ width: 250, height: 250 }}>
-          <span className="letter" style={{ transform: 'rotate(-60deg) translateY(-100px)' }}>S</span>
-          <span className="letter" style={{ transform: 'rotate(-20deg) translateY(-100px)' }}>E</span>
-          <span className="letter" style={{ transform: 'rotate(20deg) translateY(-100px)' }}>T</span>
-          <span className="letter" style={{ transform: 'rotate(60deg) translateY(-100px)' }}>A</span>
+        <div className="circular-text">
+          <span className="letter">S</span>
+          <span className="letter">E</span>
+          <span className="letter">T</span>
+          <span className="letter">A</span>
         </div>
-
       </div>
           </div>
         );
