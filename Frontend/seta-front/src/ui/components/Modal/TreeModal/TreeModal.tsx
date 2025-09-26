@@ -331,7 +331,7 @@ export default function TreeModal({
                         </p>
                         <div className="lgm-btns mt-2">
                             <button className="lgm-btn lgm-btn-primary" type="button" onClick={handleShare}>
-                                친구에게 공유하기
+                                공유하기
                             </button>
                             <button
                                 className="lgm-btn"

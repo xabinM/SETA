@@ -14,7 +14,7 @@ import {
     TREE_LEVELS
 } from "@/ui/components/Modal/TreeModal/data";
 import CarModal from "@/ui/components/Modal/CarModal/CarModal";
-import { createCarModalData } from "@/ui/components/Modal/CarModal/data";
+import { createCarModalData, getDestinationByTokens } from "@/ui/components/Modal/CarModal/data";
 
 /* ===== Styles ===== */
 import "./Dashboard.css";
@@ -73,19 +73,72 @@ function Dashboard() {
     // API 데이터 가져오기
     const { data, loading, error, refetch } = useDashboardKpi();
 
-    // CarModal 데이터 생성 (API 데이터 기반) - null 안전성 추가
+    // scope에 따른 데이터 선택 - useMemo 밖으로 이동
+    const currentStats = data ? (scope === "me" 
+        ? (data.userTotal || getDefaultStats()) 
+        : (data.globalTotal || getDefaultStats())) : getDefaultStats();
+    const currentDaily = data ? (scope === "me" 
+        ? (data.userDaily || getDefaultDaily()) 
+        : (data.globalDaily || getDefaultDaily())) : getDefaultDaily();
+
+    const currentSavedTokens = currentStats.savedTokens || 0;
+
+    // CarModal 데이터 생성 (API 데이터 기반) - 수정됨
     const carModalData = useMemo(() => {
         if (!data) return null;
         try {
-            const currentStats = scope === "me" 
-                ? (data.userTotal || getDefaultStats()) 
-                : (data.globalTotal || getDefaultStats());
-            return createCarModalData(currentStats.savedTokens || 0, scope);
+            console.log('CarModal 데이터 생성 - currentStats:', currentStats);
+            console.log('savedTokens:', currentStats.savedTokens);
+            
+            // 실제 주행 데이터 예시 (향후 API에서 받을 데이터)
+            const actualData = {
+                // 실제 데이터가 있다면 이런 형태로 전달
+                // totalDistanceDriven: 1000, // 실제 주행한 총 거리
+                // totalPowerConsumed: 200,   // 실제 소비한 총 전력
+                // averageEfficiency: 5.0     // 평균 전비
+            };
+            
+            return createCarModalData(currentStats.savedTokens || 0, scope, actualData);
         } catch (error) {
             console.warn('CarModal 데이터 생성 실패:', error);
             return null;
         }
-    }, [data, scope]);
+    }, [data, scope, currentStats.savedTokens]);
+
+    // 교통수단 카드의 목적지 계산 - useMemo로 최적화
+    const destinationInfo = useMemo(() => {
+        return getDestinationByTokens(currentSavedTokens);
+    }, [currentSavedTokens]);
+
+    // TreeModal용 데이터 준비 (API 데이터 기반) - useMemo로 최적화
+    const treeModalProps = useMemo(() => {
+        if (!data) return null;
+
+        const baseData = treeModalDataByScope[scope];
+        
+        // API 데이터로 TreeModal 데이터 업데이트
+        const tokens = {
+            current: currentSavedTokens,
+            goal: calculateNextGoal(currentSavedTokens),
+            step: calculateCurrentStep(currentSavedTokens)
+        };
+        
+        const trees = calculateTreeStatus(currentSavedTokens);
+        
+        const kpis = baseData.kpis.map((kpi) => {
+            if (kpi.label === "누적 비용 절약") {
+                return { ...kpi, value: formatCost(currentStats.costSumUsd || 0) };
+            }
+            if (kpi.label === "CO₂ 절감량") {
+                return { ...kpi, value: formatCO2(currentSavedTokens) };
+            }
+            return kpi;
+        });
+        
+        const timeline = baseData.timeline;
+
+        return { tokens, trees, kpis, timeline };
+    }, [data, scope, currentSavedTokens, currentStats.costSumUsd]);
 
     // 로딩 상태
     if (loading) {
@@ -172,57 +225,9 @@ function Dashboard() {
         );
     }
 
-    // scope에 따른 데이터 선택 - null 안전성 추가
-    const currentStats = scope === "me" 
-        ? (data.userTotal || getDefaultStats()) 
-        : (data.globalTotal || getDefaultStats());
-    const currentDaily = scope === "me" 
-        ? (data.userDaily || getDefaultDaily()) 
-        : (data.globalDaily || getDefaultDaily());
-
     console.log("Current scope:", scope);
     console.log("Current stats:", currentStats);
     console.log("Cost sum USD:", currentStats.costSumUsd);
-
-    // TreeModal용 데이터 준비 (API 데이터 기반) - null 안전성 추가
-    const baseData = treeModalDataByScope[scope];
-    const currentSavedTokens = currentStats.savedTokens || 0;
-    
-    // API 데이터로 TreeModal 데이터 업데이트
-    const tokens = {
-        current: currentSavedTokens,
-        goal: calculateNextGoal(currentSavedTokens),
-        step: calculateCurrentStep(currentSavedTokens)
-    };
-    
-    const trees = calculateTreeStatus(currentSavedTokens);
-    
-    const kpis = baseData.kpis.map((kpi) => {
-        if (kpi.label === "누적 비용 절약") {
-            return { ...kpi, value: formatCost(currentStats.costSumUsd || 0) };
-        }
-        if (kpi.label === "CO₂ 절감량") {
-            return { ...kpi, value: formatCO2(currentSavedTokens) };
-        }
-        return kpi;
-    });
-    
-    const timeline = baseData.timeline;
-
-    // 교통수단 카드의 목적지 계산 - null 안전성 추가
-    const getDestinationByTokens = (savedTokens: number = 0) => {
-        const powerKwh = savedTokens / 1000;
-        const maxKm = Math.round(powerKwh * 5.2);
-        
-        if (maxKm < 150) return { destination: "대전", distance: "140km" };
-        if (maxKm < 320) return { destination: "대구", distance: "290km" };
-        if (maxKm < 500) return { destination: "부산", distance: "325km" };
-        if (maxKm < 1000) return { destination: "제주", distance: "470km" };
-        if (maxKm < 1200) return { destination: "상하이", distance: "950km" };
-        return { destination: "도쿄", distance: "1160km" };
-    };
-
-    const destinationInfo = getDestinationByTokens(currentSavedTokens);
 
     return (
         <div
@@ -380,7 +385,7 @@ function Dashboard() {
                                         절약한 토큰으로 {TREE_LEVELS.filter(level => currentSavedTokens >= level).length}그루의 나무를 심었어요!
                                     </div>
                                     <div className="lg-dim">
-                                        다음 나무까지 {Math.max(0, tokens.goal - tokens.current)}토큰 남았습니다.
+                                        다음 나무까지 {treeModalProps ? Math.max(0, treeModalProps.tokens.goal - treeModalProps.tokens.current) : 0}토큰 남았습니다.
                                     </div>
                                     <div className="lg-dot-row" aria-hidden="true">
                                         {TREE_LEVELS.map((level, index) => (
@@ -443,6 +448,8 @@ function Dashboard() {
                                             ({destinationInfo.distance}) 갈 수 있는
                                         </div>
                                         <div className="lg-strong">에너지를 절약했어요!</div>
+                                        <div className="lg-dim" style={{fontSize: '0.9em', marginTop: '8px'}}>
+                                        </div>
                                     </div>
                                 </div>
                             </article>
@@ -522,14 +529,13 @@ function Dashboard() {
             </main>
 
             {/* ===== TreeModal (API 데이터 연동) ===== */}
-            <TreeModal
-                open={isTreeModalOpen}
-                onClose={() => setIsTreeModalOpen(false)}
-                tokens={tokens}
-                trees={trees}
-                kpis={kpis}
-                timeline={timeline}
-            />
+            {treeModalProps && (
+                <TreeModal
+                    open={isTreeModalOpen}
+                    onClose={() => setIsTreeModalOpen(false)}
+                    {...treeModalProps}
+                />
+            )}
 
             {/* ===== CarModal (API 데이터 연동) ===== */}
             {carModalData && (
