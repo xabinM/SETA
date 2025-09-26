@@ -4,14 +4,15 @@ import type {Tokens, Tree, KPI, TimelineItem} from "./types";
 const fmt = (n: number) => n.toLocaleString();
 
 /** ===== 개인 데이터 ===== */
-const meTokens: Tokens = {current: 1047, goal: 1500, step: 500};
+const TREE_LEVELS = [500, 2000, 5000, 8000, 10000];
+const meTokens: Tokens = {current: 1047, goal: 2000, step: 500};
 
 const meTrees: Tree[] = [
-    {emoji: "🌱", label: `${fmt(500)}토큰`, achieved: true},
-    {emoji: "🌿", label: `${fmt(1000)}토큰`, achieved: true},
-    {emoji: "🌳", label: `${fmt(1247)}토큰`, achieved: true},
-    {emoji: "🌲", label: `${fmt(1500)}토큰`, achieved: false},
-    {emoji: "🌴", label: `${fmt(2000)}토큰`, achieved: false},
+    {emoji: "🌱", label: `${fmt(TREE_LEVELS[0])}토큰`, achieved: true},   // 500
+    {emoji: "🌿", label: `${fmt(TREE_LEVELS[1])}토큰`, achieved: false},  // 2000
+    {emoji: "🌳", label: `${fmt(TREE_LEVELS[2])}토큰`, achieved: false},  // 5000
+    {emoji: "🌲", label: `${fmt(TREE_LEVELS[3])}토큰`, achieved: false},  // 8000
+    {emoji: "🌴", label: `${fmt(TREE_LEVELS[4])}토큰`, achieved: false},  // 10000
 ];
 
 const meKpis: KPI[] = [
@@ -58,44 +59,50 @@ const meTimeline: TimelineItem[] = [
         title: "첫 번째 새싹이 자랐어요!",
         status: "done",
         date: "2024.08.25",
-        desc: "500토큰을 절약하여 첫 번째 나무를 심었습니다. 환경보호 여정의 시작!"
+        desc: "500토큰을 절약하여 첫 번째 나무를 심었습니다."
     },
     {
         icon: "🌿",
-        title: "두 번째 나무가 자랐어요!",
-        status: "done",
-        date: "2024.09.02",
-        desc: "1,000토큰 달성! 꾸준한 절약으로 작은 숲이 만들어지고 있어요."
+        title: "두 번째 나무 목표",
+        status: "progress",
+        date: "진행 중",
+        desc: "2,000토큰을 목표로 열심히 자라고 있어요."
     },
     {
         icon: "🌳",
-        title: "세 번째 나무 완성!",
-        status: "done",
-        date: "2024.09.10",
-        desc: "1,247토큰으로 세 번째 나무까지! 이제 작은 숲의 모습을 갖추었네요."
+        title: "세 번째 나무 심기",
+        status: "upcoming",
+        date: "예정",
+        desc: "5,000토큰 달성 시 세 번째 나무를 심을 수 있어요."
     },
     {
         icon: "🌲",
-        title: "네 번째 나무 자라는 중...",
-        status: "progress",
-        date: "진행 중",
-        desc: "1,500토큰을 목표로 열심히 자라고 있어요. 253토큰만 더 절약하면 완성!"
+        title: "네 번째 나무 심기",
+        status: "upcoming",
+        date: "예정",
+        desc: "8,000토큰 달성 시 네 번째 나무를 심을 수 있어요."
     },
-    {icon: "🌴", title: "다섯 번째 나무 심기", status: "upcoming", date: "예정", desc: "2,000토큰 달성 시 다섯 번째 나무를 심을 수 있어요."},
+    {
+        icon: "🌴",
+        title: "다섯 번째 나무 심기",
+        status: "upcoming",
+        date: "예정",
+        desc: "10,000토큰 달성 시 다섯 번째 나무를 심을 수 있어요."
+    },
 ];
 
-/** ===== 전체 데이터 ===== */
-const allTokens: Tokens = {current: 13442, goal: 20000, step: 5000};
+/** ===== 전체 데이터 (기본값) ===== */
+const allTokens: Tokens = {current: 13442, goal: 20000, step: 2000};
 
 const allTrees: Tree[] = [
-    {emoji: "🌱", label: `${fmt(5000)}토큰`, achieved: true},
-    {emoji: "🌿", label: `${fmt(10000)}토큰`, achieved: true},
-    {emoji: "🌳", label: `${fmt(15000)}토큰`, achieved: false},
-    {emoji: "🌲", label: `${fmt(20000)}토큰`, achieved: false},
-    {emoji: "🌴", label: `${fmt(30000)}토큰`, achieved: false},
+    {emoji: "🌱", label: `${fmt(TREE_LEVELS[0])}토큰`, achieved: true},   // 500
+    {emoji: "🌿", label: `${fmt(TREE_LEVELS[1])}토큰`, achieved: true},   // 2000
+    {emoji: "🌳", label: `${fmt(TREE_LEVELS[2])}토큰`, achieved: true},   // 5000
+    {emoji: "🌲", label: `${fmt(TREE_LEVELS[3])}토큰`, achieved: true},   // 8000
+    {emoji: "🌴", label: `${fmt(TREE_LEVELS[4])}토큰`, achieved: true},   // 10000
 ];
 
-export const allKpis: KPI[] = [
+const allKpis: KPI[] = [
     {
         icon: "💰",
         value: "₩27,350",
@@ -134,12 +141,37 @@ export const allKpis: KPI[] = [
 ];
 
 const allTimeline: TimelineItem[] = [
-    {icon: "🌱", title: "작은 숲의 시작", status: "done", date: "2024.07.18", desc: "5,000토큰 달성으로 첫 숲 조성!"},
-    {icon: "🌿", title: "더 푸르게", status: "done", date: "2024.08.21", desc: "10,000토큰 달성! 팀의 꾸준함이 빛나요."},
-    {icon: "🌳", title: "세 번째 목표 진행", status: "progress", date: "진행 중", desc: "15,000토큰을 향해 전진 중. 조금만 더!"},
-    {icon: "🌲", title: "대형 숲 완성", status: "upcoming", date: "예정", desc: "20,000토큰 달성 시 대형 숲 완성!"},
-    {icon: "🌴", title: "확장 목표", status: "upcoming", date: "예정", desc: "30,000토큰 달성 시 확장 숲 프로젝트 시작!"},
+    {icon: "🌱", title: "작은 숲의 시작", status: "done", date: "2024.07.18", desc: "500토큰 달성으로 첫 숲 조성!"},
+    {icon: "🌿", title: "더 푸르게", status: "done", date: "2024.08.21", desc: "2,000토큰 달성! 팀의 꾸준함이 빛나요."},
+    {icon: "🌳", title: "중간 목표 달성", status: "done", date: "2024.09.10", desc: "5,000토큰 달성! 숲이 더욱 울창해졌습니다."},
+    {icon: "🌲", title: "대형 나무 완성", status: "done", date: "2024.09.15", desc: "8,000토큰 달성! 멋진 대형 나무가 자랐어요."},
+    {icon: "🌴", title: "최고 목표 달성", status: "done", date: "2024.09.20", desc: "10,000토큰 달성! 완벽한 숲이 완성되었습니다."},
 ];
+
+// 나무 레벨과 상태를 계산하는 유틸리티 함수들
+export function calculateTreeStatus(savedTokens: number): Tree[] {
+    return TREE_LEVELS.map((level, index) => ({
+        emoji: ["🌱", "🌿", "🌳", "🌲", "🌴"][index],
+        label: `${fmt(level)}토큰`,
+        achieved: savedTokens >= level
+    }));
+}
+
+export function calculateNextGoal(savedTokens: number): number {
+    for (const level of TREE_LEVELS) {
+        if (savedTokens < level) {
+            return level;
+        }
+    }
+    return TREE_LEVELS[TREE_LEVELS.length - 1]; // 모든 목표 달성 시 마지막 레벨 반환
+}
+
+export function calculateCurrentStep(savedTokens: number): number {
+    // 현재 토큰 수에 따라 적절한 step 반환
+    if (savedTokens < 2000) return 500;
+    if (savedTokens < 5000) return 1000;
+    return 2000;
+}
 
 /** ===== export: 범위별 데이터 집합 ===== */
 export const treeModalDataByScope = {
@@ -147,4 +179,5 @@ export const treeModalDataByScope = {
     all: {tokens: allTokens, trees: allTrees, kpis: allKpis, timeline: allTimeline},
 };
 
+export { TREE_LEVELS };
 export type {Tokens, Tree, KPI, TimelineItem};
