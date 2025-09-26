@@ -88,7 +88,7 @@
 .logo-center {
   position: absolute;
   top: 45%;
-  left: 50%;
+  left: 46%;
   transform: translate(-50%, -50%) scale(0.5);
   width: 130px;
   height: 130px;
@@ -109,14 +109,13 @@
 /* SETA 텍스트 - 로고 위에 위치 */
 .seta-text-container {
   position: absolute;
-  top: 5%; /* 로고와 같은 높이로 조정 */
-  left: 45%;
+  top: 45%; /* 로고와 같은 위치 */
+  left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
   opacity: 0;
   z-index: 600;
   will-change: transform, opacity;
-  margin-top: -100px;
 }
 
 .seta-text {
@@ -165,24 +164,39 @@
 
 .circular-text {
   position: relative;
-  width: 250px;
-  height: 250px;
-  margin: 0 auto; /* 중앙 정렬 */
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
 }
 
+/* 개별 글자들을 원형으로 배치 */
 .letter {
   position: absolute;
-  top: 30%;
-  left: 50%;
-  transform-origin: center;
-  font-size: 50px; /* 폰트 크기 조정 */
+  font-size: 40px;
   font-weight: 900;
-  background: linear-gradient(45deg, #00d4aa, #64ffda, #1de9b6);
+  opacity: 0;
+  
+  /* 그라디언트 배경 */
+  background: linear-gradient(
+    135deg,
+    #00d4aa 0%,
+    #64ffda 25%,
+    #1de9b6 50%,
+    #00bcd4 75%,
+    #0097a7 100%
+  );
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 15px rgba(100, 255, 218, 0.6));
-  opacity: 0; /* 초기값 추가 */
+  -webkit-text-fill-color: transparent;
+  
+  /* 글로우 효과 */
+  filter: 
+    drop-shadow(0 0 10px rgba(100, 255, 218, 0.6))
+    drop-shadow(0 0 20px rgba(29, 233, 182, 0.4))
+    drop-shadow(0 0 30px rgba(0, 212, 170, 0.3));
+  
+  will-change: transform, opacity, filter;
+  transform-style: preserve-3d;
 }
 
 @keyframes gentleGradientShift {
@@ -190,7 +204,40 @@
   50% { background-position: 100% 50%; }
 }
 
+/* 각 글자의 개별 위치 설정 */
+.letter:nth-child(1) { /* S */
+  left: 15%;
+  top: 45%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+}
 
+.letter:nth-child(2) { /* E */
+  left: 35%;
+  top: 35%;
+  transform: translate(-50%, -50%) rotate(-5deg);
+}
+
+.letter:nth-child(3) { /* T */
+  left: 65%;
+  top: 35%;
+  transform: translate(-50%, -50%) rotate(5deg);
+}
+
+.letter:nth-child(4) { /* A */
+  left: 85%;
+  top: 45%;
+  transform: translate(-50%, -50%) rotate(15deg);
+}
+
+/* 호버 효과 */
+.letter:hover {
+  filter: 
+    drop-shadow(0 0 15px rgba(100, 255, 218, 0.8))
+    drop-shadow(0 0 25px rgba(29, 233, 182, 0.6))
+    drop-shadow(0 0 35px rgba(0, 212, 170, 0.5));
+  transform: scale(1.1);
+  transition: all 0.3s ease;
+}
 
 /* 개별 글자 호버 효과 */
 .seta-letter:hover {
