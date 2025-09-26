@@ -54,10 +54,12 @@ export default function Header() {
                 <span
                     className="font-bold"
                     style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        fontSize: "24px",
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "1.5rem",
+                        color: "#e5e7eb",
                         lineHeight: "32px",
-                        marginLeft: "10px",
+                        marginLeft: "15px",
                     }}
                 >
           SETA
@@ -70,9 +72,11 @@ export default function Header() {
                     to="/chat"
                     className="transition-opacity opacity-90 hover:opacity-100"
                     style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        fontSize: "20px",
-                        lineHeight: "24px",
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "1.25rem",  // 20px
+                        lineHeight: "1.75rem",
+                        color: "#e5e7eb",
                         marginRight: "70px",
                         marginTop: "3px",
                     }}
@@ -83,10 +87,12 @@ export default function Header() {
                     to="/dashboard"
                     className="transition-opacity opacity-90 hover:opacity-100"
                     style={{
-                        fontFamily: "'Space Grotesk', sans-serif",
-                        fontSize: "20px",
-                        lineHeight: "24px",
-                        marginRight: "45px",
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "1.25rem",
+                        lineHeight: "1.75rem",
+                        color: "#e5e7eb",
+                        marginRight: "30px",
                         marginTop: "3px",
                     }}
                 >
