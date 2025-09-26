@@ -1,3 +1,4 @@
+/* ========== 기존 스타일 유지 ========== */
 .home-container {
     position: relative;
     min-height: 100vh;
@@ -19,8 +20,9 @@
     position: relative;
     z-index: 10;
     display: flex;
+    flex-direction: column; /* ⬅︎ 가치 섹션이 아래로 이어지도록 */
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: 100vh;
     padding: 0 1rem;
 }
@@ -32,6 +34,8 @@
     text-align: center;
     max-width: 1152px;
     margin: 0 auto;
+    min-height: 100vh; /* 히어로를 1스크린로 고정 */
+    justify-content: center;
 }
 
 .home-title {
@@ -107,4 +111,179 @@
 .btn-primary:focus,
 .btn-secondary:focus {
     outline: none;
+}
+
+/* ========== 가치 섹션 추가 ========== */
+.value-section {
+    width: 100%;
+    max-width: 1600px;               /* 넓게 사용 */
+    margin: 0 auto;
+    padding: clamp(64px, 10vh, 120px) clamp(16px, 4vw, 40px);
+    position: relative;
+
+    /* 화면 정중앙 배치 */
+    min-height: 100vh;               /* 한 화면 기준 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;         /* 세로 중앙 정렬 */
+}
+
+.value-head {
+    text-align: center;
+    margin-bottom: clamp(22px, 3vw, 28px);
+}
+.value-head--tight { margin-bottom: clamp(28px, 4vw, 48px); }
+
+.value-title {
+    margin: 0 0 14px 0;
+    font-size: clamp(44px, 6vw, 72px); /* 크게 */
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: #fff;
+}
+
+.value-sub {
+    margin: 0 auto;
+    max-width: 980px;
+    color: rgba(255,255,255,0.86);
+    font-size: clamp(16px, 2.2vw, 20px);
+    line-height: 1.65;
+}
+
+.value-grid {
+    display: grid;
+    gap: clamp(24px, 2vw, 32px);
+    grid-template-columns: repeat(4, 1fr); /* 4개 일렬 */
+    width: 100%;
+    margin-top: clamp(24px, 4vw, 40px);
+}
+.value-grid--uniform {
+    grid-template-columns: repeat(4, minmax(320px, 1fr));
+    align-items: stretch;
+}
+
+/* 카드 */
+.v-card {
+    position: relative;
+    padding: clamp(28px, 3.2vw, 40px);
+    border-radius: 20px; /* 대시보드 톤 */
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+    transition: opacity .5s ease, transform .5s cubic-bezier(.25, 1, .5, 1);
+}
+.v-card--uniform{
+    display: flex;
+    flex-direction: column;
+    min-height: 360px; /* 높이 통일 */
+}
+
+.v-card::after{
+    content:"";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    padding: 1px;
+    border: 1px solid transparent;
+    background:
+            linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0)) padding-box,
+            linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0)) border-box;
+    box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.06);
+}
+
+.v-card:hover {
+    transform: translateY(-2px) scale(1);
+    box-shadow: 0px 30px 60px -12px rgba(0,0,0,0.35);
+    background: rgba(255,255,255,0.08);
+}
+
+/* 인터섹션 시 reveal */
+.v-card.reveal {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* 상단: 아이콘 + 타이틀 */
+.v-top{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 6px;
+}
+
+.v-icon{
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.05));
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+    font-size: 24px;
+    user-select: none;
+}
+
+.v-title{
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(18px, 2vw, 20px);
+    letter-spacing: -0.01em;
+    color: #fff;
+}
+
+/* 본문은 남은 공간을 채워 칩이 항상 아래로 */
+.v-body{
+    flex: 1;
+    display: grid;
+    gap: 10px;
+}
+
+.v-strong{
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(16px, 2.3vw, 18px);
+    color: #fff;
+}
+
+.v-desc{
+    margin: 0;
+    font-size: clamp(14px, 2vw, 16px);
+    color: rgba(255,255,255,0.88);
+    line-height: 1.7;
+    max-width: 44ch;
+    text-wrap: pretty;
+}
+
+/* 하단 칩 */
+.v-foot{ margin-top: 6px; }
+
+.v-chip{
+    display: inline-block;
+    font-size: 12px;
+    color: #c2c8d4;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: 6px 10px;
+    border-radius: 999px;
+}
+
+/* 반응형 */
+@media (max-width: 1280px) {
+    .value-grid, .value-grid--uniform {
+        grid-template-columns: repeat(2, minmax(300px, 1fr));
+    }
+}
+@media (max-width: 680px) {
+    .value-section { max-width: 100%; padding: 56px 16px 72px; }
+    .value-grid, .value-grid--uniform { grid-template-columns: 1fr; gap: 18px; }
+    .v-card--uniform { min-height: 0; }
 }

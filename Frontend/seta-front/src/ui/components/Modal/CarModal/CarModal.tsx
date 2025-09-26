@@ -1,10 +1,9 @@
-// src/ui/components/Modal/CarModal/CarModal.tsx
-
 import {useEffect, useMemo, useRef} from "react";
 import {createPortal} from "react-dom";
 import {gsap} from "gsap";
 import "./CarModal.css";
 import type {CarModalProps} from "./types";
+import { useNavigate } from "react-router-dom";
 
 export default function CarModal({
                                      open,
@@ -18,6 +17,7 @@ export default function CarModal({
                                  }: CarModalProps) {
     const shellRef = useRef<HTMLDivElement>(null);
     const fillRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
 
     // 파생값 계산
     const {
@@ -56,7 +56,7 @@ export default function CarModal({
     const getSegmentStatus = (i: number) => {
         const totalSegments = segments?.length ?? 3;
         const segmentProgress = progress01 * totalSegments;
-        
+
         if (segmentProgress > i + 1) return "done";
         if (segmentProgress > i) return "progress";
         return "upcoming";
@@ -68,9 +68,9 @@ export default function CarModal({
         const costSaving = `${Math.round(currentKwh * 110).toLocaleString()}원`;
         const co2Reduction = `${Math.round(currentKwh * 0.2).toLocaleString()}kg`;
         const energySaving = `${currentKwh.toLocaleString()}kWh`;
-        
+
         const shareText = `🚗 SETA 가상 드라이브\n\nAI 사용 최적화로 절약한 에너지로 가상 여행 중!\n\n📍 ${trip?.origin || "출발지"} → ${trip?.destination || "목적지"}\n🛣️ 총 거리: ${totalKm.toLocaleString()}km\n🏃‍♂️ 현재 진행: ${equivKm.toLocaleString()}km (${pct}%)\n\n⚡ 절약 현황:\n• ${energySaving} 전력 절약\n• ${costSaving} 비용 절감\n• ${co2Reduction} CO₂ 절감\n\n작은 실천이 환경을 바꿉니다! 🌍`;
-        
+
         const shareData = {
             title: 'SETA 가상 드라이브 - 에너지 절약 여행',
             text: shareText,
@@ -92,7 +92,7 @@ export default function CarModal({
 
     const handleCopyLink = async (customText?: string) => {
         const shareText = customText || `🚗 SETA 가상 드라이브\n\n절약한 에너지로 ${trip?.origin || "출발지"}에서 ${trip?.destination || "목적지"}까지 ${equivKm.toLocaleString()}km 여행 중!\n\n${window.location.href}`;
-        
+
         try {
             await navigator.clipboard.writeText(shareText);
             // 복사 완료 피드백
@@ -120,7 +120,7 @@ export default function CarModal({
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
+
         try {
             document.execCommand('copy');
             const button = document.querySelector('.cm-btn-primary') as HTMLButtonElement;
@@ -136,7 +136,7 @@ export default function CarModal({
         } catch {
             console.log('복사 기능을 사용할 수 없습니다.');
         }
-        
+
         document.body.removeChild(textArea);
     };
 
@@ -293,7 +293,7 @@ export default function CarModal({
                             {(segments ?? []).map((seg, i) => {
                                 const st = getSegmentStatus(i);
                                 const statusText = st === "done" ? "완료" : st === "progress" ? "진행중" : "예정";
-                                
+
                                 return (
                                     <div key={i} className={`cm-item cm-item--${st}`}>
                                         <div className="cm-node" aria-hidden="true">
@@ -352,7 +352,16 @@ export default function CarModal({
                                     <button className="cm-btn cm-btn-primary" type="button" onClick={handleShare}>
                                         공유하기
                                     </button>
-                                    <button className="cm-btn" type="button" onClick={onClose}>대화 계속하기</button>
+                                    <button
+                                        className="cm-btn"
+                                        type="button"
+                                        onClick={() => {
+                                            onClose();
+                                            navigate("/chat");
+                                        }}
+                                    >
+                                        대화 계속하기
+                                    </button>
                                 </div>
                             </div>
                         </section>
