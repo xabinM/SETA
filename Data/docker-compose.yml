@@ -30,24 +30,53 @@ services:
   filter-worker-1:
     build: .
     command: python -m app.workers.filter_worker
+    env_file:
+      - .env
     environment:
       - KAFKA_BROKER=kafka:9092
       - CONSUMER_GROUP=filter-group
+    depends_on:
+      - elasticsearch
+      - kafka
+    volumes:
+      - .:/app
+      - /home/ubuntu/models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
 
   filter-worker-2:
     build: .
     command: python -m app.workers.filter_worker
+    env_file:
+      - .env
     environment:
       - KAFKA_BROKER=kafka:9092
       - CONSUMER_GROUP=filter-group
+    depends_on:
+      - elasticsearch
+      - kafka
+    volumes:
+      - .:/app
+      - /home/ubuntu/models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
 
   filter-worker-3:
     build: .
     command: python -m app.workers.filter_worker
+    env_file:
+      - .env
     environment:
       - KAFKA_BROKER=kafka:9092
       - CONSUMER_GROUP=filter-group
-
+    depends_on:
+      - elasticsearch
+      - kafka
+    volumes:
+      - .:/app
+      - /home/ubuntu/models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
 
   llm-worker-gms:
     build: .

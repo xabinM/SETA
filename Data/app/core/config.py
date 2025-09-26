@@ -29,9 +29,11 @@ class Settings(BaseSettings):
     EMBED_MODEL_PATH: str = Field("/app/models/embedding", env="EMBED_MODEL_PATH")
     EMBED_DIMS: int = Field(768, env="EMBED_DIMS")
 
-    # GPT(GMS)
+    # GPT
     GMS_API_URL: str = Field(..., env="GMS_API_URL")
     GMS_API_KEY: str = Field(..., env="GMS_API_KEY")
+    OPENAI_KEY_1: str = Field(..., env="OPENAI_KEY_1")
+    OPENAI_KEY_2: str = Field(..., env="OPENAI_KEY_2")
 
     # Redis (필요 시)
     REDIS_HOST: str = Field("redis", env="REDIS_HOST")
