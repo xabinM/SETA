@@ -209,7 +209,7 @@ const Landing: React.FC = () => {
             navigate('/home');
           }
         });
-      }, 1000);
+      }, 500);
     }, 7.5);
   };
 
