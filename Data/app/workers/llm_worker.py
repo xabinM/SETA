@@ -117,7 +117,7 @@ def run_worker():
 
         # === LLM 호출 ===
         start = time.time()
-        model_name = os.getenv("LLM_MODEL", "gpt-4o")
+        model_name = os.getenv("LLM_MODEL", "gpt-4.1-nano")
         temperature = float(os.getenv("LLM_TEMPERATURE", "0.7"))
         logger.info("🤖 Calling LLM model=%s temperature=%.2f", model_name, temperature)
 
