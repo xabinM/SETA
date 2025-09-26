@@ -78,7 +78,7 @@ def run_worker():
 
                 # 2) 최근 대화 맥락
                 context_snippets = [
-                    f"{m['role']}: {m['content']}" for m in prompt_builder_service.get_recent_conversation(chat_room_id, limit=5)
+                    f"{m['role']}: {m['content']}" for m in prompt_builder_service.get_recent_conversation(chat_room_id, limit=10)
                 ]
                 logger.info("📝 Context snippets: %d items", len(context_snippets))
 
