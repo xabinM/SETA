@@ -57,7 +57,7 @@ const Landing: React.FC = () => {
         gsap.to(particle, {
           opacity: 0.6 + Math.random() * 0.4,
           scale: 0.8 + Math.random() * 0.4,
-          duration: 0.8,
+          duration: 0.6,
           delay: appearDelay,
           ease: "power2.out",
           onComplete: () => {
@@ -84,7 +84,7 @@ const Landing: React.FC = () => {
     // 미세한 회전 효과
     gsap.to(particle, {
       rotation: `+=${(Math.random() - 0.5) * 30}`,
-      duration: 8 + Math.random() * 4,
+      duration: 6 + Math.random() * 4,
       repeat: -1,
       yoyo: true,
       ease: "none"
@@ -152,7 +152,7 @@ const Landing: React.FC = () => {
             y: deltaY,
             scale: 0,
             opacity: 0,
-            duration: 1.5,
+            duration: 1,
             delay: index * 0.003,
             ease: "power2.in"
           });
@@ -203,14 +203,14 @@ const Landing: React.FC = () => {
       setTimeout(() => {
         gsap.to(containerRef.current, {
           opacity: 0,
-          duration: 0.6,
+          duration: 0.5,
           ease: "power2.inOut",
           onComplete: () => {
             navigate('/home');
           }
         });
-      }, 1000);
-    }, 7.5);
+      }, 600);
+    }, 6.5);
   };
 
   const addParticleRef = (el: HTMLDivElement | null) => {
