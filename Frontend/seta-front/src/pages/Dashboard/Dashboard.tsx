@@ -394,23 +394,36 @@ const carModalData = useMemo(() => {
                                 </div>
 
                                 <div className="lg-center">
-                                    <img
-                                        src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Racing%20Car.png"
-                                        alt="Racing Car"
-                                        width="72"
-                                        height="72"
-                                    />
-                                    <div style={{lineHeight: 1.65}}>
-                                        <div className="lg-strong">전기를 아껴서</div>
-                                        <div className="lg-em">
-                                            서울 → {destinationInfo.destination}
-                                        </div>
-                                        <div className="lg-dim">
-                                            ({destinationInfo.distance}) 갈 수 있는
-                                        </div>
-                                        <div className="lg-strong">에너지를 절약했어요!</div>
-                                    </div>
-                                </div>
+    <img
+        src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Racing%20Car.png"
+        alt="Racing Car"
+        width="72"
+        height="72"
+    />
+    {currentSavedTokens === 0 ? (
+        <div style={{lineHeight: 1.65}}>
+            <div className="lg-strong">SETA와 채팅을 시작해보세요!</div>
+            <div className="lg-dim">
+                AI 사용을 최적화하면
+                <br/>
+                전력을 절약하고 가상 여행을 떠날 수 있어요!
+                <br/>
+                
+            </div>
+        </div>
+    ) : (
+        <div style={{lineHeight: 1.65}}>
+            <div className="lg-strong">전기를 아껴서</div>
+            <div className="lg-em">
+                서울 → {destinationInfo.destination}
+            </div>
+            <div className="lg-dim">
+                ({destinationInfo.distance}) 갈 수 있는
+            </div>
+            <div className="lg-strong">에너지를 절약했어요!</div>
+        </div>
+)}
+        </div>
                             </article>
                         </section>
                         <section className="lg-card lg-ranking"
