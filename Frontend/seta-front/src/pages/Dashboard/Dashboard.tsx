@@ -45,11 +45,13 @@ function ScopeChipGroup({
 const getDefaultStats = () => ({
     savedTokens: 0,
     costSumUsd: 0,
+    co2: 0,
 });
 
 const getDefaultDaily = () => ({
     savedTokens: 0,
     costSumUsd: 0,
+    co2: 0,
 });
 
 function Dashboard() {
@@ -191,14 +193,14 @@ const carModalData = useMemo(() => {
     };
     const trees = calculateTreeStatus(currentSavedTokens);
     const kpis = baseData.kpis.map((kpi) => {
-        if (kpi.label === "누적 비용 절약") {
-            return {...kpi, value: formatCost(currentStats.costSumUsd || 0)};
-        }
-        if (kpi.label === "CO₂ 절감량") {
-            return {...kpi, value: formatCO2(currentSavedTokens)};
-        }
-        return kpi;
-    });
+    if (kpi.label === "누적 비용 절약") {
+        return {...kpi, value: formatCost(currentStats.costSumUsd || 0)};
+    }
+    if (kpi.label === "CO₂ 절감량") {
+        return {...kpi, value: formatCO2(currentStats.co2 || 0)};  // 수정: 계산된 CO2 값 사용
+    }
+    return kpi;
+});
     const timeline = baseData.timeline;
 
     return (
@@ -294,10 +296,10 @@ const carModalData = useMemo(() => {
                                 </div>
                                 <div className="lg-stat-title">CO₂ 절감량</div>
                                 <div className="lg-stat-value">
-                                    {formatCO2(currentSavedTokens)}
+                                    {formatCO2(currentStats.co2 || 0)}  {/* 수정: 계산된 CO2 값 사용 */}
                                 </div>
                                 <div className="lg-stat-delta">
-                                    +{formatCO2(currentDaily.savedTokens || 0)} (오늘)
+                                    +{formatCO2(currentDaily.co2 || 0)} (오늘)  {/* 수정: 계산된 CO2 값 사용 */}
                                 </div>
                             </article>
                         </section>
