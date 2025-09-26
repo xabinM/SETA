@@ -28,23 +28,26 @@ services:
     restart: unless-stopped
 
   filter-worker-1:
-    build: .
+    build: ./Data
     command: python -m app.workers.filter_worker
-    env_file:
-      - .env
-    depends_on:
-      - elasticsearch
-    volumes:
-      - .:/app
-      - /home/ubuntu/models:/app/models
-      - ./logs:/app/logs
-    restart: unless-stopped
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - CONSUMER_GROUP=filter-group
 
   filter-worker-2:
-    <<: *filter-worker-1
+    build: ./Data
+    command: python -m app.workers.filter_worker
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - CONSUMER_GROUP=filter-group
 
   filter-worker-3:
-    <<: *filter-worker-1
+    build: ./Data
+    command: python -m app.workers.filter_worker
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - CONSUMER_GROUP=filter-group
+
 
   llm-worker-gms:
     build: .
