@@ -99,7 +99,7 @@ def run_worker():
         decision = ev.get("decision") or {}
         action = decision.get("action") or ev.get("action")
         if action != "PASS":
-            logger.info(f"⏩ PASS가 아닌 메시지 건너뜀 (action={action})")
+            logger.info("\n" + f"⏩ PASS가 아닌 메시지 건너뜀")
             continue  # PASS가 아닌 경우는 처리 안 함
 
         trace_id = ev.get("trace_id")
