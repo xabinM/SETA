@@ -28,7 +28,7 @@ LABEL_MAP = {
 
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,   # INFO → DEBUG 로 변경
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
 )
 logger = logging.getLogger("filter-worker")
@@ -37,6 +37,7 @@ logging.getLogger("elastic_transport.transport").setLevel(logging.WARNING)
 
 FILTER_MODEL_PATH = os.getenv("FILTER_MODEL_PATH", "/app/models/filter")
 
+logger.info("📦 Loading tokenizer/model from %s", FILTER_MODEL_PATH)
 tokenizer = AutoTokenizer.from_pretrained(FILTER_MODEL_PATH, local_files_only=True)
 model = AutoModelForSequenceClassification.from_pretrained(FILTER_MODEL_PATH, local_files_only=True)
 
@@ -44,6 +45,7 @@ KAFKA_IN = os.getenv("KAFKA_TOPIC_IN_RAW", "chat.raw.filtered.v1")
 KAFKA_OUT_FILTER = os.getenv("KAFKA_TOPIC_FILTER_RESULT", "chat.filter.result.v1")
 
 KST = timezone(timedelta(hours=9))
+
 
 def normalize_timestamp(ts):
     if ts is None:
@@ -109,7 +111,6 @@ def log_filter_process(original_text: str, decision: dict, mode: str = "ml", fil
         logger.warning("⚠️ 로그 요약 중 오류: %s", e)
 
 
-
 def estimate_tokens(text: str) -> int:
     try:
         enc = tiktoken.get_encoding("cl100k_base")
@@ -122,18 +123,21 @@ def estimate_tokens(text: str) -> int:
 def run_filter_worker():
     consumer = make_consumer([KAFKA_IN], group_id="filter-worker")
     producer = make_producer()
+    logger.info("🚀 filter-worker started (IN=%s, OUT=%s)", KAFKA_IN, KAFKA_OUT_FILTER)
 
     while True:
         msg = consumer.poll(1.0)
         if msg is None:
+            logger.debug("⏳ no message polled")
             continue
         if msg.error():
             logger.error("❌ Kafka 오류: %s", msg.error())
             continue
 
         try:
+            logger.debug("📩 Raw Kafka message: %s", msg.value())
             ev = json.loads(msg.value().decode("utf-8"))
-            # logger.info("📩 Kafka 메시지 수신: %s", ev)
+            logger.info("📥 Kafka 메시지 디코딩 성공: %s", ev)
         except Exception as e:
             logger.error("❌ Kafka 메시지 디코딩 실패: %s", e)
             continue
@@ -149,8 +153,13 @@ def run_filter_worker():
         top_category = ev.get("top_category", "no_meaning")
         now_utc = datetime.now(timezone.utc)
 
+        logger.debug("▶️ trace_id=%s, room_id=%s, message_id=%s, user_id=%s, mode=%s, top_category=%s",
+                     trace_id, room_id, message_id, user_id, mode, top_category)
+
         if mode == "auto":
+            logger.info("🔎 AUTO 모드 처리 시작")
             token_count = estimate_tokens(text)
+            logger.debug("AUTO token_count=%s", token_count)
             saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(token_count)
 
             try:
@@ -183,7 +192,9 @@ def run_filter_worker():
                     )
                     session.add(tu)
                     session.commit()
+                logger.debug("AUTO DB 저장 완료")
             except Exception as e:
+                logger.exception("❌ DB 저장 실패 (AUTO)")
                 error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
             try:
@@ -201,48 +212,46 @@ def run_filter_worker():
                         "reason_type": l,
                         "explanations": [],
                     }
+                    logger.debug("AUTO ES 저장 요청: %s", es_decision)
                     filter_service.save_to_es(raw, es_decision)
             except Exception as e:
                 logger.exception("❌ ES 저장 실패 (AUTO)")
                 error_service.save_error(trace_id, "ES_SAVE_ERROR", e)
 
-            publish(
-                producer,
-                KAFKA_OUT_FILTER,
-                key=room_id,
-                value={
-                    "trace_id": trace_id,
-                    "room_id": room_id,
-                    "message_id": message_id,
-                    "stage": "filler_removal",
-                    "stage_order": 1,
-                    "timestamp": normalize_timestamp(ev.get("timestamp")),
-                    "original_text": text,
-                    "cleaned_text": "",
-                    "detected_phrases": ev.get("filtered_words_details", [[], []])[0],
-                    "decision": {"action": "DROP", "reason_type": top_category},
-                    "schema_version": "1.0.0",
-                },
-                headers=[("traceparent", trace_id.encode())] if trace_id else None,
-            )
+            payload = {
+                "trace_id": trace_id,
+                "room_id": room_id,
+                "message_id": message_id,
+                "stage": "filler_removal",
+                "stage_order": 1,
+                "timestamp": normalize_timestamp(ev.get("timestamp")),
+                "original_text": text,
+                "cleaned_text": "",
+                "detected_phrases": ev.get("filtered_words_details", [[], []])[0],
+                "decision": {"action": "DROP", "reason_type": top_category},
+                "schema_version": "1.0.0",
+            }
+            logger.debug("📤 AUTO Publish payload=%s", payload)
+            publish(producer, KAFKA_OUT_FILTER, key=room_id, value=payload)
 
             log_filter_process(text, {}, mode="rule", filtered_words_details=ev.get("filtered_words_details"))
             done_at = int(datetime.now(timezone.utc).timestamp() * 1000)
             produced_at = normalize_timestamp(ev.get("timestamp"))
             logger.info(f"📌 produced_at={produced_at}, done_at={done_at}")
             total_pipeline_ms = done_at - produced_at
-            logger.info("\n"+f"🏁 전체 파이프라인 처리 시간 (규칙 기반 DROP): {total_pipeline_ms}ms")
-
+            logger.info("\n" + f"🏁 전체 파이프라인 처리 시간 (규칙 기반 DROP): {total_pipeline_ms}ms")
 
         else:
             decision = filter_classifier(final_text or text, model, tokenizer)
-            # logger.info("🤖 ML 분류 결과: %s", decision)
+            logger.info("🤖 ML 분류 결과: %s", decision)
 
             fwd = ev.get("filtered_words_details")
             log_filter_process(text, decision, mode="ml", filtered_words_details=fwd)
 
             if decision["status"] == "drop":
+                logger.info("❌ ML DROP 결정")
                 original_tokens = estimate_tokens(text)
+                logger.debug("ML DROP token_count=%s", original_tokens)
                 saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(original_tokens)
 
                 raw = RawFilteredMessage(
@@ -252,9 +261,10 @@ def run_filter_worker():
                     user_id=user_id,
                     text=text,
                     final_text="",
-                    timestamp= normalize_timestamp(ev.get("timestamp")),
+                    timestamp=normalize_timestamp(ev.get("timestamp")),
                     schema_version=ev.get("schema_version", "1.0.0"),
                 )
+                logger.debug("ML DROP FilterResult 저장 요청")
                 filter_service.save_filter_results(raw, decision, rule_name="no_meaning")
 
                 try:
@@ -276,48 +286,48 @@ def run_filter_worker():
                         )
                         session.add(tu)
                         session.commit()
+                    logger.debug("ML DROP DB 저장 완료")
                 except Exception as e:
                     logger.exception("❌ DB 저장 실패 (ML DROP)")
                     error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
                 try:
+                    logger.debug("ML DROP ES 저장 요청: %s", decision)
                     filter_service.save_to_es(raw, decision)
                 except Exception as e:
                     logger.exception("❌ ES 저장 실패 (ML DROP)")
                     error_service.save_error(trace_id, "ES_SAVE_ERROR", e)
 
-                publish(
-                    producer,
-                    KAFKA_OUT_FILTER,
-                    key=room_id,
-                    value={
-                        "trace_id": trace_id,
-                        "room_id": room_id,
-                        "message_id": message_id,
-                        "stage": "intent_classifier",
-                        "stage_order": 2,
-                        "timestamp": normalize_timestamp(ev.get("timestamp")),
-                        "original_text": text,
-                        "cleaned_text": final_text or text,
-                        "decision": {
-                            "action": "DROP",
-                            "score": decision.get("score"),
-                            "threshold": decision.get("threshold"),
-                            "reason_type": decision.get("label"),
-                            "reason_text": decision.get("reason_text"),
-                        },
-                        "explanations": decision.get("explanations", []),
-                        "schema_version": "1.0.0",
+                payload = {
+                    "trace_id": trace_id,
+                    "room_id": room_id,
+                    "message_id": message_id,
+                    "stage": "intent_classifier",
+                    "stage_order": 2,
+                    "timestamp": normalize_timestamp(ev.get("timestamp")),
+                    "original_text": text,
+                    "cleaned_text": final_text or text,
+                    "decision": {
+                        "action": "DROP",
+                        "score": decision.get("score"),
+                        "threshold": decision.get("threshold"),
+                        "reason_type": decision.get("label"),
+                        "reason_text": decision.get("reason_text"),
                     },
-                )
+                    "explanations": decision.get("explanations", []),
+                    "schema_version": "1.0.0",
+                }
+                logger.debug("📤 ML DROP Publish payload=%s", payload)
+                publish(producer, KAFKA_OUT_FILTER, key=room_id, value=payload)
 
                 done_at = int(datetime.now(timezone.utc).timestamp() * 1000)
                 produced_at = normalize_timestamp(ev.get("timestamp", done_at))
                 logger.info(f"📌 produced_at={produced_at}, done_at={done_at}")
                 total_pipeline_ms = done_at - produced_at
-                logger.info("\n"+""f"🏁 전체 파이프라인 처리 시간 (ML 기반 DROP): {total_pipeline_ms}ms")
+                logger.info("\n" + f"🏁 전체 파이프라인 처리 시간 (ML 기반 DROP): {total_pipeline_ms}ms")
 
             else:
+                logger.info("✅ ML PASS 결정")
                 raw = RawFilteredMessage(
                     trace_id=trace_id,
                     room_id=room_id,
@@ -334,10 +344,14 @@ def run_filter_worker():
                 cleaned_tokens = estimate_tokens(cleaned_text)
                 saved_tokens = max(0, original_tokens - cleaned_tokens)
 
+                logger.debug("ML PASS original_tokens=%s, cleaned_tokens=%s, saved_tokens=%s",
+                             original_tokens, cleaned_tokens, saved_tokens)
+
                 cost_usd, energy_wh, co2_g, _ = estimate_usage_by_tokens(cleaned_tokens)
                 saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(saved_tokens)
 
                 if decision.get("drop_logs"):
+                    logger.debug("ML PASS FilterResult 저장 요청")
                     filter_service.save_filter_results(raw, decision, rule_name="no_meaning")
 
                 try:
@@ -359,41 +373,40 @@ def run_filter_worker():
                         )
                         session.add(tu)
                         session.commit()
+                    logger.debug("ML PASS DB 저장 완료")
                 except Exception as e:
                     logger.exception("❌ DB 저장 실패 (ML PASS)")
                     error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
                 try:
+                    logger.debug("ML PASS ES 저장 요청: %s", decision)
                     filter_service.save_to_es(raw, decision)
                 except Exception as e:
                     logger.exception("❌ ES 저장 실패 (ML PASS)")
                     error_service.save_error(trace_id, "ES_SAVE_ERROR", e)
 
-                publish(
-                    producer,
-                    KAFKA_OUT_FILTER,
-                    key=room_id,
-                    value={
-                        "trace_id": trace_id,
-                        "room_id": room_id,
-                        "user_id": user_id,
-                        "message_id": message_id,
-                        "stage": "intent_classifier",
-                        "stage_order": 2,
-                        "timestamp": normalize_timestamp(ev.get("timestamp")),
-                        "original_text": text,
-                        "cleaned_text": decision.get("content") or text,
-                        "decision": {
-                            "action": "PASS",
-                            "score": decision.get("score"),
-                            "threshold": decision.get("threshold"),
-                            "reason_type": decision.get("label"),
-                            "reason_text": decision.get("reason_text"),
-                        },
-                        "explanations": decision.get("explanations", []),
-                        "schema_version": "1.0.0",
+                payload = {
+                    "trace_id": trace_id,
+                    "room_id": room_id,
+                    "user_id": user_id,
+                    "message_id": message_id,
+                    "stage": "intent_classifier",
+                    "stage_order": 2,
+                    "timestamp": normalize_timestamp(ev.get("timestamp")),
+                    "original_text": text,
+                    "cleaned_text": decision.get("content") or text,
+                    "decision": {
+                        "action": "PASS",
+                        "score": decision.get("score"),
+                        "threshold": decision.get("threshold"),
+                        "reason_type": decision.get("label"),
+                        "reason_text": decision.get("reason_text"),
                     },
-                )
+                    "explanations": decision.get("explanations", []),
+                    "schema_version": "1.0.0",
+                }
+                logger.debug("📤 ML PASS Publish payload=%s", payload)
+                publish(producer, KAFKA_OUT_FILTER, key=room_id, value=payload)
 
 
 if __name__ == "__main__":
