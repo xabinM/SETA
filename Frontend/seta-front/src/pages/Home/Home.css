@@ -222,19 +222,6 @@
     margin-bottom: 6px;
 }
 
-.v-icon{
-    width: 48px;
-    height: 48px;
-    display: grid;
-    place-items: center;
-    border-radius: 14px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.05));
-    border: 1px solid rgba(255,255,255,0.22);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
-    font-size: 24px;
-    user-select: none;
-}
-
 .v-title{
     margin: 0;
     font-weight: 800;
