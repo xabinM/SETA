@@ -4,10 +4,12 @@ import {getDashboardKpi, type DashboardKpiResponse} from "./api";
 // 1토큰당 CO2 그램 단위 환산값 (백엔드 usage.py 상수와 동일)
 const CO2_G_PER_TOKEN = 0.0003; // 0.03 / 100
 
-// 토큰 수로 CO2 절감량 계산 함수 (그램 단위 숫자 반환)
+// 토큰 수로 CO2 절감량 계산 함수 (그램 단위 숫자 반환
 function calcCO2(tokens: number | undefined | null): number {
   if (!tokens) return 0;
-  return tokens * CO2_G_PER_TOKEN;
+  const result = tokens * CO2_G_PER_TOKEN;
+  console.log('CO2 계산:', { tokens, CO2_G_PER_TOKEN, result });
+  return result;
 }
 
 export function useDashboardKpi() {
@@ -50,6 +52,8 @@ export function useDashboardKpi() {
       setLoading(false);
     }
   };
+
+  
 
   useEffect(() => {
     fetchData();
