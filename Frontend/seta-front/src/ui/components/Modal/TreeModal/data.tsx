@@ -4,7 +4,7 @@ import type {Tokens, Tree, KPI, TimelineItem} from "./types";
 const fmt = (n: number) => n.toLocaleString();
 
 /** ===== 개인 데이터 ===== */
-const TREE_LEVELS = [500, 2000, 5000, 8000, 10000];
+const TREE_LEVELS = [5000, 20000, 50000, 80000, 100000];
 const meTokens: Tokens = {current: 1047, goal: 2000, step: 500};
 
 const meTrees: Tree[] = [

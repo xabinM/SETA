@@ -409,10 +409,10 @@ body {
     transform: translateX(2px);
 }
 
-.lg-center{ 
-    display: grid; 
-    place-items: center; 
-    text-align: center; 
+.lg-center{
+    display: grid;
+    place-items: center;
+    text-align: center;
     gap: 10px;
 }
 
@@ -609,4 +609,8 @@ body {
 
 .lg-card::after {
     pointer-events: none;
+}
+
+.lg-car {
+    margin-top: -20px;
 }

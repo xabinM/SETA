@@ -127,10 +127,16 @@
     flex-direction: column;
     justify-content: center;         /* 세로 중앙 정렬 */
 }
+.v-desc {
+    white-space: normal;  /* 자동 줄바꿈 허용 */
+    word-break: keep-all; /* 단어 중간이 아닌 띄어쓰기 기준으로 줄바꿈 */
+    line-height: 1.5;
+}
 
 .value-head {
     text-align: center;
     margin-bottom: clamp(22px, 3vw, 28px);
+    margin-top: -10px;
 }
 .value-head--tight { margin-bottom: clamp(28px, 4vw, 48px); }
 
@@ -144,10 +150,9 @@
 
 .value-sub {
     margin: 0 auto;
-    max-width: 980px;
     color: rgba(255,255,255,0.86);
-    font-size: clamp(16px, 2.2vw, 20px);
     line-height: 1.65;
+    margin-top: 40px;
 }
 
 .value-grid {
