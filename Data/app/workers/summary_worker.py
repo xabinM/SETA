@@ -73,7 +73,6 @@ def run_summary_trigger_loop():
 
 
 def summarize_room(room_id: str):
-    """특정 방 요약 실행"""
     try:
         with get_session() as session:
             state = session.query(RoomSummaryState).filter_by(chat_room_id=room_id).first()
