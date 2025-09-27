@@ -217,8 +217,8 @@ def run_filter_worker():
             decision = filter_classifier(final_text or text, model, tokenizer)
             # logger.info("🤖 ML 분류 결과: %s", decision)
 
-            # 한국어 요약 로그 출력
-            log_filter_process(text, decision, mode="ml")
+            fwd = ev.get("filtered_words_details")
+            log_filter_process(text, decision, mode="ml", filtered_words_details=fwd)
 
             if decision["status"] == "drop":
                 original_tokens = estimate_tokens(text)
@@ -291,7 +291,6 @@ def run_filter_worker():
                 )
 
             else:
-                # === PASS 처리 ===
                 raw = RawFilteredMessage(
                     trace_id=trace_id,
                     room_id=room_id,
