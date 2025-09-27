@@ -12,9 +12,19 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from app.contracts.raw_filtered import RawFilteredMessage
 from app.utils.usage import estimate_usage_by_tokens
 
-# ------------------
-# Logging 설정
-# ------------------
+LABEL_MAP = {
+    "goodbye": "🙇 작별",
+    "apology": "🙏 사과",
+    "thank": "🙏 감사",
+    "greeting": "👋 인사",
+    "call_only": "🎯 단순 호출",
+    "reaction_only": "😮 감탄사",
+    "no_meaning": "❌ 의미 없음",
+    "connector_filler": "🔗 연결어",
+    "meaningful": "✅ 정상 요청",
+}
+
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
@@ -64,9 +74,9 @@ def log_filter_process(original_text: str, decision: dict, mode: str = "ml", fil
             if drop_logs:
                 for i, log in enumerate(drop_logs, 1):
                     part = log.get("text") or log.get("원문") or log.get("dropped_text")
-                    label = log.get("label")
-                    step = log.get("단계", "분류")
-                    lines.append(f"  {i}단계({step}): \"{part}\" → {label} 필터됨")
+                    label_en = log.get("label")
+                    label_ko = LABEL_MAP.get(label_en, label_en)
+                    lines.append(f'  - "{part}" → {label_ko} 이유로 필터링 됨')
             else:
                 lines.append("  ⚪️ 필터된 구간 없음")
 
@@ -82,9 +92,6 @@ def log_filter_process(original_text: str, decision: dict, mode: str = "ml", fil
         logger.warning("⚠️ 로그 요약 중 오류: %s", e)
 
 
-# ------------------
-# 토큰 개수 추정
-# ------------------
 def estimate_tokens(text: str) -> int:
     try:
         enc = tiktoken.get_encoding("cl100k_base")
