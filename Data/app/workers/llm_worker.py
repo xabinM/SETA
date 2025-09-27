@@ -12,9 +12,7 @@ from app.services import prompt_builder_service, llm_client, error_service
 from app.adapters.redis_io import append_conversation
 from app.utils.usage import estimate_usage_by_tokens  # ✅ 소비량 계산 유틸
 
-# ------------------
-# Logging 설정
-# ------------------
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
@@ -61,9 +59,14 @@ def log_llm_process(user_input: str, system_prompt: str, context_snippets: list,
                 if isinstance(ctx, dict):
                     text = ctx.get("text", "")
                     score = ctx.get("score", 0)
-                    lines.append(f"    {i}) (점수={score:.2f}) {text}")
+
+                    preview = text[:100] + "..." if len(text) > 100 else text
+
+                    lines.append(f"    {i}) (점수={score:.2f}) {preview}")
                 else:
-                    lines.append(f"    {i}) {ctx}")
+                    preview = ctx[:100] + "..." if len(ctx) > 100 else ctx
+                    lines.append(f"    {i}) {preview}")
+
         else:
             lines.append("  🔍 유사 맥락 없음")
 
