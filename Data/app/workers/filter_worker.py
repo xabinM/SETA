@@ -45,9 +45,7 @@ KAFKA_OUT_FILTER = os.getenv("KAFKA_TOPIC_FILTER_RESULT", "chat.filter.result.v1
 KST = timezone(timedelta(hours=9))
 
 
-# ------------------
-# 필터링 로그 요약 출력
-# ------------------
+
 def log_filter_process(original_text: str, decision: dict, mode: str = "ml", filtered_words_details=None):
     try:
         lines = []
@@ -59,12 +57,13 @@ def log_filter_process(original_text: str, decision: dict, mode: str = "ml", fil
             labels = filtered_words_details[1] if len(filtered_words_details) > 1 else []
 
             if words and labels:
-                lines.append("  ⚙️ 규칙 기반 필터링 결과:")
+                lines.append("  📌 규칙 기반 필터링 결과")
                 for i, (w, l) in enumerate(zip(words, labels), 1):
-                    lines.append(f"    {i}) \"{w}\" → {l} 규칙으로 필터됨")
+                    label_ko = LABEL_MAP.get(l, l)
+                    lines.append(f'  - "{w}" → {label_ko} 이유로 필터링 됨')
                 lines.append("  ❌ 최종 남은 문장 없음 (규칙 기반 DROP)")
             else:
-                lines.append("  ⚪️ 필터된 구간 없음 (auto)")
+                lines.append("  ⚪️ 규칙 기반 필터된 구간 없음")
                 lines.append(f"  ✅ 최종 남은 문장: \"{original_text}\"")
 
         else:
@@ -72,20 +71,20 @@ def log_filter_process(original_text: str, decision: dict, mode: str = "ml", fil
             kept = decision.get("kept_sentences", [])
 
             if drop_logs:
-                for i, log in enumerate(drop_logs, 1):
+                lines.append("  📌 ML 기반 필터링 결과")
+                for log in drop_logs:
                     part = log.get("text") or log.get("원문") or log.get("dropped_text")
                     label_en = log.get("label")
                     label_ko = LABEL_MAP.get(label_en, label_en)
                     lines.append(f'  - "{part}" → {label_ko} 이유로 필터링 됨')
             else:
-                lines.append("  ⚪️ 필터된 구간 없음")
+                lines.append("  ⚪️ ML 기반 필터된 구간 없음")
 
             if kept:
                 lines.append(f"  ✅ 최종 남은 문장: \"{' '.join(kept)}\"")
             else:
                 lines.append("  ❌ 최종 남은 문장 없음 (전부 DROP)")
 
-        # ✅ 한국어 요약 로그는 꼭 찍어야 함
         logger.info("\n" + "\n".join(lines))
 
     except Exception as e:
