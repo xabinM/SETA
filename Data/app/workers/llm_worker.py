@@ -58,7 +58,12 @@ def log_llm_process(user_input: str, system_prompt: str, context_snippets: list,
         if similar_contexts:
             lines.append("  🔍 유사 맥락(ES):")
             for i, ctx in enumerate(similar_contexts, 1):
-                lines.append(f"    {i}) {ctx}")
+                if isinstance(ctx, dict):
+                    text = ctx.get("text", "")
+                    score = ctx.get("score", 0)
+                    lines.append(f"    {i}) (점수={score:.2f}) {text}")
+                else:
+                    lines.append(f"    {i}) {ctx}")
         else:
             lines.append("  🔍 유사 맥락 없음")
 
@@ -125,7 +130,7 @@ def run_worker():
 
                 # 3) ES embedding 기반 검색
                 similar_contexts = prompt_builder_service.search_similar_context_es(
-                    query=user_input, user_id=user_id, top_k=3, min_score=0.7
+                    query=user_input, user_id=user_id, top_k=3, min_score=0.8
                 )
 
                 # 4) full_prompt 조립

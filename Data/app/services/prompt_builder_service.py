@@ -7,9 +7,6 @@ from app.models import UserSetting
 from app.utils.es import get_es
 from sentence_transformers import SentenceTransformer
 
-# ===============================
-# Redis 설정
-# ===============================
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 REDIS_DB = int(os.getenv("REDIS_DB", "0"))
@@ -17,20 +14,12 @@ REDIS_TTL_SEC = int(os.getenv("REDIS_TTL_SEC", "3600"))  # 1시간 기본
 
 r = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 
-# ===============================
-# 임베딩 모델 (서버에서 로컬 로드)
-# ===============================
 EMBED_MODEL_PATH = os.getenv("EMBED_MODEL_PATH", "/app/models/embedding")
 embedder = SentenceTransformer(EMBED_MODEL_PATH)
 
 
-# ===============================
-# Redis 대화 기록 관리
-# ===============================
 def append_conversation(room_id: str, user_input: str, assistant_output: str, max_turns: int = 5):
-    """
-    Redis에 대화 저장 (최근 max_turns 쌍만 유지)
-    """
+
     key = f"chat:{room_id}:messages"
     history_json = r.get(key)
     history = json.loads(history_json) if history_json else []
@@ -49,9 +38,7 @@ def append_conversation(room_id: str, user_input: str, assistant_output: str, ma
 
 
 def get_recent_conversation(room_id: str, limit: int = 5):
-    """
-    Redis에서 최근 대화 불러오기
-    """
+
     key = f"chat:{room_id}:messages"
     history_json = r.get(key)
     if not history_json:
@@ -60,9 +47,7 @@ def get_recent_conversation(room_id: str, limit: int = 5):
     return history[-limit * 2 :]  # 최근 limit턴만 반환
 
 
-# ===============================
-# System Prompt 생성
-# ===============================
+
 def build_system_prompt(session: Session, user_id: str) -> str:
     setting = session.query(UserSetting).filter(UserSetting.user_id == user_id).first()
     if not setting:
@@ -95,9 +80,7 @@ def build_system_prompt(session: Session, user_id: str) -> str:
     return "\n- ".join(parts)
 
 
-# ===============================
-# ES 유사 맥락 검색
-# ===============================
+
 def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_score: float = 0.7):
     es = get_es()
     emb = embedder.encode(query).tolist()
@@ -119,6 +102,11 @@ def search_similar_context_es(query: str, user_id: str, top_k: int = 3, min_scor
 
     results = []
     for hit in resp["hits"]["hits"]:
-        if hit.get("_score", 0.0) >= min_score:
-            results.append(hit["_source"]["content"])
+        score = hit.get("_score", 0.0)
+        if score >= min_score:
+            results.append({
+                "text": hit["_source"]["content"],
+                "score": score,
+            })
     return results
+
