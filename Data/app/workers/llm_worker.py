@@ -35,7 +35,6 @@ KAFKA_OUT_DONE = os.getenv("KAFKA_TOPIC_OUT_LLM_DONE", "chat.llm.answer.done.v1"
 
 def log_llm_process(user_input: str, system_prompt: str, context_snippets: list,
                     similar_contexts: list, full_text: str = None, usage: dict = None):
-    """LLM 처리 과정 한국어 요약 로그"""
     try:
         lines = []
         lines.append("🤖 [LLM 처리 과정 요약]")
@@ -158,7 +157,6 @@ def run_worker():
             error_service.save_error(trace_id=trace_id, error_type="PROMPT_BUILD_ERROR", error=e)
             continue
 
-        # === LLM 호출 ===
         start = time.time()
         model_name = os.getenv("LLM_MODEL", "gpt-4.1-nano")
         temperature = float(os.getenv("LLM_TEMPERATURE", "0.7"))
@@ -192,7 +190,6 @@ def run_worker():
                     latency_ms = int((time.time() - start) * 1000)
                     full_text = "".join(chunks)
 
-                    # 한국어 요약 로그 출력
                     log_llm_process(user_input, system_prompt, context_snippets, similar_contexts, full_text, usage)
 
                     # TokenUsage 저장
@@ -258,6 +255,12 @@ def run_worker():
                             },
                             headers=[("traceparent", tp.encode())] if tp else None,
                         )
+
+                        done_at = int(datetime.now(timezone.utc).timestamp() * 1000)
+                        produced_at = ev.get("timestamp", done_at)
+                        total_pipeline_ms = done_at - produced_at
+                        logger.info("\n"+f"🏁 전체 파이프라인 처리 시간 (LLM DONE): {total_pipeline_ms}ms")
+
                     except Exception as e:
                         error_service.save_error(trace_id, "KAFKA_DONE_ERROR", e)
 

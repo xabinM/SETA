@@ -31,7 +31,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("filter-worker")
 
-# ES 내부 transport 로그 감추기
 logging.getLogger("elastic_transport.transport").setLevel(logging.WARNING)
 
 FILTER_MODEL_PATH = os.getenv("FILTER_MODEL_PATH", "/app/models/filter")
@@ -200,7 +199,7 @@ def run_filter_worker():
                     "message_id": message_id,
                     "stage": "filler_removal",
                     "stage_order": 1,
-                    "timestamp": int(datetime.now().timestamp() * 1000),
+                    "timestamp": ev.get("timestamp") or int(datetime.now().timestamp() * 1000),
                     "original_text": text,
                     "cleaned_text": "",
                     "detected_phrases": ev.get("filtered_words_details", [[], []])[0],
@@ -211,6 +210,10 @@ def run_filter_worker():
             )
 
             log_filter_process(text, {}, mode="rule", filtered_words_details=ev.get("filtered_words_details"))
+            done_at = int(datetime.now(timezone.utc).timestamp() * 1000)
+            produced_at = ev.get("timestamp", done_at)
+            total_pipeline_ms = done_at - produced_at
+            logger.info("\n"+f"🏁 전체 파이프라인 처리 시간 (규칙 기반 DROP): {total_pipeline_ms}ms")
 
 
         else:
@@ -275,7 +278,7 @@ def run_filter_worker():
                         "message_id": message_id,
                         "stage": "intent_classifier",
                         "stage_order": 2,
-                        "timestamp": int(datetime.now().timestamp() * 1000),
+                        "timestamp": ev.get("timestamp") or int(datetime.now().timestamp() * 1000),
                         "original_text": text,
                         "cleaned_text": final_text or text,
                         "decision": {
@@ -289,6 +292,11 @@ def run_filter_worker():
                         "schema_version": "1.0.0",
                     },
                 )
+
+                done_at = int(datetime.now(timezone.utc).timestamp() * 1000)
+                produced_at = ev.get("timestamp", done_at)
+                total_pipeline_ms = done_at - produced_at
+                logger.info("\n"+""f"🏁 전체 파이프라인 처리 시간 (ML 기반 DROP): {total_pipeline_ms}ms")
 
             else:
                 raw = RawFilteredMessage(
@@ -353,7 +361,7 @@ def run_filter_worker():
                         "message_id": message_id,
                         "stage": "intent_classifier",
                         "stage_order": 2,
-                        "timestamp": int(datetime.now().timestamp() * 1000),
+                        "timestamp": ev.get("timestamp") or int(datetime.now().timestamp() * 1000),
                         "original_text": text,
                         "cleaned_text": decision.get("content") or text,
                         "decision": {
