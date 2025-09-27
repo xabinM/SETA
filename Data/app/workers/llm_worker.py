@@ -130,7 +130,7 @@ def run_worker():
 
                 # 3) ES embedding 기반 검색
                 similar_contexts = prompt_builder_service.search_similar_context_es(
-                    query=user_input, user_id=user_id, top_k=3, min_score=0.8
+                    query=user_input, user_id=user_id, top_k=3, min_score=0.7
                 )
 
                 # 4) full_prompt 조립
