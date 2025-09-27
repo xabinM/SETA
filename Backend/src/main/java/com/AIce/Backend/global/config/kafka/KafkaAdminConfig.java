@@ -20,7 +20,7 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic chatRawRequest() {
         return TopicBuilder.name("chat.raw.request.v1")
-                .partitions(2)
+                .partitions(3)
                 .replicas(1)
                 .config("retention.ms", RETENTION_1D)
                 .config("cleanup.policy", "delete")
