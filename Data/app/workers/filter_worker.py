@@ -10,27 +10,34 @@ from app.adapters.db import get_session
 from app.models import FilterResult, TokenUsage
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from app.contracts.raw_filtered import RawFilteredMessage
-from app.utils.usage import estimate_usage_by_tokens  # ✅ 추가
+from app.utils.usage import estimate_usage_by_tokens
 
-
+# ------------------
+# Logging 설정
+# ------------------
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
 )
 logger = logging.getLogger("filter-worker")
 
+# ES 내부 transport 로그 감추기
+logging.getLogger("elastic_transport.transport").setLevel(logging.WARNING)
+
 FILTER_MODEL_PATH = os.getenv("FILTER_MODEL_PATH", "/app/models/filter")
 
-#logger.info("📦 Loading filter model from %s", FILTER_MODEL_PATH)
 tokenizer = AutoTokenizer.from_pretrained(FILTER_MODEL_PATH, local_files_only=True)
 model = AutoModelForSequenceClassification.from_pretrained(FILTER_MODEL_PATH, local_files_only=True)
-#logger.info(" Model loaded successfully")
 
 KAFKA_IN = os.getenv("KAFKA_TOPIC_IN_RAW", "chat.raw.filtered.v1")
 KAFKA_OUT_FILTER = os.getenv("KAFKA_TOPIC_FILTER_RESULT", "chat.filter.result.v1")
 
 KST = timezone(timedelta(hours=9))
 
+
+# ------------------
+# 필터링 로그 요약 출력
+# ------------------
 def log_filter_process(original_text: str, decision: dict, mode: str = "ml", filtered_words_details=None):
     try:
         lines = []
@@ -40,13 +47,15 @@ def log_filter_process(original_text: str, decision: dict, mode: str = "ml", fil
         if mode == "auto" and filtered_words_details:
             words = filtered_words_details[0] if len(filtered_words_details) > 0 else []
             labels = filtered_words_details[1] if len(filtered_words_details) > 1 else []
+
             if words and labels:
+                lines.append("  ⚙️ 규칙 기반 필터링 결과:")
                 for i, (w, l) in enumerate(zip(words, labels), 1):
-                    lines.append(f"  {i}단계: \"{w}\" → {l} 필터됨")
+                    lines.append(f"    {i}) \"{w}\" → {l} 규칙으로 필터됨")
+                lines.append("  ❌ 최종 남은 문장 없음 (규칙 기반 DROP)")
             else:
                 lines.append("  ⚪️ 필터된 구간 없음 (auto)")
-
-            lines.append("  ❌ 최종 남은 문장 없음 (전부 DROP)")
+                lines.append(f"  ✅ 최종 남은 문장: \"{original_text}\"")
 
         else:
             drop_logs = decision.get("drop_logs", [])
@@ -66,21 +75,28 @@ def log_filter_process(original_text: str, decision: dict, mode: str = "ml", fil
             else:
                 lines.append("  ❌ 최종 남은 문장 없음 (전부 DROP)")
 
+        # ✅ 한국어 요약 로그는 꼭 찍어야 함
         logger.info("\n" + "\n".join(lines))
 
     except Exception as e:
         logger.warning("⚠️ 로그 요약 중 오류: %s", e)
 
 
+# ------------------
+# 토큰 개수 추정
+# ------------------
 def estimate_tokens(text: str) -> int:
     try:
         enc = tiktoken.get_encoding("cl100k_base")
         return len(enc.encode(text))
     except Exception as e:
-        #logger.warning("⚠️ Token estimation failed: %s", e)
+        logger.warning("⚠️ 토큰 개수 추정 실패: %s", e)
         return 0
 
 
+# ------------------
+# Worker 실행
+# ------------------
 def run_filter_worker():
     consumer = make_consumer([KAFKA_IN], group_id="filter-worker")
     producer = make_producer()
@@ -90,14 +106,14 @@ def run_filter_worker():
         if msg is None:
             continue
         if msg.error():
-            #logger.error("❌ Kafka error: %s", msg.error())
+            logger.error("❌ Kafka 오류: %s", msg.error())
             continue
 
         try:
             ev = json.loads(msg.value().decode("utf-8"))
-            #logger.info("📩 Received message: %s", ev)
+            # logger.info("📩 Kafka 메시지 수신: %s", ev)
         except Exception as e:
-            #logger.error("❌ Failed to decode message: %s", e)
+            logger.error("❌ Kafka 메시지 디코딩 실패: %s", e)
             continue
 
         trace_id = ev.get("trace_id")
@@ -110,8 +126,10 @@ def run_filter_worker():
         mode = ev.get("mode", "pass")
         top_category = ev.get("top_category", "no_meaning")
         now_utc = datetime.now(timezone.utc)
-        #logger.info("➡️ Processing trace_id=%s, mode=%s", trace_id, mode)
 
+        # ------------------
+        # 규칙 기반 (auto 모드)
+        # ------------------
         if mode == "auto":
             token_count = estimate_tokens(text)
             saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(token_count)
@@ -146,9 +164,7 @@ def run_filter_worker():
                     )
                     session.add(tu)
                     session.commit()
-                #logger.info("💾 Saved FilterResult & TokenUsage (AUTO)")
             except Exception as e:
-                #logger.exception("❌ Failed DB insert (AUTO)")
                 error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
             try:
@@ -167,9 +183,8 @@ def run_filter_worker():
                         "explanations": [],
                     }
                     filter_service.save_to_es(raw, es_decision)
-                    #logger.info("📤 Saved to Elasticsearch (AUTO) word=%s, label=%s", w, l)
             except Exception as e:
-                #logger.exception("❌ Failed ES save (AUTO)")
+                logger.exception("❌ ES 저장 실패 (AUTO)")
                 error_service.save_error(trace_id, "ES_SAVE_ERROR", e)
 
             publish(
@@ -191,20 +206,22 @@ def run_filter_worker():
                 },
                 headers=[("traceparent", trace_id.encode())] if trace_id else None,
             )
-            #logger.info("📡 Published filler_removal → %s", KAFKA_OUT_FILTER)
 
             # 한국어 요약 로그 출력
             log_filter_process(text, {}, mode="auto", filtered_words_details=ev.get("filtered_words_details"))
 
-        # ML 모드
+        # ------------------
+        # ML 기반 (ml 모드)
+        # ------------------
         else:
             decision = filter_classifier(final_text or text, model, tokenizer)
-            #logger.info("🤖 Classifier decision: %s", decision)
+            # logger.info("🤖 ML 분류 결과: %s", decision)
 
             # 한국어 요약 로그 출력
             log_filter_process(text, decision, mode="ml")
 
             if decision["status"] == "drop":
+                # === DROP 처리 ===
                 original_tokens = estimate_tokens(text)
                 saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(original_tokens)
 
@@ -239,15 +256,14 @@ def run_filter_worker():
                         )
                         session.add(tu)
                         session.commit()
-                    #logger.info("💾 TokenUsage saved (ML DROP)")
                 except Exception as e:
-                    #logger.exception("❌ Failed DB insert (ML DROP)")
+                    logger.exception("❌ DB 저장 실패 (ML DROP)")
                     error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
                 try:
                     filter_service.save_to_es(raw, decision)
                 except Exception as e:
-                    #logger.exception("❌ Failed ES save (ML DROP)")
+                    logger.exception("❌ ES 저장 실패 (ML DROP)")
                     error_service.save_error(trace_id, "ES_SAVE_ERROR", e)
 
                 publish(
@@ -274,9 +290,9 @@ def run_filter_worker():
                         "schema_version": "1.0.0",
                     },
                 )
-                #logger.info("📡 Published intent_classifier DROP → %s", KAFKA_OUT_FILTER)
 
             else:
+                # === PASS 처리 ===
                 raw = RawFilteredMessage(
                     trace_id=trace_id,
                     room_id=room_id,
@@ -318,15 +334,14 @@ def run_filter_worker():
                         )
                         session.add(tu)
                         session.commit()
-                    #logger.info("💾 TokenUsage saved (ML PASS)")
                 except Exception as e:
-                    #logger.exception("❌ Failed DB insert (ML PASS)")
+                    logger.exception("❌ DB 저장 실패 (ML PASS)")
                     error_service.save_error(trace_id, "DB_INSERT_ERROR", e)
 
                 try:
                     filter_service.save_to_es(raw, decision)
                 except Exception as e:
-                    #logger.exception("❌ Failed ES save (ML PASS)")
+                    logger.exception("❌ ES 저장 실패 (ML PASS)")
                     error_service.save_error(trace_id, "ES_SAVE_ERROR", e)
 
                 publish(
@@ -354,7 +369,6 @@ def run_filter_worker():
                         "schema_version": "1.0.0",
                     },
                 )
-                #logger.info("📡 Published intent_classifier PASS → %s", KAFKA_OUT_FILTER)
 
 
 if __name__ == "__main__":

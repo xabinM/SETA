@@ -7,11 +7,20 @@ from app.adapters.db import get_session
 from app.models import ChatMessage, RoomSummaryState
 from app.services import summary_service, embed_service, error_service
 from sqlalchemy import and_, or_
+import transformers
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
 )
+
+# 외부 라이브러리 로그 줄이기
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("elastic_transport.transport").setLevel(logging.WARNING)
+
+# Huggingface tqdm 끄기
+transformers.logging.set_verbosity_error()
+
 logger = logging.getLogger("summary-worker")
 
 # 트리거 조건
