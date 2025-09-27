@@ -229,6 +229,7 @@ def run_filter_worker():
             log_filter_process(text, {}, mode="rule", filtered_words_details=ev.get("filtered_words_details"))
             done_at = int(datetime.now(timezone.utc).timestamp() * 1000)
             produced_at = normalize_timestamp(ev.get("timestamp"))
+            logger.info(f"📌 produced_at={produced_at}, done_at={done_at}")
             total_pipeline_ms = done_at - produced_at
             logger.info("\n"+f"🏁 전체 파이프라인 처리 시간 (규칙 기반 DROP): {total_pipeline_ms}ms")
 

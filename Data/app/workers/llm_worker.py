@@ -107,7 +107,7 @@ def run_worker():
         action = decision.get("action") or ev.get("action")
         if action != "PASS":
             logger.info("\n" + f"⏩ PASS가 아닌 메시지 건너뜀")
-            continue  # PASS가 아닌 경우는 처리 안 함
+            continue 
 
         trace_id = ev.get("trace_id")
         chat_room_id = ev.get("room_id")
@@ -164,6 +164,7 @@ def run_worker():
         chunks = []
         try:
             for event in llm_client.call_llm(full_prompt, stream=True, model=model_name, temperature=temperature):
+                logger.info(f"LLM Raw Event: {event}")
                 if event["type"] == "delta":
                     delta = event["delta"]
                     chunks.append(delta)
@@ -183,6 +184,7 @@ def run_worker():
                             headers=[("traceparent", tp.encode())] if tp else None,
                         )
                     except Exception as e:
+                        logger.exception("🔥 LLM 스트리밍 중 오류 발생")
                         error_service.save_error(trace_id, "KAFKA_DELTA_ERROR", e)
 
                 elif event["type"] == "done":

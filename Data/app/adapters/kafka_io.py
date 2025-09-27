@@ -19,9 +19,6 @@ def make_consumer(
     auto_offset_reset: str = "earliest",
     extra_config: Optional[Dict[str, Any]] = None,
 ) -> Consumer:
-    """
-    지정된 토픽을 구독하는 Kafka Consumer 생성
-    """
     cfg = {
         "bootstrap.servers": bootstrap or KAFKA_BOOTSTRAP,
         "group.id": group_id,
@@ -67,9 +64,6 @@ def publish(
         raise e
 
 def read_headers(msg) -> Dict[str, bytes]:
-    """
-    Kafka 메시지의 headers를 dict로 변환
-    """
     hdrs = {}
     if msg is not None and msg.headers():
         for k, v in msg.headers():
