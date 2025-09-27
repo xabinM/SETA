@@ -10,7 +10,7 @@ from app.utils.trace import extract_traceparent
 from app.adapters.db import get_session
 from app.services import prompt_builder_service, llm_client, error_service
 from app.adapters.redis_io import append_conversation
-from app.utils.usage import estimate_usage_by_tokens  # ✅ 소비량 계산 유틸
+from app.utils.usage import estimate_usage_by_tokens
 
 
 logging.basicConfig(

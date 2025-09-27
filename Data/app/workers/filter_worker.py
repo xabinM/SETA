@@ -11,6 +11,8 @@ from app.models import FilterResult, TokenUsage
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from app.contracts.raw_filtered import RawFilteredMessage
 from app.utils.usage import estimate_usage_by_tokens
+import dateutil.parser
+
 
 LABEL_MAP = {
     "goodbye": "🙇 작별",
@@ -43,6 +45,21 @@ KAFKA_OUT_FILTER = os.getenv("KAFKA_TOPIC_FILTER_RESULT", "chat.filter.result.v1
 
 KST = timezone(timedelta(hours=9))
 
+def normalize_timestamp(ts):
+    if ts is None:
+        return int(datetime.now(timezone.utc).timestamp() * 1000)
+    if isinstance(ts, (int, float)):
+        return int(ts)
+    if isinstance(ts, str):
+        try:
+            return int(ts)
+        except ValueError:
+            try:
+                dt = dateutil.parser.parse(ts)
+                return int(dt.timestamp() * 1000)
+            except Exception:
+                return int(datetime.now(timezone.utc).timestamp() * 1000)
+    return int(datetime.now(timezone.utc).timestamp() * 1000)
 
 
 def log_filter_process(original_text: str, decision: dict, mode: str = "ml", filtered_words_details=None):
@@ -199,7 +216,7 @@ def run_filter_worker():
                     "message_id": message_id,
                     "stage": "filler_removal",
                     "stage_order": 1,
-                    "timestamp": int(ev.get("timestamp")) or int(datetime.now().timestamp() * 1000),
+                    "timestamp": normalize_timestamp(ev.get("timestamp")),
                     "original_text": text,
                     "cleaned_text": "",
                     "detected_phrases": ev.get("filtered_words_details", [[], []])[0],
@@ -234,7 +251,7 @@ def run_filter_worker():
                     user_id=user_id,
                     text=text,
                     final_text="",
-                    timestamp=int(ev.get("timestamp")),
+                    timestamp= normalize_timestamp(ev.get("timestamp")),
                     schema_version=ev.get("schema_version", "1.0.0"),
                 )
                 filter_service.save_filter_results(raw, decision, rule_name="no_meaning")
@@ -278,7 +295,7 @@ def run_filter_worker():
                         "message_id": message_id,
                         "stage": "intent_classifier",
                         "stage_order": 2,
-                        "timestamp": int(ev.get("timestamp")) or int(datetime.now().timestamp() * 1000),
+                        "timestamp": normalize_timestamp(ev.get("timestamp")),
                         "original_text": text,
                         "cleaned_text": final_text or text,
                         "decision": {
@@ -306,7 +323,7 @@ def run_filter_worker():
                     user_id=user_id,
                     text=text,
                     final_text=decision.get("content") or "",
-                    timestamp=int(ev.get("timestamp")),
+                    timestamp=normalize_timestamp(ev.get("timestamp")),
                     schema_version=ev.get("schema_version", "1.0.0"),
                 )
 
@@ -361,7 +378,7 @@ def run_filter_worker():
                         "message_id": message_id,
                         "stage": "intent_classifier",
                         "stage_order": 2,
-                        "timestamp": int(ev.get("timestamp")) or int(datetime.now().timestamp() * 1000),
+                        "timestamp": normalize_timestamp(ev.get("timestamp")),
                         "original_text": text,
                         "cleaned_text": decision.get("content") or text,
                         "decision": {
