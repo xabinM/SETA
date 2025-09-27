@@ -52,15 +52,17 @@ def log_filter_process(original_text: str, decision: dict, mode: str = "ml", fil
         lines.append("📑 [필터링 과정 요약]")
         lines.append(f"  📝 원문: \"{original_text}\"")
 
-        if mode == "auto" and filtered_words_details:
+        if filtered_words_details:
             words = filtered_words_details[0] if len(filtered_words_details) > 0 else []
             labels = filtered_words_details[1] if len(filtered_words_details) > 1 else []
-
             if words and labels:
                 lines.append("  📌 규칙 기반 필터링 결과")
-                for i, (w, l) in enumerate(zip(words, labels), 1):
+                for w, l in zip(words, labels):
                     label_ko = LABEL_MAP.get(l, l)
                     lines.append(f'  - "{w}" → {label_ko} 이유로 필터링 됨')
+
+        if mode == "rule":
+            if filtered_words_details and words and labels:
                 lines.append("  ❌ 최종 남은 문장 없음 (규칙 기반 DROP)")
             else:
                 lines.append("  ⚪️ 규칙 기반 필터된 구간 없음")
@@ -91,6 +93,7 @@ def log_filter_process(original_text: str, decision: dict, mode: str = "ml", fil
         logger.warning("⚠️ 로그 요약 중 오류: %s", e)
 
 
+
 def estimate_tokens(text: str) -> int:
     try:
         enc = tiktoken.get_encoding("cl100k_base")
@@ -100,9 +103,6 @@ def estimate_tokens(text: str) -> int:
         return 0
 
 
-# ------------------
-# Worker 실행
-# ------------------
 def run_filter_worker():
     consumer = make_consumer([KAFKA_IN], group_id="filter-worker")
     producer = make_producer()
@@ -133,9 +133,6 @@ def run_filter_worker():
         top_category = ev.get("top_category", "no_meaning")
         now_utc = datetime.now(timezone.utc)
 
-        # ------------------
-        # 규칙 기반 (auto 모드)
-        # ------------------
         if mode == "auto":
             token_count = estimate_tokens(text)
             saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(token_count)
@@ -213,12 +210,9 @@ def run_filter_worker():
                 headers=[("traceparent", trace_id.encode())] if trace_id else None,
             )
 
-            # 한국어 요약 로그 출력
-            log_filter_process(text, {}, mode="auto", filtered_words_details=ev.get("filtered_words_details"))
+            log_filter_process(text, {}, mode="rule", filtered_words_details=ev.get("filtered_words_details"))
 
-        # ------------------
-        # ML 기반 (ml 모드)
-        # ------------------
+
         else:
             decision = filter_classifier(final_text or text, model, tokenizer)
             # logger.info("🤖 ML 분류 결과: %s", decision)
@@ -227,7 +221,6 @@ def run_filter_worker():
             log_filter_process(text, decision, mode="ml")
 
             if decision["status"] == "drop":
-                # === DROP 처리 ===
                 original_tokens = estimate_tokens(text)
                 saved_cost, saved_energy, saved_co2, _ = estimate_usage_by_tokens(original_tokens)
 
