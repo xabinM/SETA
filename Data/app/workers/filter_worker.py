@@ -199,7 +199,7 @@ def run_filter_worker():
                     "message_id": message_id,
                     "stage": "filler_removal",
                     "stage_order": 1,
-                    "timestamp": ev.get("timestamp") or int(datetime.now().timestamp() * 1000),
+                    "timestamp": int(ev.get("timestamp")) or int(datetime.now().timestamp() * 1000),
                     "original_text": text,
                     "cleaned_text": "",
                     "detected_phrases": ev.get("filtered_words_details", [[], []])[0],
@@ -234,7 +234,7 @@ def run_filter_worker():
                     user_id=user_id,
                     text=text,
                     final_text="",
-                    timestamp=ev.get("timestamp"),
+                    timestamp=int(ev.get("timestamp")),
                     schema_version=ev.get("schema_version", "1.0.0"),
                 )
                 filter_service.save_filter_results(raw, decision, rule_name="no_meaning")
@@ -278,7 +278,7 @@ def run_filter_worker():
                         "message_id": message_id,
                         "stage": "intent_classifier",
                         "stage_order": 2,
-                        "timestamp": ev.get("timestamp") or int(datetime.now().timestamp() * 1000),
+                        "timestamp": int(ev.get("timestamp")) or int(datetime.now().timestamp() * 1000),
                         "original_text": text,
                         "cleaned_text": final_text or text,
                         "decision": {
@@ -306,7 +306,7 @@ def run_filter_worker():
                     user_id=user_id,
                     text=text,
                     final_text=decision.get("content") or "",
-                    timestamp=ev.get("timestamp"),
+                    timestamp=int(ev.get("timestamp")),
                     schema_version=ev.get("schema_version", "1.0.0"),
                 )
 
@@ -361,7 +361,7 @@ def run_filter_worker():
                         "message_id": message_id,
                         "stage": "intent_classifier",
                         "stage_order": 2,
-                        "timestamp": ev.get("timestamp") or int(datetime.now().timestamp() * 1000),
+                        "timestamp": int(ev.get("timestamp")) or int(datetime.now().timestamp() * 1000),
                         "original_text": text,
                         "cleaned_text": decision.get("content") or text,
                         "decision": {

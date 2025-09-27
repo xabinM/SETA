@@ -257,7 +257,7 @@ def run_worker():
                         )
 
                         done_at = int(datetime.now(timezone.utc).timestamp() * 1000)
-                        produced_at = ev.get("timestamp", done_at)
+                        produced_at = int(ev.get("timestamp", done_at))
                         total_pipeline_ms = done_at - produced_at
                         logger.info("\n"+f"🏁 전체 파이프라인 처리 시간 (LLM DONE): {total_pipeline_ms}ms")
 
