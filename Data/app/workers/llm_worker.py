@@ -150,7 +150,11 @@ def run_worker():
                 full_prompt = (
                     f"System: {system_prompt}\n\n"
                     + "\n".join(context_snippets)
-                    + ("\n\n[과거 유사 맥락]\n" + "\n".join(similar_contexts) if similar_contexts else "")
+                    + (
+                        "\n\n[과거 유사 맥락]\n"
+                        + "\n".join([ctx["text"] if isinstance(ctx, dict) else str(ctx) for ctx in similar_contexts])
+                        if similar_contexts else ""
+                    )
                     + (f"\n\n유저: {user_input}" if user_input else "")
                 )
                 logger.debug("full_prompt=%s", full_prompt)
