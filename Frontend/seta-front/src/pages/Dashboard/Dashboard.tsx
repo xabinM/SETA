@@ -395,7 +395,7 @@ const carModalData = useMemo(() => {
                                     </button>
                                 </div>
 
-                                <div className="lg-center">
+                                <div className="lg-center lg-car">
     <img
         src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Racing%20Car.png"
         alt="Racing Car"
