@@ -168,7 +168,6 @@ def run_worker():
         chunks = []
         try:
             for event in llm_client.call_llm(full_prompt, stream=True, model=model_name, temperature=temperature):
-                logger.info(f"LLM Raw Event: {event}")
                 if event["type"] == "delta":
                     delta = event["delta"]
                     chunks.append(delta)
@@ -265,7 +264,7 @@ def run_worker():
                         done_at = int(datetime.now(timezone.utc).timestamp() * 1000)
                         produced_at = int(ev.get("timestamp", done_at))
                         total_pipeline_ms = done_at - produced_at
-                        logger.info("\n"+f"🏁 전체 파이프라인 처리 시간 (LLM DONE): {total_pipeline_ms}ms")
+                        logger.info(f"🏁 전체 파이프라인 처리 시간 (LLM DONE): {total_pipeline_ms}ms")
 
                     except Exception as e:
                         error_service.save_error(trace_id, "KAFKA_DONE_ERROR", e)
