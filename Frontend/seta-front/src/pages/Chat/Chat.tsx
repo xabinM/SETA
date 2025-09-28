@@ -508,25 +508,73 @@ export default function Chat() {
                                             <div className="welcome-subtitle">SETA Assistant입니다. 무엇을 도와드릴까요?</div>
                                             <div className="feature-cards">
                                                 <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("프로젝트 아이디어가 필요해요")}>
-                                                    <div className="feature-title">💡 프로젝트 아이디어</div>
-                                                    <div className="feature-description">새로운 프로젝트 아이디어를 제안해드릴까요?</div>
+                                                     onClick={() => onCreateRoomAndSeed("오늘 뭘 해볼지 아이디어 좀 추천해줘")}>
+                                                    <div className="feature-title">
+                                                        <img
+                                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png"
+                                                            alt="아이디어 나눔"
+                                                            width="25"
+                                                            height="25"
+                                                            style={{ marginRight: "8px", verticalAlign: "middle" }}
+                                                        />
+                                                        아이디어 나눔
+                                                    </div>
+                                                    <div className="feature-description">
+                                                        작은 일상부터 프로젝트까지 아이디어를 함께 나눠요.
+                                                    </div>
                                                 </div>
+
                                                 <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("기술적인 문제에 대해서 궁금해요")}>
-                                                    <div className="feature-title">💻 기술 상담</div>
-                                                    <div className="feature-description">기술적인 질문이나 문제해결을 도와드릴게요</div>
+                                                     onClick={() => onCreateRoomAndSeed("요즘 집중이 안 돼서 고민이에요")}>
+                                                    <div className="feature-title">
+                                                        <img
+                                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Sun%20Behind%20Small%20Cloud.png"
+                                                            alt="고민 상담"
+                                                            width="25"
+                                                            height="25"
+                                                            style={{ marginRight: "8px", verticalAlign: "middle" }}
+                                                        />
+                                                        고민 상담
+                                                    </div>
+                                                    <div className="feature-description">
+                                                        가볍게 털어놓고 싶은 고민, 대화로 풀어갈 수 있어요.
+                                                    </div>
                                                 </div>
+
                                                 <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("학습 로드맵 추천해줘")}>
-                                                    <div className="feature-title">📚 학습 가이드</div>
-                                                    <div className="feature-description">새로운 기술을 배우고 싶으신가요?</div>
+                                                     onClick={() => onCreateRoomAndSeed("시간 관리 습관을 어떻게 만들 수 있을까?")}>
+                                                    <div className="feature-title">
+                                                        <img
+                                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fire.png"
+                                                            alt="자기 성장"
+                                                            width="25"
+                                                            height="25"
+                                                            style={{ marginRight: "8px", verticalAlign: "middle" }}
+                                                        />
+                                                        자기 성장
+                                                    </div>
+                                                    <div className="feature-description">
+                                                        습관·학습·목표 달성 같은 성장 이야기를 나눠요.
+                                                    </div>
                                                 </div>
+
                                                 <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("빠른 질문: ")}>
-                                                    <div className="feature-title">⚡ 빠른 질문</div>
-                                                    <div className="feature-description">궁금한 것이 있으시면 언제든지 물어보세요</div>
+                                                     onClick={() => onCreateRoomAndSeed("오늘 기분 좋은 농담 하나 해줘")}>
+                                                    <div className="feature-title">
+                                                        <img
+                                                            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Wind%20Face.png"
+                                                            alt="가벼운 대화"
+                                                            width="25"
+                                                            height="25"
+                                                            style={{ marginRight: "8px", verticalAlign: "middle" }}
+                                                        />
+                                                        가벼운 대화
+                                                    </div>
+                                                    <div className="feature-description">
+                                                        아무 주제나 편하게 던져도 대화를 시작할 수 있어요.
+                                                    </div>
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>
