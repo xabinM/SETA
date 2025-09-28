@@ -37,9 +37,9 @@ backend-build-docker:
     - docker build -t $BACKEND_IMAGE .
     - docker push $BACKEND_IMAGE
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
-      changes:
-        - Backend/**
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+      when: always
+    - when: never
 
 # ----------------
 # 2. Frontend Docker Image Build & Push
@@ -61,9 +61,9 @@ frontend-build-docker:
     - docker build --build-arg VITE_API_BASE_URL="$VITE_API_BASE_URL" -t $FRONTEND_IMAGE ./Frontend/seta-front
     - docker push $FRONTEND_IMAGE
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
-      changes:
-        - Frontend/**
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+      when: always
+    - when: never
 
 # ----------------
 # 3. Deploy backend
@@ -74,9 +74,9 @@ deploy-backend:
   needs:
     - job: backend-build-docker
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
-      changes:
-        - Backend/**
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+      when: always
+    - when: never
   before_script:
     - apt-get update && apt-get install -y openssh-client bash rsync
     - mkdir -p ~/.ssh
@@ -121,9 +121,9 @@ deploy-frontend:
   needs:
     - job: frontend-build-docker
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
-      changes:
-        - Frontend/**
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+      when: always
+    - when: never
   before_script:
     - apt-get update && apt-get install -y openssh-client bash rsync
     - mkdir -p ~/.ssh
