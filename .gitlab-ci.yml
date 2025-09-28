@@ -73,11 +73,10 @@ deploy-backend:
   image: ubuntu:22.04
   needs:
     - job: backend-build-docker
-      optional: true
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
-      when: always
-    - when: never
+      changes:
+        - Backend/**
   before_script:
     - apt-get update && apt-get install -y openssh-client bash rsync
     - mkdir -p ~/.ssh
@@ -121,11 +120,10 @@ deploy-frontend:
   image: ubuntu:22.04
   needs:
     - job: frontend-build-docker
-      optional: true
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
-      when: always
-    - when: never
+      changes:
+        - Frontend/**
   before_script:
     - apt-get update && apt-get install -y openssh-client bash rsync
     - mkdir -p ~/.ssh
