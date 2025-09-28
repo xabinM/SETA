@@ -73,6 +73,7 @@ deploy-backend:
   image: ubuntu:22.04
   needs:
     - job: backend-build-docker
+      optional: true
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
       when: always
@@ -120,6 +121,7 @@ deploy-frontend:
   image: ubuntu:22.04
   needs:
     - job: frontend-build-docker
+      optional: true
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
       when: always
