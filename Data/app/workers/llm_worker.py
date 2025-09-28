@@ -162,7 +162,7 @@ def run_worker():
             continue
 
         start = time.time()
-        model_name = os.getenv("LLM_MODEL", "gpt-4.1-nano")
+        model_name = os.getenv("LLM_MODEL", "gpt-4o")
         temperature = float(os.getenv("LLM_TEMPERATURE", "0.7"))
 
         chunks = []
