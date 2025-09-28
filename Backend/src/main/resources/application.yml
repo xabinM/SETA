@@ -60,9 +60,16 @@ springdoc:
 logging:
   pattern:
     level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"
+    console: "%d{HH:mm:ss} | %highlight(%-5level) | %green(%logger{20}) | %blue(traceId=%X{traceId}) %msg%n"
   level:
-    com.zaxxer.hikari: DEBUG
-    org.springframework.transaction: DEBUG
+    root: INFO
+    com.zaxxer.hikari: WARN
+    org.springframework.transaction: WARN
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+
+    # kafka package
+    com.AIce.Backend.chat.adapter.messaging.kafka: INFO
 
 gms:
   openai:
