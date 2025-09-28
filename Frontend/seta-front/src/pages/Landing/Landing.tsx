@@ -11,12 +11,30 @@ const Landing: React.FC = () => {
     const setaTextRef = useRef<HTMLDivElement>(null);
     const particlesRef = useRef<HTMLDivElement[]>([]);
 
-    // 불용어 목록 (기존과 동일)
+    // 불용어 목록 
     const stopwords = [
-        // 한국어 불용어
-        '안녕하세요', '그런데요', '하지만요', '사실은요', '어쨌든요', '그러므로요', '따라서요', '그리하여요', '왜냐하면요', '때문입니다', '그렇습니다', '그런겁니다', '어디에서든지', '언제든지', '누구든지', '무엇이든지', '어떻게든지', '아무튼간에', '그럼에도불구하고', '그렇기때문에', '어떤경우에든', '사실상으로는', '일반적으로는', '보통의경우', '대부분의경우', '거의모든경우', '어쨌거나간에', '그렇다고하더라도', '그런것치고는', '그런편이긴하지만', '어떻게보면', '생각해보니까', '돌이켜보면', '말하자면요', '다시말해서요', '바꿔말하면요', '요약하자면요',
-        // 영어 불용어
-        'however', 'therefore', 'furthermore', 'nevertheless', 'nonetheless', 'consequently', 'accordingly', 'specifically', 'particularly', 'especially', 'obviously', 'certainly', 'definitely', 'absolutely', 'completely', 'essentially', 'basically', 'fundamentally', 'generally', 'typically', 'normally', 'usually', 'frequently', 'occasionally', 'sometimes', 'meanwhile', 'otherwise', 'moreover', 'additionally', 'similarly', 'likewise', 'conversely', 'alternatively', 'subsequently', 'previously', 'ultimately', 'eventually', 'immediately', 'simultaneously', 'temporarily', 'permanently', 'approximately', 'relatively', 'significantly'
+            "고마워", "고맙다", "고마워요", "고맙습니다", "감사해요", "감사합니다", 
+            "땡큐", "땡큐베리머치",
+            "도움 고마워", "답변 감사", "설명 감사", "친절해서 고마워", "수고했어",
+            "thanks a lot", "much appreciated", "appreciate it", "grateful",
+            "thanks for help", "thanks for explaining",
+           "미안해", "미안해요", "미안합니다", "죄송해", "죄송해요", "죄송합니다",
+            "잘못했어", "잘못했습니다", 
+            "늦어서 미안", "바쁜데 미안", "다시 물어봐서 미안",
+            "sorry", "apologize", 
+            "안녕", "안녕하세요", "안녕하십니까", "하이", "헬로", "hello", "hi",
+            "오랜만", "오랜만이야", "오랜만이에요", 
+            "greetings", "good morning", "good afternoon", "good evening", 
+            "그런데", "근데", "그래서", "그러면", "그럼", "그리고", "또", "그리고나서",
+            "있잖아", "내말은", "그니깐", "그러니까", "뭐랄까", "어떻게보면", "사실은",
+            "일단", "다음에", "그다음에", "어쨌든", "아무튼", "어디보자",
+            "생각해보니", "돌이켜보면", "말하자면", 
+            "honestly", "frankly", "obviously", 
+            "particularly", "especially", "specifically", "generally", "typically", "normally",
+            "usually", "frequently", "occasionally", "sometimes", "often", "rarely", "hardly",
+            "meanwhile", "however", "therefore", "furthermore", "moreover", "additionally",
+            
+
     ];
 
     useEffect(() => {
@@ -57,7 +75,7 @@ const Landing: React.FC = () => {
                 gsap.to(particle, {
                     opacity: 0.6 + Math.random() * 0.4,
                     scale: 0.8 + Math.random() * 0.4,
-                    duration: 0.6,
+                    duration: 0.5,
                     delay: appearDelay,
                     ease: "power2.out",
                     onComplete: () => {
@@ -209,7 +227,7 @@ const Landing: React.FC = () => {
                             navigate('/home');
                         }
                     });
-                }, 600);
+                }, 500);
             }, 6.5);
     };
 
