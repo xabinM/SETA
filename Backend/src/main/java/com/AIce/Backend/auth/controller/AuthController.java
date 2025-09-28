@@ -54,8 +54,6 @@ public class AuthController {
         return ResponseEntity.ok(new ReissueResponse(ResponseMessage.SUCCESS_TOKEN_REISSUE.getMessage(), tokens));
     }
 
-    // maybe 회원 정보 수정, 회원 탈퇴
-    
     // 회원 정보 조회
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> me(@AuthenticationPrincipal Long userId) {
