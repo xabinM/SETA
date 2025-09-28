@@ -570,7 +570,10 @@ export default function Chat() {
                 cancelText="취소"
                 danger
                 onConfirm={() => {
-                    if (confirmDeleteId) void deleteRoomById(confirmDeleteId);
+                    const id = confirmDeleteId;
+                    if (!id) return;
+                    setConfirmDeleteId(null);          // ✅ 모달 닫기
+                    void deleteRoomById(id);           // ✅ 삭제 실행 + 토스트 출력
                 }}
                 onClose={() => setConfirmDeleteId(null)}
             />

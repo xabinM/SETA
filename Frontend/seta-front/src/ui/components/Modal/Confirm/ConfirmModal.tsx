@@ -1,73 +1,87 @@
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useEffect, useRef } from "react";
 import "./ConfirmModal.css";
 
 type Props = {
   open: boolean;
-  title?: string;
+  title: string;
   description?: string;
   confirmText?: string;
   cancelText?: string;
-  danger?: boolean;              // 삭제 같은 위험 동작일 때 강조
+  danger?: boolean;
   onConfirm: () => void;
   onClose: () => void;
+  disableOutsideClose?: boolean; // 필요시 옵션
 };
 
 export default function ConfirmModal({
                                        open,
-                                       title = "확인",
-                                       description = "이 채팅방을 삭제하시겠어요?",
+                                       title,
+                                       description,
                                        confirmText = "확인",
                                        cancelText = "취소",
-                                       danger = false,
+                                       danger,
                                        onConfirm,
                                        onClose,
+                                       disableOutsideClose,
                                      }: Props) {
-  const panelRef = useRef<HTMLDivElement>(null);
-
+  // 열릴 때 스크롤 잠금
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
+    const { scrollY } = window;
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    panelRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
+    // 모바일 레이아웃 흔들림 방지
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
     return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollY);
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
   return createPortal(
-      <div className="cm-backdrop" role="dialog" aria-modal="true" aria-labelledby="cm-title" onClick={onClose}>
+      <div
+          className="cmodal-root"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cmodal-title"
+          aria-describedby={description ? "cmodal-desc" : undefined}
+      >
+        {/* 배경 스크림: blur + dim */}
         <div
-            className="cm-panel"
-            role="document"
-            ref={panelRef}
-            tabIndex={-1}
-            onClick={(e) => e.stopPropagation()}
-        >
-          <div className="cm-header">
-            <h3 id="cm-title">{title}</h3>
-          </div>
+            className="cmodal-scrim"
+            onClick={() => {
+              if (!disableOutsideClose) onClose();
+            }}
+            aria-hidden
+        />
 
-          {description && <p className="cm-desc">{description}</p>}
+        {/* 모달 패널 */}
+        <div className="cmodal-panel" role="document">
+          <h3 id="cmodal-title" className="cmodal-title">
+            {title}
+          </h3>
+          {description && (
+              <p id="cmodal-desc" className="cmodal-desc">
+                {description}
+              </p>
+          )}
 
-          <div className="cm-actions">
-            <button className="cm-btn cm-cancel" onClick={onClose} type="button">
+          <div className="cmodal-actions">
+            <button className="btn ghost" onClick={onClose}>
               {cancelText}
             </button>
             <button
-                className={`cm-btn cm-confirm ${danger ? "cm-danger" : ""}`}
-                onClick={() => {
-                  onConfirm();
-                  onClose();
-                }}
-                type="button"
+                className={`btn ${danger ? "danger" : "primary"}`}
+                onClick={onConfirm}
             >
               {confirmText}
             </button>

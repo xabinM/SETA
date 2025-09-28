@@ -1,109 +1,112 @@
-/* 리퀴드 글래스 톤과 일관되게 */
-.cm-backdrop {
+/* 루트: 전체 화면 레이어 */
+.cmodal-root {
   position: fixed;
   inset: 0;
-  z-index: 2000;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: cm-backdrop-in 120ms ease-out;
+  z-index: 2000; /* 헤더/사이드바보다 위 */
+  /* 스크린 리더/포인터 이벤트 분리 위해 내부 요소에서 처리 */
 }
 
-.cm-panel {
-  width: min(92vw, 400px);
-  /* 네온 느낌의 라디얼 + glass */
-  background:
-      radial-gradient(120% 95% at 12% 20%, rgba(188,172,242,.18) 0%, rgba(188,172,242,0) 45%),
-      radial-gradient(120% 95% at 80% 80%, rgba(121,224,211,.18) 0%, rgba(121,224,211,0) 45%),
-      var(--glass-bg);
+/* 스크림: 배경 흐림 + 어둡게 */
+.cmodal-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 10, 15, 0.35);            /* 살짝 어둡게 */
+  backdrop-filter: blur(10px);                   /* 핵심: 배경 블러 */
+  -webkit-backdrop-filter: blur(10px);           /* Safari */
+  will-change: backdrop-filter, opacity;         /* 성능 힌트 */
+  transition: opacity .18s ease;
+  opacity: 1;
+}
+
+/* 폴백: 백드롭 미지원 환경에서 투명도만 */
+@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+  .cmodal-scrim {
+    background: rgba(9, 10, 15, 0.6);
+  }
+}
+
+/* 패널: 중앙 카드 */
+.cmodal-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.98);
+  opacity: 0;
+  animation: cmodal-in .18s ease forwards;
+
+  min-width: 320px;
+  max-width: min(560px, 92vw);
+  padding: 20px 20px 16px;
+
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
-  backdrop-filter: blur(var(--blur));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--blur));            /* 내부도 살짝 글래스 느낌 */
   -webkit-backdrop-filter: blur(var(--blur));
-  box-shadow:
-      0 12px 28px rgba(0,0,0,.45),
-      inset 0 1px 0 rgba(255,255,255,.04);
   color: #e5e7eb;
-  padding: 18px 18px 14px;
-  animation: cm-panel-in 140ms ease-out;
 }
 
-.cm-header h3 {
-  margin: 0 0 8px;
+/* 등장 애니메이션 */
+@keyframes cmodal-in {
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.cmodal-title {
   font-weight: 800;
   font-size: 1.05rem;
-  letter-spacing: -.01em;
-  color: #e5e7eb;
+  margin: 0 0 8px 0;
 }
 
-.cm-desc {
-  margin: 0 0 16px;
-  color: #b3b7c4;
+.cmodal-desc {
+  margin: 0 0 16px 0;
+  color: #b9bdc7;
   line-height: 1.5;
-  font-size: .95rem;
 }
 
-.cm-actions {
+.cmodal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
 
-.cm-btn {
-  min-width: 84px;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 12px;
+.btn {
+  appearance: none;
   border: 1px solid var(--glass-border);
-  background: rgba(255,255,255,.06);
+  background: rgba(255, 255, 255, 0.08);
   color: #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 14px;
   font-weight: 600;
-  font-size: .92rem;
   cursor: pointer;
-  transition: transform .08s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
-  backdrop-filter: blur(6px);
+  transition: background .15s ease, transform .06s ease, border-color .15s ease;
 }
 
-.cm-btn:hover {
-  background: rgba(255,255,255,.10);
+.btn:hover { background: rgba(255, 255, 255, 0.12); }
+.btn:active { transform: translateY(1px); }
+
+.btn.ghost {
+  background: transparent;
+}
+
+.btn.primary {
+  background: linear-gradient(90deg, rgba(147, 51, 234, 0.22), rgba(79, 70, 229, 0.22));
   border-color: var(--glass-border-strong);
 }
 
-.cm-btn:active { transform: translateY(1px); }
-
-.cm-cancel {
-  color: #d1d5db;
+.btn.danger {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fecaca;
 }
 
-.cm-confirm {
-  background: linear-gradient(90deg, rgba(147, 51, 234, .18), rgba(79, 70, 229, .18));
-  border-color: var(--glass-border-strong);
-}
-
-.cm-confirm:hover {
-  background: linear-gradient(90deg, rgba(147, 51, 234, .24), rgba(79, 70, 229, .24));
-}
-
-.cm-danger {
-  /* 위험 동작 강조 (붉은 틴트) */
-  background: linear-gradient(90deg, rgba(239,68,68,.16), rgba(190,45,45,.16));
-  border-color: rgba(239,68,68,.35);
-}
-
-.cm-danger:hover {
-  background: linear-gradient(90deg, rgba(239,68,68,.22), rgba(190,45,45,.22));
-  border-color: rgba(239,68,68,.55);
-}
-
-@keyframes cm-backdrop-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes cm-panel-in {
-  from { opacity: 0; transform: translateY(6px) scale(.98); }
-  to   { opacity: 1; transform: translateY(0)   scale(1); }
+/* 모바일 최적화 */
+@media (max-width: 480px) {
+  .cmodal-panel {
+    width: calc(100vw - 28px);
+    padding: 16px 16px 12px;
+  }
 }
