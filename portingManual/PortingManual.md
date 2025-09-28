@@ -2,9 +2,7 @@
 
 ## 1. 시스템 개요
 - **프로젝트**: Seta (Save the earth Through AI)
-- **목적**: Blue-Green 배포, Redis 캐시, PostgreSQL DB, Kafka 메시징, Jaeger 트레이싱 지원
 - **배포 환경**: Docker 컨테이너 + 호스트 서버(EC2)
-
 ---
 
 ## 2. 기술 스택 및 버전
