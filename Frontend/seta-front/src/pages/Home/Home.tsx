@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 import './Home.css';
 
 const VALUES = [
-    { icon: "💡", title: "효율성", strong: "불필요한 토큰을 줄여 실제 비용을 낮춥니다.",
-        desc: "모델 호출 전·중·후 최적화로 의미 없는 토큰을 차단합니다.", metric: "평균 ₩2.0/토큰 기준" },
-    { icon: "🌍", title: "지속 가능성", strong: "덜 쓰는 만큼 CO₂ 발자국도 줄어듭니다.",
-        desc: "토큰 절감 → 연산 에너지 절감 → 탄소 감축으로 이어집니다.", metric: "누적 CO₂ 감축 추적" },
-    { icon: "🤝", title: "함께 성장", strong: "개인도, 팀도 더 빠르고 가볍게.",
-        desc: "개발·PM·재무 모두가 체감하는 공용 지표를 제공합니다.", metric: "온보딩 ~15분" },
-    { icon: "🚀", title: "혁신", strong: "AI 사용의 새 표준을 만듭니다.",
-        desc: "정책·프롬프트·로깅을 한곳에서 관리하고 자동 최적화합니다.", metric: "TTV 단축" },
+    { icon: (<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Crystal%20Ball.png" alt="Crystal Ball" width="30" height="30" />), title: "효율성", strong: "낭비 없는 최적화",
+        desc: "불필요한 토큰을 줄여 짧고 명확한 대화로 시간과 비용을 절약합니다.", metric: "토큰 절감 효과" },
+    { icon: (<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Christmas%20Tree.png" alt="Christmas Tree" width="40" height="40" />), title: "지속 가능성", strong: "책임 있는 기술 사용",
+        desc: "최적화된 사용이 에너지 절약으로 이어지고, 지속 가능한 환경을 만듭니다.", metric: "누적 CO₂ 감축 추적" },
+    { icon: (<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Folded%20Hands%20Light%20Skin%20Tone.png" alt="Folded Hands Light Skin Tone" width="30" height="30" />), title: "연결성", strong: "맥락을 잇는 경험",
+        desc: "채팅방이 달라도 대화가 이어지고, 모든 대화가 하나의 흐름으로 연결됩니다.", metric: "대화 간 맥락 유지" },
+    { icon: (<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Shooting%20Star.png" alt="Shooting Star" width="30" height="30" />), title: "혁신", strong: "새로운 활용 패러다임",
+        desc: "AI를 하나의 지능형 파트너처럼 활용하며, 대화의 방식을 새롭게 정의합니다.", metric: "AI 활용 표준화" },
 ];
 
 export default function Home() {
@@ -59,10 +59,10 @@ export default function Home() {
                     aria-label="SETA의 핵심 가치"
                 >
                     <header className="value-head value-head--tight">
-                        <h2 className="value-title">SETA는 이렇게 가치가 됩니다</h2>
-                        <p className="value-sub">
-                            왜(문제) → 무엇(해결) → 어떤 임팩트(지표)로 연결되는지 한눈에 보세요.
-                        </p>
+                        <h1 className="value-title">SETA가 만드는 지능형 대화의 4가지 가치</h1>
+                        <h1 className="value-sub">
+                            효율적이고, 지속 가능하며, 연결되고, 혁신적인 AI 경험
+                        </h1>
                     </header>
 
                     <div className="value-grid value-grid--uniform">

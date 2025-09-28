@@ -10,6 +10,8 @@ import {getChatRooms, createChatRoom, deleteChatRoom, type ChatRoom} from "@/fea
 import {loadCachedRooms, saveCachedRooms} from "@/features/chat/cache";
 import {getMe} from "@/features/auth/api";
 import type {Me} from "@/features/auth/api";
+import ConfirmModal from "@/ui/components/Modal/Confirm/ConfirmModal"; // ✅ 커스텀 확인 모달
+import CustomToast from "@/ui/components/Toast/CustomToast";           // ✅ 로그인과 동일 토스트
 
 function AddIcon(props: SVGProps<SVGSVGElement>) {
     return (
@@ -68,6 +70,11 @@ export default function Chat() {
         delete titleCheckTimersRef.current[roomId];
         delete titleCheckInFlightRef.current[roomId];
     }, []);
+
+    // ✅ 모달 오픈용
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+    // ✅ 토스트 상태 (Login과 동일한 형태)
+    const [toast, setToast] = useState<{ msg: string; desc?: string } | null>(null);
 
     const applyRoomsIfChanged = useCallback(
         (fresh: ChatRoom[], targetRoomId: string) => {
@@ -276,7 +283,7 @@ export default function Chat() {
 
     const deleteRoomById = useCallback(
         async (roomId: string) => {
-            if (!window.confirm("이 채팅방을 삭제하시겠어요?")) return;
+            // 모달에서 최종 확인 후 호출됨
             try {
                 setDeletingId(roomId);
                 await deleteChatRoom(roomId);
@@ -285,9 +292,13 @@ export default function Chat() {
                     saveCachedRooms(next);
                     return next;
                 });
+                // ✅ 삭제 성공 토스트
+                setToast({ msg: "채팅방 삭제 완료", desc: "대화가 목록에서 제거되었어요." });
                 if (activeId === roomId) navigate("/chat", {replace: true});
             } catch (e) {
                 console.error(e);
+                // 실패도 토스트로 노출해주고 싶다면 아래 주석 해제
+                // setToast({ msg: "삭제 실패", desc: e instanceof Error ? e.message : "알 수 없는 오류" });
                 alert("채팅방 삭제에 실패했습니다.");
             } finally {
                 setDeletingId(null);
@@ -394,7 +405,8 @@ export default function Chat() {
                                                     disabled={deletingId === r.chatRoomId}
                                                     onClick={(e) => {
                                                         e.stopPropagation(); // 항목 클릭(열기) 방지
-                                                        void deleteRoomById(r.chatRoomId);
+                                                        // ✅ 기본 confirm 대신 커스텀 모달 오픈
+                                                        setConfirmDeleteId(r.chatRoomId);
                                                     }}
                                                 >
                                                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
@@ -548,6 +560,33 @@ export default function Chat() {
                     </div>
                 </div>
             </div>
+
+            {/* 확인 모달 */}
+            <ConfirmModal
+                open={!!confirmDeleteId}
+                title="채팅방 삭제"
+                description="이 채팅방을 정말 삭제할까요? 삭제 후 복구할 수 없습니다."
+                confirmText="삭제"
+                cancelText="취소"
+                danger
+                onConfirm={() => {
+                    const id = confirmDeleteId;
+                    if (!id) return;
+                    setConfirmDeleteId(null);          // ✅ 모달 닫기
+                    void deleteRoomById(id);           // ✅ 삭제 실행 + 토스트 출력
+                }}
+                onClose={() => setConfirmDeleteId(null)}
+            />
+
+            {/* ✅ 로그인과 같은 스타일의 토스트 */}
+            {toast && (
+                <CustomToast
+                    message={toast.msg}
+                    description={toast.desc}
+                    duration={1200}
+                    onClose={() => setToast(null)}
+                />
+            )}
 
             <UserPersonalizeContainer open={personalizeOpen} onClose={() => setPersonalizeOpen(false)}/>
         </div>
