@@ -70,7 +70,7 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic chatLlmAnswerDelta() {
         return TopicBuilder.name("chat.llm.answer.delta.v1")
-                .partitions(2)
+                .partitions(3)
                 .replicas(1)
                 .config("retention.ms", RETENTION_1D)
                 .build();
@@ -79,7 +79,7 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic chatLlmAnswerDone() {
         return TopicBuilder.name("chat.llm.answer.done.v1")
-                .partitions(2)
+                .partitions(3)
                 .replicas(1)
                 .config("retention.ms", RETENTION_1D)
                 .build();
