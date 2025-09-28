@@ -31,6 +31,18 @@ export default function Home() {
         return () => io.disconnect();
     }, []);
 
+    useEffect(() => {
+        const html = document.documentElement;
+        html.classList.add('hide-scrollbar');
+        document.body.classList.add('hide-scrollbar');
+        return () => {
+            html.classList.remove('hide-scrollbar');
+            document.body.classList.remove('hide-scrollbar');
+        };
+    }, []);
+
+
+
     const scrollToValues = () => valueRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
     return (

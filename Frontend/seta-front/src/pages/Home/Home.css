@@ -243,6 +243,28 @@
     border-radius: 999px;
 }
 
+/* 홈 페이지에서만 스크롤바 숨김(스크롤 기능 유지) */
+html.hide-scrollbar,
+body.hide-scrollbar {
+    overflow-y: auto;          /* 스크롤은 그대로 */
+    -ms-overflow-style: none;  /* IE/Edge(레거시) */
+    scrollbar-width: none;     /* Firefox */
+}
+
+/* WebKit 계열(크롬/사파리/엣지) */
+html.hide-scrollbar::-webkit-scrollbar,
+body.hide-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+html.hide-scrollbar::-webkit-scrollbar-thumb,
+body.hide-scrollbar::-webkit-scrollbar-thumb,
+html.hide-scrollbar::-webkit-scrollbar-track,
+body.hide-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 /* 반응형 */
 @media (max-width: 1280px) {
     .value-grid {
