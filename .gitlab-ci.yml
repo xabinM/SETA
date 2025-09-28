@@ -1,5 +1,4 @@
 stages:
-  - build
   - build-docker
   - deploy
 
@@ -12,57 +11,7 @@ variables:
   GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"   # Gradle 캐시를 프로젝트 내부에 저장
 
 # ----------------
-# 1. Backend Build (Java + Gradle)
-# ----------------
-#backend-build:
-#  stage: build
-#  image: amazoncorretto:17
-#  cache:
-#    key: ${CI_COMMIT_REF_SLUG}
-#    paths:
-#      - .gradle/caches/
-#      - .gradle/wrapper/
-#      - .gradle/wrapper/dists/
-#      - Backend/.gradle
-#  script:
-#    - cd Backend
-#    - chmod +x gradlew
-#    - ./gradlew clean bootJar
-#  artifacts:
-#    paths:
-#      - Backend/build/libs/*.jar
-#    expire_in: 1 hour
-#  rules:
-#    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
-#      when: always
-#    - when: never
-
-# ----------------
-# 2. Frontend Build (React + Node)
-# ----------------
-# frontend-build:
-#   stage: build
-#   image:
-#     name: node:20-alpine
-#   cache:
-#     key: ${CI_COMMIT_REF_SLUG}
-#     paths:
-#       - Frontend/seta-front/node_modules/
-#   script:
-#     - cd Frontend/seta-front
-#     - npm ci
-#     - npm run build
-#   artifacts:
-#     paths:
-#       - Frontend/seta-front/dist
-#     expire_in: 1 hour
-#   rules:
-#     - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
-#       when: always
-#     - when: never
-
-# ----------------
-# 3. Backend Docker Image & Push to Registry.
+# 1. Backend Docker Image Build & Push
 # ----------------
 backend-build-docker:
   stage: build-docker
@@ -88,12 +37,12 @@ backend-build-docker:
     - docker build -t $BACKEND_IMAGE .
     - docker push $BACKEND_IMAGE
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
-      when: always
-    - when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
+      changes:
+        - Backend/**
 
 # ----------------
-# 4. Frontend Docker Image Build & Push
+# 2. Frontend Docker Image Build & Push
 # ----------------
 frontend-build-docker:
   stage: build-docker
@@ -112,14 +61,12 @@ frontend-build-docker:
     - docker build --build-arg VITE_API_BASE_URL="$VITE_API_BASE_URL" -t $FRONTEND_IMAGE ./Frontend/seta-front
     - docker push $FRONTEND_IMAGE
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
-      when: always
-    - when: never
-  # dependencies:
-  #   - frontend-build
+    - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
+      changes:
+        - Frontend/**
 
 # ----------------
-# 5. Deploy backend
+# 3. Deploy backend
 # ----------------
 deploy-backend:
   stage: deploy
@@ -127,7 +74,7 @@ deploy-backend:
   needs:
     - job: backend-build-docker
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
       when: always
     - when: never
   before_script:
@@ -147,17 +94,11 @@ deploy-backend:
       ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
       DB_USER=${DB_USER}
       DB_PASSWORD=${DB_PASSWORD}
-      DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       DB_NAME=${DB_NAME}
-
-      SPRING_REDIS_HOST=${REDIS_HOST}
-      SPRING_REDIS_PORT=${REDIS_PORT}
 
       JWT_SECRET=${JWT_SECRET}
       JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
       JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
-
-      SPRING_KAFKA_BOOTSTRAP_SERVERS=${SPRING_KAFKA_BOOTSTRAP_SERVERS}
 
       BACKEND_IMAGE=${BACKEND_IMAGE}
 
@@ -172,7 +113,7 @@ deploy-backend:
     - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-backend.sh && ./deploy-backend.sh '${DEPLOY_USER}'"
 
 # ----------------
-# 6. Deploy frontend
+# 4. Deploy frontend
 # ----------------
 deploy-frontend:
   stage: deploy
@@ -180,7 +121,7 @@ deploy-frontend:
   needs:
     - job: frontend-build-docker
   rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^(master)$/'
       when: always
     - when: never
   before_script:
