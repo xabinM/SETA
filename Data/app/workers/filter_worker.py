@@ -392,6 +392,10 @@ def run_filter_worker():
                         "schema_version": "1.0.0",
                     },
                 )
+                done_at = int(datetime.now(timezone.utc).timestamp() * 1000)
+                produced_at = normalize_timestamp(ev.get("timestamp", done_at))
+                total_pipeline_ms = done_at - produced_at
+                logger.info(f"🏁 전체 파이프라인 처리 시간 (ML PASS): {total_pipeline_ms}ms")
 
 
 if __name__ == "__main__":
