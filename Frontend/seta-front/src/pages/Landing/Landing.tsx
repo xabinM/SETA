@@ -13,26 +13,20 @@ const Landing: React.FC = () => {
 
     // 불용어 목록 
     const stopwords = [
-            "고마워", "고맙다", "고마워요", "고맙습니다", "감사해요", "감사합니다", 
-            "땡큐", "땡큐베리머치",
-            "도움 고마워", "답변 감사", "설명 감사", "친절해서 고마워", "수고했어",
-            "thanks a lot", "much appreciated", "appreciate it", "grateful",
+            "고마워", "고마워요", "감사해요", "감사합니다", 
+            "도움 고마워", "답변 감사", "수고했어",
+            "thanks a lot", 
             "thanks for help", "thanks for explaining",
-           "미안해", "미안해요", "미안합니다", "죄송해", "죄송해요", "죄송합니다",
-            "잘못했어", "잘못했습니다", 
+            "잘못했어", 
             "늦어서 미안", "바쁜데 미안", "다시 물어봐서 미안",
             "sorry", "apologize", 
             "안녕", "안녕하세요", "안녕하십니까", "하이", "헬로", "hello", "hi",
-            "오랜만", "오랜만이야", "오랜만이에요", 
-            "greetings", "good morning", "good afternoon", "good evening", 
-            "그런데", "근데", "그래서", "그러면", "그럼", "그리고", "또", "그리고나서",
+            "오랜만", "오랜만이야", 
+            "그런데", "근데", "그래서", "그리고나서",
             "있잖아", "내말은", "그니깐", "그러니까", "뭐랄까", "어떻게보면", "사실은",
-            "일단", "다음에", "그다음에", "어쨌든", "아무튼", "어디보자",
             "생각해보니", "돌이켜보면", "말하자면", 
             "honestly", "frankly", "obviously", 
-            "particularly", "especially", "specifically", "generally", "typically", "normally",
-            "usually", "frequently", "occasionally", "sometimes", "often", "rarely", "hardly",
-            "meanwhile", "however", "therefore", "furthermore", "moreover", "additionally",
+            "therefore", "furthermore", "moreover",
             
 
     ];
