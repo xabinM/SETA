@@ -1,0 +1,269 @@
+:root {
+    --gradient-start: rgba(255, 255, 255, 1);
+    --gradient-end: rgba(156, 163, 175, 1);
+    --card-title-color: #ffffff;
+    --card-strong-color: #e8ecf3;
+    --card-desc-color: rgba(255, 255, 255, 0.9);
+    --card-shadow: rgba(0, 0, 0, 0.25);
+}
+
+.home-container {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+.home-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 10;
+}
+
+.home-main {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 0 1rem;
+}
+
+.home-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 1152px;
+    margin: 0 auto;
+    min-height: 100vh;
+    justify-content: center;
+}
+
+.home-title {
+    font-weight: 900;
+    font-size: clamp(48px, 8vw, 72px);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+}
+
+.home-description {
+    color: white;
+    opacity: 0.92;
+    max-width: 860px;
+    font-size: clamp(16px, 2.5vw, 20px);
+    line-height: 1.6;
+    word-break: keep-all;
+    margin-bottom: 50px;
+}
+
+.home-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 2vw, 16px);
+}
+
+.btn-primary {
+    font-weight: bold;
+    padding: clamp(10px, 2.5vw, 13px) clamp(20px, 5vw, 30px);
+    border-radius: 9999px;
+    background-color: #38E07B;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    font-size: clamp(14px, 2.5vw, 16px);
+    box-shadow: 0px 2px 8px rgba(56, 224, 123, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0px);
+    margin-right: 23px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 8px 25px rgba(56, 224, 123, 0.4);
+    background-color: #32D374;
+}
+
+.btn-secondary {
+    padding: clamp(10px, 2.5vw, 12px) clamp(20px, 5vw, 26px);
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    color: rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+    font-size: clamp(14px, 2.5vw, 16px);
+    box-shadow: 0px 2px 8px rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0px);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.30);
+    box-shadow: 0px 8px 25px rgba(255, 255, 255, 0.15);
+}
+
+.value-section {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: clamp(64px, 10vh, 120px) clamp(16px, 4vw, 40px);
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.value-head {
+    text-align: center;
+    margin-bottom: clamp(22px, 3vw, 28px);
+    margin-top: -10px;
+}
+
+.value-title {
+    margin: 0 0 14px 0;
+    font-size: clamp(44px, 6vw, 72px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.value-sub {
+    margin: 0 auto;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: clamp(16px, 2vw, 20px);
+    line-height: 1.6;
+    max-width: 720px;
+    text-align: center;
+    opacity: 0.95;
+}
+
+.value-grid {
+    display: grid;
+    gap: clamp(24px, 2vw, 32px);
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
+    margin-top: clamp(24px, 4vw, 40px);
+}
+
+.v-card {
+    position: relative;
+    padding: clamp(28px, 3.2vw, 40px);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0px 25px 50px -12px var(--card-shadow);
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.v-card.reveal {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.v-card:hover {
+    transform: translateY(-2px) scale(1);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0px 30px 60px -12px rgba(0, 0, 0, 0.35);
+}
+
+.v-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+}
+
+.v-title {
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(18px, 2vw, 20px);
+    color: var(--card-title-color);
+}
+
+.v-strong {
+    margin: 0;
+    font-weight: 700;
+    font-size: clamp(16px, 2vw, 18px);
+    color: var(--card-strong-color);
+}
+
+.v-desc {
+    margin: 0;
+    font-size: clamp(14px, 2vw, 16px);
+    color: var(--card-desc-color);
+    line-height: 1.7;
+    max-width: 44ch;
+    word-break: keep-all;
+    text-wrap: pretty;
+}
+
+.v-chip {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #c2c8d4;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 6px 10px;
+    border-radius: 999px;
+}
+
+html.hide-scrollbar,
+body.hide-scrollbar {
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+html.hide-scrollbar::-webkit-scrollbar,
+body.hide-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+html.hide-scrollbar::-webkit-scrollbar-thumb,
+body.hide-scrollbar::-webkit-scrollbar-thumb,
+html.hide-scrollbar::-webkit-scrollbar-track,
+body.hide-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+@media (max-width: 1280px) {
+    .value-grid {
+        grid-template-columns: repeat(2, minmax(300px, 1fr));
+    }
+}
+@media (max-width: 680px) {
+    .value-section {
+        max-width: 100%;
+        padding: 56px 16px 72px;
+    }
+    .value-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+}

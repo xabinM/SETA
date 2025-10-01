@@ -1,0 +1,109 @@
+services:
+  db:
+    image: postgres:15
+    container_name: db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: kafka
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,EXTERNAL://:29092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://3.35.206.91:29092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
+    ports:
+      - "9092:9092"   # Kafka 클라이언트 연결
+      - "29092:29092"   # 외부 PC 접속용
+      - "9093:9093"   # KRaft controller 내부 통신
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+      - "6831:6831/udp"
+    restart: unless-stopped
+
+  # --------------------
+  # Backend 공통 템플릿
+  # --------------------
+  backend_base: &backend-base
+    image: ${BACKEND_IMAGE}
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+      - kafka
+      - jaeger
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESSTOKENEXPIRATIONMS: ${JWT_ACCESSTOKENEXPIRATIONMS}
+      JWT_REFRESHTOKENEXPIRATIONMS: ${JWT_REFRESHTOKENEXPIRATIONMS}
+
+      # kafka
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://jaeger:4318/v1/traces
+
+      # openAI
+      GMS_OPENAI_API_KEY: ${GMS_OPENAI_API_KEY}
+      GMS_OPENAI_BASE_URL: ${GMS_OPENAI_BASE_URL}
+      GMS_OPENAI_COMPLETIONS_PATH: ${GMS_OPENAI_COMPLETIONS_PATH}
+      GMS_OPENAI_MODEL: ${GMS_OPENAI_MODEL}
+      GMS_OPENAI_TIMEOUT_MS: ${GMS_OPENAI_TIMEOUT_MS}
+
+  backend_blue:
+    <<: *backend-base
+    container_name: backend_blue
+    ports:
+      - "8081:8080"
+
+  backend_green:
+    <<: *backend-base
+    container_name: backend_green
+    ports:
+      - "8082:8080"
+
+# -----------------
+# 볼륨 정의
+# -----------------
+volumes:
+  db_data:
+  redis_data:

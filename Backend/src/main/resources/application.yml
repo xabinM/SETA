@@ -1,31 +1,80 @@
 spring:
   application:
-    name: argo-backend
-
-
+    name: backend # Jaeger에서 사용
 
   profiles:
-    include: secret
+    active: msk
 
   datasource:
-    url: jdbc:postgresql://localhost:55432/mydb
+    url: ${SPRING_DATASOURCE_URL}        # PostgreSQL JDBC URL
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
-
+    hikari:
+      maximum-pool-size: 20  # 기존 10에서 증가
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 0  # 연결 누수 탐지
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate                 # 운영 환경에서는 validate 또는 none
+    defer-datasource-initialization: false
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+    open-in-view: false
+
+  sql:
+    init:
+      mode: never
+      encoding: UTF-8
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${SPRING_DATA_REDIS_HOST}          # Redis 호스트
+      port: ${SPRING_DATA_REDIS_PORT}          # Redis 포트
+    elasticsearch:
+      repositories:
+        enabled: true
+  elasticsearch:
+    uris: http://172.26.8.129:9200
 
+jwt:
+  secret: ${JWT_SECRET}                  # JWT 시크릿
+  accessTokenExpirationMs: ${JWT_ACCESSTOKENEXPIRATIONMS}
+  refreshTokenExpirationMs: ${JWT_REFRESHTOKENEXPIRATIONMS}
 
 springdoc:
+  api-docs:
+    path: /v3/api-docs
   swagger-ui:
-    path: /docs
+    path: /swagger-ui.html
+    # https
+    urls:
+      - url: /v3/api-docs
+        name: default
+
+logging:
+  pattern:
+    level: "%5p [traceId=%X{traceId:-},spanId=%X{spanId:-}]"
+    console: "%d{HH:mm:ss} | %highlight(%-5level) | %green(%logger{20}) | %blue(traceId=%X{traceId}) %msg%n"
+  level:
+    root: INFO
+    com.zaxxer.hikari: WARN
+    org.springframework.transaction: WARN
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+
+    # kafka package
+    com.AIce.Backend.chat.adapter.messaging.kafka: INFO
+
+gms:
+  openai:
+    base-url: ${GMS_OPENAI_BASE_URL}
+    completions-path: ${GMS_OPENAI_COMPLETIONS_PATH}
+    model: ${GMS_OPENAI_MODEL}
+    api-key: ${GMS_OPENAI_API_KEY}
+    timeout-ms: ${GMS_OPENAI_TIMEOUT_MS}

@@ -1,0 +1,108 @@
+.cmodal-root {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+}
+
+.cmodal-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(9, 10, 15, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    will-change: backdrop-filter, opacity;
+    transition: opacity .18s ease;
+    opacity: 1;
+}
+
+@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+    .cmodal-scrim {
+        background: rgba(9, 10, 15, 0.6);
+    }
+}
+
+.cmodal-panel {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.98);
+    opacity: 0;
+    animation: cmodal-in .18s ease forwards;
+    min-width: 320px;
+    max-width: min(560px, 92vw);
+    padding: 20px 20px 16px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    color: #e5e7eb;
+}
+
+@keyframes cmodal-in {
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.cmodal-title {
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin: 0 0 8px 0;
+}
+
+.cmodal-desc {
+    margin: 0 0 16px 0;
+    color: #b9bdc7;
+    line-height: 1.5;
+}
+
+.cmodal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.btn {
+    appearance: none;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s ease, transform .06s ease, border-color .15s ease;
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn.ghost {
+    background: transparent;
+}
+
+.btn.primary {
+    background: linear-gradient(90deg, rgba(147, 51, 234, 0.22), rgba(79, 70, 229, 0.22));
+    border-color: var(--glass-border-strong);
+}
+
+.btn.danger {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #fecaca;
+}
+
+@media (max-width: 480px) {
+    .cmodal-panel {
+        width: calc(100vw - 28px);
+        padding: 16px 16px 12px;
+    }
+}

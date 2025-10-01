@@ -27,7 +27,8 @@ public class SecurityConfig {
     private static final String[] SWAGGER_WHITELIST = {
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/docs"
     };
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -36,16 +37,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> {})
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         
                         .requestMatchers(
-                                "/auth/signup",
-                                "/auth/login",
-                                "/auth/reissue"
+                                "/api/auth/signup",
+                                "/api/auth/login",
+                                "/api/auth/reissue",
+                                "/actuator/**"
                         ).permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        .requestMatchers("/api/sse/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, entryPoint), UsernamePasswordAuthenticationFilter.class);

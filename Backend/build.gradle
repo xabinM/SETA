@@ -29,15 +29,33 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	// implementation 'com.mysql:mysql-connector-j'
-	implementation 'org.postgresql:postgresql:42.7.4'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12'
+
+	// web client
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// micrometer tracing
+	implementation "org.springframework.boot:spring-boot-starter-actuator"
+	implementation "io.micrometer:micrometer-tracing-bridge-otel"
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "org.springframework.boot:spring-boot-starter-aop"
+
+	// kafka
+	implementation 'org.springframework.kafka:spring-kafka:3.3.6'
+	implementation 'org.apache.kafka:kafka-clients'
+	// msk iam 인증
+	implementation 'software.amazon.msk:aws-msk-iam-auth:2.2.0'
+
+	// DB
+	implementation 'org.postgresql:postgresql'
+	implementation 'co.elastic.clients:elasticsearch-java:8.11.0'
 
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

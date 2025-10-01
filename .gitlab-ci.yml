@@ -1,44 +1,140 @@
 stages:
-  - build
-  - test
+  - build-docker
+  - deploy
 
-# ---------- Backend ----------
-backend-build:
-  stage: build
-  image: amazoncorretto:17
+variables:
+  BACKEND_IMAGE: $DOCKER_REGISTRY/$DOCKER_USERNAME/backend:$CI_COMMIT_SHORT_SHA
+  FRONTEND_IMAGE: $DOCKER_REGISTRY/$DOCKER_USERNAME/frontend:$CI_COMMIT_SHORT_SHA
+  DOCKER_TLS_CERTDIR: ""                         # DIND 사용 시 TLS 비활성화
+  SSH_KNOWN_HOSTS: $SSH_KNOWN_HOSTS
+  SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"   # Gradle 캐시를 프로젝트 내부에 저장
+
+# ----------------
+# 1. Backend Docker Image Build & Push
+# ----------------
+backend-build-docker:
+  stage: build-docker
+  image: docker:25
+  services:
+    - name: docker:dind
+      alias: docker
+      command: ["--host=tcp://0.0.0.0:2375"]
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+  before_script:
+    - apk add --no-cache openjdk17 bash curl
+    - docker info
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
+    # 1. JAR 빌드
     - cd Backend
     - chmod +x gradlew
-    - ./gradlew clean build -x test
-    - echo "Backend Build Job 실행 테스트 성공"
-  # rules:  // 변경이 있을 때만 실행하는 명령어 
-  #   - changes:
-  #     - Backend/**/*
-  only:
-    - Devops_config
+    - ./gradlew clean bootJar
 
-# ---------- Frontend ----------
-frontend-build:
-  stage: build
-  script:
-    - echo "Frontend Build Job 실행 테스트"
+    # 2. Docker 이미지 빌드 & 푸시
+    - docker build -t $BACKEND_IMAGE .
+    - docker push $BACKEND_IMAGE
   rules:
-    - changes:
-      - Frontend/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+      when: always
+    - when: never
 
-frontend-test:
-  stage: test
+# ----------------
+# 2. Frontend Docker Image Build & Push
+# ----------------
+frontend-build-docker:
+  stage: build-docker
+  image: docker:25
+  services:
+    - name: docker:dind
+      alias: docker
+      command: ["--host=tcp://0.0.0.0:2375"]
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+  before_script:
+    - docker info
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
   script:
-    - echo "Frontend Test Job 실행 테스트"
+    - docker build --build-arg VITE_API_BASE_URL="$VITE_API_BASE_URL" -t $FRONTEND_IMAGE ./Frontend/seta-front
+    - docker push $FRONTEND_IMAGE
   rules:
-    - changes:
-      - Frontend/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+      when: always
+    - when: never
 
-# ---------- AI ----------
-ai-test:
-  stage: test
-  script:
-    - echo "AI Test Job 실행 테스트"
+# ----------------
+# 3. Deploy backend
+# ----------------
+deploy-backend:
+  stage: deploy
+  image: ubuntu:22.04
+  needs:
+    - job: backend-build-docker
   rules:
-    - changes:
-      - AI/**/*
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+      when: always
+    - when: never
+  before_script:
+    - apt-get update && apt-get install -y openssh-client bash rsync
+    - mkdir -p ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - eval "$(ssh-agent -s)"
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  script:
+    # 파일 전송
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy-backend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.backend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+
+    # .env 파일 생성 (모든 Backend 환경변수 포함)
+    - |
+      ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cat > /home/${DEPLOY_USER}/.env <<EOF
+      DB_USER=${DB_USER}
+      DB_PASSWORD=${DB_PASSWORD}
+      DB_NAME=${DB_NAME}
+
+      JWT_SECRET=${JWT_SECRET}
+      JWT_ACCESSTOKENEXPIRATIONMS=${JWT_ACCESSTOKENEXPIRATIONMS}
+      JWT_REFRESHTOKENEXPIRATIONMS=${JWT_REFRESHTOKENEXPIRATIONMS}
+
+      BACKEND_IMAGE=${BACKEND_IMAGE}
+
+      GMS_OPENAI_API_KEY=${GMS_OPENAI_API_KEY}
+      GMS_OPENAI_BASE_URL=${GMS_OPENAI_BASE_URL}
+      GMS_OPENAI_COMPLETIONS_PATH=${GMS_OPENAI_COMPLETIONS_PATH}
+      GMS_OPENAI_MODEL=${GMS_OPENAI_MODEL}
+      GMS_OPENAI_TIMEOUT_MS=${GMS_OPENAI_TIMEOUT_MS}
+      EOF"
+      
+      # 파일 실행
+    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-backend.sh && ./deploy-backend.sh '${DEPLOY_USER}'"
+
+# ----------------
+# 4. Deploy frontend
+# ----------------
+deploy-frontend:
+  stage: deploy
+  image: ubuntu:22.04
+  needs:
+    - job: frontend-build-docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
+      when: always
+    - when: never
+  before_script:
+    - apt-get update && apt-get install -y openssh-client bash rsync
+    - mkdir -p ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - eval "$(ssh-agent -s)"
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  script:
+      # 파일 전송
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/deploy-frontend.sh $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+    - rsync -avz -e "ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no" Devops/docker-compose.frontend.yml $DEPLOY_USER@$DEPLOY_SERVER_A:/home/$DEPLOY_USER/
+
+      # 파일 실행
+    - ssh -o LogLevel=ERROR $DEPLOY_USER@$DEPLOY_SERVER_A "cd /home/${DEPLOY_USER} && chmod +x deploy-frontend.sh && ./deploy-frontend.sh '${FRONTEND_IMAGE}' '${DEPLOY_USER}'"

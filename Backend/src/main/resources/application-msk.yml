@@ -1,0 +1,40 @@
+spring:
+  kafka:
+    bootstrap-servers: 172.26.14.94:9092
+    properties:
+      security.protocol: PLAINTEXT
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        compression.type: zstd
+        linger.ms: 20
+        batch.size: 131072
+        enable.idempotence: true
+        acks: all
+        max.in.flight.requests.per.connection: 5
+    consumer:
+      group-id: backend-${spring.profiles.active}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        fetch.min.bytes: 65536         # 64KB
+        fetch.max.wait.ms: 50
+    listener:
+      observation-enabled: true
+    template:
+      observation-enabled: true
+
+  elasticsearch:
+    uris: http://172.26.8.129:9200
+
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://172.26.14.94:4317

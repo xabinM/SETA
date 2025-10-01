@@ -10,12 +10,17 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user_setting")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(
+        name = "user_setting",
+        indexes = {
+                @Index(name = "idx_user_setting_user", columnList = "user_id")
+        }
+)
 public class UserSetting extends BaseTimeEntity {
     @Id
     @UuidGenerator
@@ -25,7 +30,6 @@ public class UserSetting extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
 
     @Column(name = "call_me", length = 64)
     private String callMe;
