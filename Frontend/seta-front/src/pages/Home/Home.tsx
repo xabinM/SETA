@@ -48,9 +48,7 @@ export default function Home() {
     return (
         <div className="home-container" style={{ backgroundImage: `url('${HomeBg}')` }}>
             <div className="home-overlay" />
-
             <main className="home-main">
-                {/* 히어로 */}
                 <section className="home-content">
                     <h1 className="home-title">AI로 밝히는 지속가능한 미래</h1>
                     <p className="home-description">
@@ -63,7 +61,6 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* 가치 섹션 */}
                 <section
                     id="values"
                     className="value-section"

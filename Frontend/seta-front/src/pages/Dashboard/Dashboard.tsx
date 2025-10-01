@@ -5,7 +5,13 @@ import ChatBg from "@/assets/ChatBackground.png";
 import {useDashboardKpi} from "@/features/dashboard/hooks";
 import {formatNumber, formatNumberRaw, formatCost, formatCO2} from "@/features/dashboard/utils";
 import TreeModal from "@/ui/components/Modal/TreeModal/TreeModal";
-import {treeModalDataByScope, calculateTreeStatus, calculateNextGoal, calculateCurrentStep, TREE_LEVELS} from "@/ui/components/Modal/TreeModal/data";
+import {
+    treeModalDataByScope,
+    calculateTreeStatus,
+    calculateNextGoal,
+    calculateCurrentStep,
+    TREE_LEVELS
+} from "@/ui/components/Modal/TreeModal/data";
 import CarModal from "@/ui/components/Modal/CarModal/CarModal";
 import {createCarModalData, getDestinationByTokens} from "@/ui/components/Modal/CarModal/data";
 import "./Dashboard.css";
@@ -61,46 +67,46 @@ function Dashboard() {
     const {data, loading, error, refetch} = useDashboardKpi();
 
     const currentStats = scope === "me"
-    ? (data?.userTotal || getDefaultStats())
-    : (data?.globalTotal || getDefaultStats());
-const currentDaily = scope === "me"
-    ? (data?.userDaily || getDefaultDaily())
-    : (data?.globalDaily || getDefaultDaily());
-const currentSavedTokens = currentStats.savedTokens || 0;
+        ? (data?.userTotal || getDefaultStats())
+        : (data?.globalTotal || getDefaultStats());
+    const currentDaily = scope === "me"
+        ? (data?.userDaily || getDefaultDaily())
+        : (data?.globalDaily || getDefaultDaily());
+    const currentSavedTokens = currentStats.savedTokens || 0;
 
-console.log('Dashboard currentStats 계산:', {
-    scope,
-    currentSavedTokens,
-    userTotal: data?.userTotal?.savedTokens,
-    globalTotal: data?.globalTotal?.savedTokens,
-    currentStats: currentStats.savedTokens,
-});
+    console.log('Dashboard currentStats 계산:', {
+        scope,
+        currentSavedTokens,
+        userTotal: data?.userTotal?.savedTokens,
+        globalTotal: data?.globalTotal?.savedTokens,
+        currentStats: currentStats.savedTokens,
+    });
 
     // 동적으로 목적지 정보 불러오기 (scope에 따른 currentSavedTokens 기반)
     const destinationInfo = useMemo(() => {
-    console.log('destinationInfo 계산:', { scope, currentSavedTokens });
-    return getDestinationByTokens(currentSavedTokens, scope); // scope 파라미터 추가
-}, [currentSavedTokens, scope]);
+        console.log('destinationInfo 계산:', {scope, currentSavedTokens});
+        return getDestinationByTokens(currentSavedTokens, scope); // scope 파라미터 추가
+    }, [currentSavedTokens, scope]);
 
-const carModalData = useMemo(() => {
-    if (!data) return null;
-    
-    console.log('carModalData 생성:', { 
-        scope, 
-        currentSavedTokens, 
-        userTotal: data.userTotal?.savedTokens,
-        globalTotal: data.globalTotal?.savedTokens 
-    });
-    
-    try {
-        const result = createCarModalData(currentSavedTokens, scope);
-        console.log('생성된 carModalData:', result);
-        return result;
-    } catch (error) {
-        console.warn('CarModal 데이터 생성 실패:', error);
-        return null;
-    }
-}, [currentSavedTokens, scope, data]);
+    const carModalData = useMemo(() => {
+        if (!data) return null;
+
+        console.log('carModalData 생성:', {
+            scope,
+            currentSavedTokens,
+            userTotal: data.userTotal?.savedTokens,
+            globalTotal: data.globalTotal?.savedTokens
+        });
+
+        try {
+            const result = createCarModalData(currentSavedTokens, scope);
+            console.log('생성된 carModalData:', result);
+            return result;
+        } catch (error) {
+            console.warn('CarModal 데이터 생성 실패:', error);
+            return null;
+        }
+    }, [currentSavedTokens, scope, data]);
 
     if (loading) {
         return (
@@ -193,14 +199,14 @@ const carModalData = useMemo(() => {
     };
     const trees = calculateTreeStatus(currentSavedTokens);
     const kpis = baseData.kpis.map((kpi) => {
-    if (kpi.label === "누적 비용 절약") {
-        return {...kpi, value: formatCost(currentStats.costSumUsd || 0)};
-    }
-    if (kpi.label === "CO₂ 절감량") {
-        return {...kpi, value: formatCO2(currentStats.co2 || 0)};  // 수정: 계산된 CO2 값 사용
-    }
-    return kpi;
-});
+        if (kpi.label === "누적 비용 절약") {
+            return {...kpi, value: formatCost(currentStats.costSumUsd || 0)};
+        }
+        if (kpi.label === "CO₂ 절감량") {
+            return {...kpi, value: formatCO2(currentStats.co2 || 0)};  // 수정: 계산된 CO2 값 사용
+        }
+        return kpi;
+    });
     const timeline = baseData.timeline;
 
     return (
@@ -296,10 +302,10 @@ const carModalData = useMemo(() => {
                                 </div>
                                 <div className="lg-stat-title">CO₂ 절감량</div>
                                 <div className="lg-stat-value">
-                                    {formatCO2(currentStats.co2 || 0)}  {/* 수정: 계산된 CO2 값 사용 */}
+                                    {formatCO2(currentStats.co2 || 0)} {/* 수정: 계산된 CO2 값 사용 */}
                                 </div>
                                 <div className="lg-stat-delta">
-                                    +{formatCO2(currentDaily.co2 || 0)} (오늘)  {/* 수정: 계산된 CO2 값 사용 */}
+                                    +{formatCO2(currentDaily.co2 || 0)} (오늘) {/* 수정: 계산된 CO2 값 사용 */}
                                 </div>
                             </article>
                         </section>
@@ -346,7 +352,8 @@ const carModalData = useMemo(() => {
                                         height="72"
                                     />
                                     <div className="lg-strong">
-                                        절약한 토큰으로 {TREE_LEVELS.filter(level => currentSavedTokens >= level).length}그루의 나무를 심었어요!
+                                        절약한 토큰으로 {TREE_LEVELS.filter(level => currentSavedTokens >= level).length}그루의
+                                        나무를 심었어요!
                                     </div>
                                     <div className="lg-dim">
                                         다음 나무까지 {Math.max(0, tokens.goal - tokens.current)}토큰 남았습니다.
@@ -396,36 +403,36 @@ const carModalData = useMemo(() => {
                                 </div>
 
                                 <div className="lg-center lg-car">
-    <img
-        src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Racing%20Car.png"
-        alt="Racing Car"
-        width="72"
-        height="72"
-    />
-    {currentSavedTokens === 0 ? (
-        <div style={{lineHeight: 1.65}}>
-            <div className="lg-strong">SETA와 채팅을 시작해보세요!</div>
-            <div className="lg-dim">
-                AI 사용을 최적화하면
-                <br/>
-                전력을 절약하고 가상 여행을 떠날 수 있어요!
-                <br/>
-                
-            </div>
-        </div>
-    ) : (
-        <div style={{lineHeight: 1.65}}>
-            <div className="lg-strong">전기를 아껴서</div>
-            <div className="lg-em">
-                서울 → {destinationInfo.destination}
-            </div>
-            <div className="lg-dim">
-                ({destinationInfo.distance}) 갈 수 있는
-            </div>
-            <div className="lg-strong">에너지를 절약했어요!</div>
-        </div>
-)}
-        </div>
+                                    <img
+                                        src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Racing%20Car.png"
+                                        alt="Racing Car"
+                                        width="72"
+                                        height="72"
+                                    />
+                                    {currentSavedTokens === 0 ? (
+                                        <div style={{lineHeight: 1.65}}>
+                                            <div className="lg-strong">SETA와 채팅을 시작해보세요!</div>
+                                            <div className="lg-dim">
+                                                AI 사용을 최적화하면
+                                                <br/>
+                                                전력을 절약하고 가상 여행을 떠날 수 있어요!
+                                                <br/>
+
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div style={{lineHeight: 1.65}}>
+                                            <div className="lg-strong">전기를 아껴서</div>
+                                            <div className="lg-em">
+                                                서울 → {destinationInfo.destination}
+                                            </div>
+                                            <div className="lg-dim">
+                                                ({destinationInfo.distance}) 갈 수 있는
+                                            </div>
+                                            <div className="lg-strong">에너지를 절약했어요!</div>
+                                        </div>
+                                    )}
+                                </div>
                             </article>
                         </section>
                         <section className="lg-card lg-ranking"

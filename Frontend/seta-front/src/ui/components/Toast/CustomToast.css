@@ -1,7 +1,7 @@
 .custom-toast {
     position: fixed;
     top: 20px;
-    right: 20px; /* 오른쪽 상단 위치 */
+    right: 20px;
     z-index: 9999;
     width: 320px;
     padding: 12px 16px;
@@ -55,7 +55,6 @@
     opacity: 0.85;
 }
 
-/* 애니메이션 */
 @keyframes slideIn {
     from {
         transform: translateX(120%);

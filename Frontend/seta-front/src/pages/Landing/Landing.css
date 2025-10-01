@@ -1,29 +1,27 @@
 .landing-container {
-  width: 100%;
-  height: 100vh;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  overflow: hidden;
-  position: relative;
-  font-family: 'Inter', sans-serif;
-  perspective: 1000px;
+    width: 100%;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    perspective: 1000px;
 }
 
-/* 배경 어둠 오버레이 */
 .background-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(15, 15, 25, 0.7) 100%),
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(15, 15, 25, 0.7) 100%),
     radial-gradient(circle at 30% 40%, rgba(60, 140, 120, 0.08) 0%, transparent 50%),
     radial-gradient(circle at 70% 60%, rgba(80, 160, 140, 0.04) 0%, transparent 50%);
-  pointer-events: none;
-  backdrop-filter: blur(1px);
-  animation: subtleColorShift 15s linear infinite alternate;
+    pointer-events: none;
+    backdrop-filter: blur(1px);
+    animation: subtleColorShift 15s linear infinite alternate;
 }
 
 @keyframes subtleColorShift {
@@ -35,7 +33,6 @@
     }
 }
 
-/* 불용어 파티클들 - 별처럼 반짝이는 효과 */
 .particles-container {
     position: absolute;
     top: 0;
@@ -46,58 +43,60 @@
 }
 
 .stopword {
-  opacity: 0;
-  position: absolute; /* 반드시 absolute 설정 */
-  color: rgba(240, 240, 245, 0.75);
-  font-weight: 300;
-  pointer-events: none;
-  user-select: none;
-  text-shadow: 
-    0 0 2px rgba(240, 240, 245, 0.8),
+    opacity: 0;
+    position: absolute;
+    color: rgba(240, 240, 245, 0.75);
+    font-weight: 300;
+    pointer-events: none;
+    user-select: none;
+    text-shadow: 0 0 2px rgba(240, 240, 245, 0.8),
     0 0 4px rgba(100, 255, 218, 0.3),
     0 0 8px rgba(29, 233, 182, 0.2);
-  transition: all 0.3s ease;
-  transform-style: preserve-3d;
-  will-change: transform, opacity, color, scale;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  filter: blur(0.3px);
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    will-change: transform, opacity, color, scale;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0.3px);
 }
 
-/* 별처럼 반짝이는 추가 효과 */
 .stopword::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 2px;
-  height: 2px;
-  background: radial-gradient(circle, rgba(100, 255, 218, 0.8) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  animation: starTwinkle 3s ease-in-out infinite;
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 2px;
+    background: radial-gradient(circle, rgba(100, 255, 218, 0.8) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: starTwinkle 3s ease-in-out infinite;
 }
 
 @keyframes starTwinkle {
-  0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    0%, 100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 
-/* SETA 로고 중심체 */
 .logo-center {
-  position: absolute;
-  top: 45%;
-  left: 46%;
-  transform: translate(-50%, -50%) scale(0.5);
-  width: 130px;
-  height: 130px;
-  opacity: 0;
-  z-index: 500;
-  will-change: transform, scale, opacity;
+    position: absolute;
+    top: 45%;
+    left: 46%;
+    transform: translate(-50%, -50%) scale(0.5);
+    width: 130px;
+    height: 130px;
+    opacity: 0;
+    z-index: 500;
+    will-change: transform, scale, opacity;
 }
 
-/* SETA 로고 이미지 */
 .seta-logo-img {
     width: 100%;
     height: 100%;
@@ -106,202 +105,175 @@
     will-change: transform, filter;
 }
 
-/* SETA 텍스트 - 로고 위에 위치 */
 .seta-text-container {
-  position: absolute;
-  top: 45%; /* 로고와 같은 위치 */
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  opacity: 0;
-  z-index: 600;
-  will-change: transform, opacity;
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    opacity: 0;
+    z-index: 600;
+    will-change: transform, opacity;
 }
 
 .seta-text {
-  font-size: clamp(3rem, 8vw, 4.5rem);
-  font-weight: 900;
-  letter-spacing: 0.5rem;
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: center;
-  gap: 0.2rem;
+    font-size: clamp(3rem, 8vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.2rem;
 }
 
-/* SETA 개별 글자 스타일 - 피그마 디자인 반영 */
 .seta-letter {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(30px) scale(0.8) rotateX(45deg);
-  background: linear-gradient(
-    135deg,
-    #00d4aa 0%,
-    #64ffda 25%,
-    #1de9b6 50%,
-    #00bcd4 75%,
-    #0097a7 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  
-  /* 3D 글래스모피즘 효과 */
-  text-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.1),
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(30px) scale(0.8) rotateX(45deg);
+    background: linear-gradient(
+            135deg,
+            #00d4aa 0%,
+            #64ffda 25%,
+            #1de9b6 50%,
+            #00bcd4 75%,
+            #0097a7 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.1),
     0 2px 4px rgba(0, 212, 170, 0.3),
     0 4px 8px rgba(0, 212, 170, 0.2),
     0 8px 16px rgba(0, 212, 170, 0.1);
-  
-  /* 네온 글로우 효과 */
-  filter: 
-    drop-shadow(0 0 10px rgba(100, 255, 218, 0.6))
-    drop-shadow(0 0 20px rgba(29, 233, 182, 0.4))
-    drop-shadow(0 0 30px rgba(0, 212, 170, 0.3));
-  
-  will-change: transform, opacity, filter;
-  transform-style: preserve-3d;
+    filter: drop-shadow(0 0 10px rgba(100, 255, 218, 0.6)) drop-shadow(0 0 20px rgba(29, 233, 182, 0.4)) drop-shadow(0 0 30px rgba(0, 212, 170, 0.3));
+    will-change: transform, opacity, filter;
+    transform-style: preserve-3d;
 }
 
 .circular-text {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  margin: 0 auto;
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
 }
 
-/* 개별 글자들을 원형으로 배치 */
 .letter {
-  position: absolute;
-  font-size: 40px;
-  font-weight: 900;
-  opacity: 0;
-  
-  /* 그라디언트 배경 */
-  background: linear-gradient(
-    135deg,
-    #00d4aa 0%,
-    #64ffda 25%,
-    #1de9b6 50%,
-    #00bcd4 75%,
-    #0097a7 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  
-  /* 글로우 효과 */
-  filter: 
-    drop-shadow(0 0 10px rgba(100, 255, 218, 0.6))
-    drop-shadow(0 0 20px rgba(29, 233, 182, 0.4))
-    drop-shadow(0 0 30px rgba(0, 212, 170, 0.3));
-  
-  will-change: transform, opacity, filter;
-  transform-style: preserve-3d;
+    position: absolute;
+    font-size: 40px;
+    font-weight: 900;
+    opacity: 0;
+    background: linear-gradient(
+            135deg,
+            #00d4aa 0%,
+            #64ffda 25%,
+            #1de9b6 50%,
+            #00bcd4 75%,
+            #0097a7 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(100, 255, 218, 0.6)) drop-shadow(0 0 20px rgba(29, 233, 182, 0.4)) drop-shadow(0 0 30px rgba(0, 212, 170, 0.3));
+    will-change: transform, opacity, filter;
+    transform-style: preserve-3d;
 }
 
 @keyframes gentleGradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
-/* 각 글자의 개별 위치 설정 */
-.letter:nth-child(1) { /* S */
-  left: 15%;
-  top: 45%;
-  transform: translate(-50%, -50%) rotate(-15deg);
+.letter:nth-child(1) {
+    left: 15%;
+    top: 45%;
+    transform: translate(-50%, -50%) rotate(-15deg);
 }
 
-.letter:nth-child(2) { /* E */
-  left: 35%;
-  top: 35%;
-  transform: translate(-50%, -50%) rotate(-5deg);
+.letter:nth-child(2) {
+    left: 35%;
+    top: 35%;
+    transform: translate(-50%, -50%) rotate(-5deg);
 }
 
-.letter:nth-child(3) { /* T */
-  left: 65%;
-  top: 35%;
-  transform: translate(-50%, -50%) rotate(5deg);
+.letter:nth-child(3) {
+    left: 65%;
+    top: 35%;
+    transform: translate(-50%, -50%) rotate(5deg);
 }
 
-.letter:nth-child(4) { /* A */
-  left: 85%;
-  top: 45%;
-  transform: translate(-50%, -50%) rotate(15deg);
+.letter:nth-child(4) {
+    left: 85%;
+    top: 45%;
+    transform: translate(-50%, -50%) rotate(15deg);
 }
 
-/* 호버 효과 */
 .letter:hover {
-  filter: 
-    drop-shadow(0 0 15px rgba(100, 255, 218, 0.8))
-    drop-shadow(0 0 25px rgba(29, 233, 182, 0.6))
-    drop-shadow(0 0 35px rgba(0, 212, 170, 0.5));
-  transform: scale(1.1);
-  transition: all 0.3s ease;
+    filter: drop-shadow(0 0 15px rgba(100, 255, 218, 0.8)) drop-shadow(0 0 25px rgba(29, 233, 182, 0.6)) drop-shadow(0 0 35px rgba(0, 212, 170, 0.5));
+    transform: scale(1.1);
+    transition: all 0.3s ease;
 }
 
-/* 개별 글자 호버 효과 */
 .seta-letter:hover {
-  filter: 
-    drop-shadow(0 0 15px rgba(100, 255, 218, 0.8))
-    drop-shadow(0 0 25px rgba(29, 233, 182, 0.6))
-    drop-shadow(0 0 35px rgba(0, 212, 170, 0.5));
-  transform: translateY(25px) scale(1.1) rotateX(0deg);
+    filter: drop-shadow(0 0 15px rgba(100, 255, 218, 0.8)) drop-shadow(0 0 25px rgba(29, 233, 182, 0.6)) drop-shadow(0 0 35px rgba(0, 212, 170, 0.5));
+    transform: translateY(25px) scale(1.1) rotateX(0deg);
 }
 
 .subtitle {
-  font-size: clamp(0.8rem, 2vw, 1.2rem);
-  color: rgba(100, 255, 218, 0.8);
-  font-weight: 300;
-  letter-spacing: 0.2rem;
-  text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(100, 255, 218, 0.4);
-  opacity: 0;
-  transform: translateY(20px);
+    font-size: clamp(0.8rem, 2vw, 1.2rem);
+    color: rgba(100, 255, 218, 0.8);
+    font-weight: 300;
+    letter-spacing: 0.2rem;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(100, 255, 218, 0.4);
+    opacity: 0;
+    transform: translateY(20px);
 }
 
-/* 성능 최적화 */
 .stopword,
 .logo-center,
 .seta-text-container {
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
 }
 
-/* 반응형 */
 @media (max-width: 768px) {
-  .seta-text {
-    font-size: clamp(2rem, 12vw, 3rem);
-    letter-spacing: 0.3rem;
-  }
-  
-  .subtitle {
-    font-size: clamp(0.6rem, 3vw, 1rem);
-    letter-spacing: 0.15rem;
-  }
-  
-  .logo-center {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .seta-text-container {
-    top: 40%;
-  }
+    .seta-text {
+        font-size: clamp(2rem, 12vw, 3rem);
+        letter-spacing: 0.3rem;
+    }
+
+    .subtitle {
+        font-size: clamp(0.6rem, 3vw, 1rem);
+        letter-spacing: 0.15rem;
+    }
+
+    .logo-center {
+        width: 60px;
+        height: 60px;
+    }
+
+    .seta-text-container {
+        top: 40%;
+    }
 }
 
 @media (max-width: 480px) {
-  .seta-text {
-    font-size: clamp(1.5rem, 15vw, 2.5rem);
-    letter-spacing: 0.2rem;
-  }
-  
-  .subtitle {
-    font-size: clamp(0.5rem, 4vw, 0.8rem);
-    letter-spacing: 0.1rem;
-  }
-  
-  .logo-center {
-    width: 50px;
-    height: 50px;
-  }
+    .seta-text {
+        font-size: clamp(1.5rem, 15vw, 2.5rem);
+        letter-spacing: 0.2rem;
+    }
+
+    .subtitle {
+        font-size: clamp(0.5rem, 4vw, 0.8rem);
+        letter-spacing: 0.1rem;
+    }
+
+    .logo-center {
+        width: 50px;
+        height: 50px;
+    }
 }

@@ -1,4 +1,3 @@
-/* ===== 백드롭/쉘 ===== */
 .treemodal-backdrop {
     position: fixed;
     inset: 0;
@@ -25,54 +24,42 @@
     overflow: hidden;
 }
 
-/* ===== 변수 ===== */
 :root {
     --close-size: 40px;
     --close-gap: 12px;
-
     --text: #f2f4f7;
     --text-dim: #d1d5db;
     --text-sub: #9ca3af;
-
     --accent: #14b88f;
     --accent-2: #0fa37f;
-
     --border: rgba(255, 255, 255, .12);
     --border-soft: rgba(255, 255, 255, .06);
     --glass-bg: rgba(255, 255, 255, .08);
     --glass-surface: linear-gradient(145deg, rgba(255, 255, 255, .1) 0%, rgba(255, 255, 255, .03) 100%);
-
     --shadow-subtle: 0 1px 0 0 rgba(255, 255, 255, .1),
     0 8px 32px rgba(0, 0, 0, .3),
     inset 0 1px 0 rgba(255, 255, 255, .05);
-
     --r-xl: 20px;
     --r-lg: 16px;
     --r-md: 12px;
-
     --h1: clamp(26px, 3.8vw, 40px);
     --h2: clamp(17px, 2vw, 22px);
-
     --timeline-progress: .83;
-
     --kpi-h-icon: 28px;
     --kpi-h-value: 34px;
     --kpi-h-label: 20px;
     --kpi-h-hint: 22px;
 }
 
-/* ===== 스크롤 컨테이너 ===== */
 .lgm-container {
     position: relative;
     width: min(960px, 92vw);
     max-height: inherit;
     margin: 0 auto 8px;
-
     padding-top: calc(24px + var(--close-size) + var(--close-gap));
     padding-right: calc(24px + var(--close-size) / 2);
     padding-bottom: 24px;
     padding-left: 24px;
-
     box-sizing: border-box;
     display: grid;
     gap: 32px;
@@ -86,7 +73,6 @@
     display: none;
 }
 
-/* ===== 닫기(X) 버튼 ===== */
 .lgm-close {
     position: absolute;
     top: var(--close-gap);
@@ -127,7 +113,6 @@
     opacity: .92;
 }
 
-/* ===== 공통 카드 ===== */
 .lgm-card {
     position: relative;
     border-radius: var(--r-xl);
@@ -155,7 +140,6 @@
     opacity: .9;
 }
 
-/* ===== Hero ===== */
 .lgm-header {
     display: flex;
     align-items: center;
@@ -207,7 +191,6 @@
     line-height: 1.6;
 }
 
-/* ===== Tree Garden ===== */
 .lgm-tree-garden {
     display: flex;
     justify-content: center;
@@ -264,7 +247,6 @@
     opacity: .9;
 }
 
-/* ===== Progress ===== */
 .lgm-section-title {
     text-align: center;
     font-size: var(--h2);
@@ -286,7 +268,6 @@
     border: 1px solid var(--border-soft);
     overflow: hidden;
     position: relative;
-    /* 진행바는 기존 느낌 유지 */
     backdrop-filter: blur(12px) saturate(110%);
     -webkit-backdrop-filter: blur(12px) saturate(110%);
 }
@@ -345,7 +326,6 @@
     opacity: .9;
 }
 
-/* ===== KPI Section ===== */
 .lgm-kpis {
     display: flex;
     flex-direction: column;
@@ -455,7 +435,6 @@
     margin-top: auto;
 }
 
-/* ===== Timeline ===== */
 .lgm-timeline {
     display: grid;
     gap: 16px;
@@ -615,7 +594,6 @@
     overflow-wrap: anywhere;
 }
 
-/* ===== CTA ===== */
 .lgm-cta {
     text-align: center;
     display: grid;
@@ -661,7 +639,6 @@
     box-shadow: 0 8px 20px rgba(20, 184, 143, .25);
 }
 
-/* ===== Responsive tweaks ===== */
 @media (max-width: 480px) {
     :root {
         --close-size: 36px;

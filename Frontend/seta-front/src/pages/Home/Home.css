@@ -1,17 +1,12 @@
-/* ========== 기본 컬러 변수 ========== */
 :root {
-    /* 히어로/가치 타이틀 공통 그라데이션 */
     --gradient-start: rgba(255, 255, 255, 1);
     --gradient-end: rgba(156, 163, 175, 1);
-
-    /* 카드 내부 색상 톤 */
     --card-title-color: #ffffff;
     --card-strong-color: #e8ecf3;
     --card-desc-color: rgba(255, 255, 255, 0.9);
     --card-shadow: rgba(0, 0, 0, 0.25);
 }
 
-/* ========== 기존 스타일 유지 ========== */
 .home-container {
     position: relative;
     min-height: 100vh;
@@ -33,7 +28,7 @@
     position: relative;
     z-index: 10;
     display: flex;
-    flex-direction: column; /* ⬅︎ 가치 섹션이 아래로 이어지도록 */
+    flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     min-height: 100vh;
@@ -47,7 +42,7 @@
     text-align: center;
     max-width: 1152px;
     margin: 0 auto;
-    min-height: 100vh; /* 히어로를 1스크린로 고정 */
+    min-height: 100vh;
     justify-content: center;
 }
 
@@ -121,7 +116,6 @@
     box-shadow: 0px 8px 25px rgba(255, 255, 255, 0.15);
 }
 
-/* ========== 가치 섹션 ========== */
 .value-section {
     width: 100%;
     max-width: 1600px;
@@ -140,7 +134,6 @@
     margin-top: -10px;
 }
 
-/* 타이틀 */
 .value-title {
     margin: 0 0 14px 0;
     font-size: clamp(44px, 6vw, 72px);
@@ -152,7 +145,6 @@
     background-clip: text;
 }
 
-/* 부제목 */
 .value-sub {
     margin: 0 auto;
     background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
@@ -166,7 +158,6 @@
     opacity: 0.95;
 }
 
-/* 카드 그리드 */
 .value-grid {
     display: grid;
     gap: clamp(24px, 2vw, 32px);
@@ -175,7 +166,6 @@
     margin-top: clamp(24px, 4vw, 40px);
 }
 
-/* 카드 */
 .v-card {
     position: relative;
     padding: clamp(28px, 3.2vw, 40px);
@@ -200,7 +190,6 @@
     box-shadow: 0px 30px 60px -12px rgba(0, 0, 0, 0.35);
 }
 
-/* 카드 내부 */
 .v-top {
     display: flex;
     align-items: center;
@@ -243,15 +232,13 @@
     border-radius: 999px;
 }
 
-/* 홈 페이지에서만 스크롤바 숨김(스크롤 기능 유지) */
 html.hide-scrollbar,
 body.hide-scrollbar {
-    overflow-y: auto;          /* 스크롤은 그대로 */
-    -ms-overflow-style: none;  /* IE/Edge(레거시) */
-    scrollbar-width: none;     /* Firefox */
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-/* WebKit 계열(크롬/사파리/엣지) */
 html.hide-scrollbar::-webkit-scrollbar,
 body.hide-scrollbar::-webkit-scrollbar {
     width: 0;
@@ -265,7 +252,6 @@ body.hide-scrollbar::-webkit-scrollbar-track {
     background: transparent;
 }
 
-/* 반응형 */
 @media (max-width: 1280px) {
     .value-grid {
         grid-template-columns: repeat(2, minmax(300px, 1fr));

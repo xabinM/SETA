@@ -1,4 +1,12 @@
-import {useEffect, useMemo, useRef, useState, type HTMLAttributes, type AnchorHTMLAttributes, type MutableRefObject,} from "react";
+import {
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type HTMLAttributes,
+    type AnchorHTMLAttributes,
+    type MutableRefObject,
+} from "react";
 import {createPortal} from "react-dom";
 import {useParams} from "react-router-dom";
 import {getRoomMessages, sendMessageToServer, type UIMsg} from "@/features/chat/api";

@@ -36,7 +36,7 @@ export type Me = {
 };
 
 const RAW_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
-const BASE = RAW_BASE.replace(/\/+$/, ""); // 끝 슬래시 제거
+const BASE = RAW_BASE.replace(/\/+$/, "");
 
 export function signUp(payload: SignUpPayload, signal?: AbortSignal) {
     return http<SignUpResponse>("/auth/signup", {

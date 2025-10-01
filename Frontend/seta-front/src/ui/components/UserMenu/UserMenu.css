@@ -1,4 +1,3 @@
-/* 푸터 기준 위로 뜨는 drop-up */
 .usermenu-wrap {
     position: absolute;
     bottom: calc(100% + 8px);
@@ -25,9 +24,8 @@
     max-width: 320px;
     border-radius: 16px;
     border: 1px solid var(--glass-border);
-    /* ✨ 투명 배경 대신 불투명 단색으로 */
-    background: rgba(24, 24, 27, 0.95); /* 거의 검정에 가까운 불투명 배경 */
-    backdrop-filter: none; /* 블러 제거 */
+    background: rgba(24, 24, 27, 0.95);
+    backdrop-filter: none;
     -webkit-backdrop-filter: none;
     box-shadow: 0 1px 0 rgba(255, 255, 255, .08),
     0 10px 32px rgba(0, 0, 0, .35),
@@ -38,7 +36,7 @@
 
 .usermenu-caret {
     position: absolute;
-    left: 18px; /* align=right면 오른쪽으로 조정해도 됨 */
+    left: 18px;
     bottom: -8px;
     width: 14px;
     height: 14px;

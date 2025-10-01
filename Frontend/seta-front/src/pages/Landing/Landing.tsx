@@ -11,23 +11,22 @@ const Landing: React.FC = () => {
     const setaTextRef = useRef<HTMLDivElement>(null);
     const particlesRef = useRef<HTMLDivElement[]>([]);
 
-    // 불용어 목록 
     const stopwords = [
-            "고마워", "고마워요", "감사해요", "감사합니다", 
-            "도움 고마워", "답변 감사", "수고했어",
-            "thanks a lot", 
-            "thanks for help", "thanks for explaining",
-            "잘못했어", 
-            "늦어서 미안", "바쁜데 미안", "다시 물어봐서 미안",
-            "sorry", "apologize", 
-            "안녕", "안녕하세요", "안녕하십니까", "하이", "헬로", "hello", "hi",
-            "오랜만", "오랜만이야", 
-            "그런데", "근데", "그래서", "그리고나서",
-            "있잖아", "내말은", "그니깐", "그러니까", "뭐랄까", "어떻게보면", "사실은",
-            "생각해보니", "돌이켜보면", "말하자면", 
-            "honestly", "frankly", "obviously", 
-            "therefore", "furthermore", "moreover",
-            
+        "고마워", "고마워요", "감사해요", "감사합니다",
+        "도움 고마워", "답변 감사", "수고했어",
+        "thanks a lot",
+        "thanks for help", "thanks for explaining",
+        "잘못했어",
+        "늦어서 미안", "바쁜데 미안", "다시 물어봐서 미안",
+        "sorry", "apologize",
+        "안녕", "안녕하세요", "안녕하십니까", "하이", "헬로", "hello", "hi",
+        "오랜만", "오랜만이야",
+        "그런데", "근데", "그래서", "그리고나서",
+        "있잖아", "내말은", "그니깐", "그러니까", "뭐랄까", "어떻게보면", "사실은",
+        "생각해보니", "돌이켜보면", "말하자면",
+        "honestly", "frankly", "obviously",
+        "therefore", "furthermore", "moreover",
+
 
     ];
 
@@ -37,10 +36,8 @@ const Landing: React.FC = () => {
             nullTargetWarn: false
         });
 
-        // 별 반짝임 애니메이션 (점점 많아지는 효과)
         animateStarfield();
 
-        // 메인 시퀀스 시작 (5초 후 - 별들이 충분히 많아진 후)
         const mainTimeline = gsap.timeline({delay: 5});
         startMainSequence(mainTimeline);
 
@@ -50,7 +47,6 @@ const Landing: React.FC = () => {
     }, [navigate]);
 
     const animateStarfield = () => {
-        // 불용어들을 3개 그룹으로 나누어 순차적으로 등장
         const totalWords = stopwords.length * 3;
 
         particlesRef.current.forEach((particle, index) => {
@@ -63,8 +59,7 @@ const Landing: React.FC = () => {
                     transformOrigin: "center center"
                 });
 
-                // 순차적 등장 (별이 하나씩 나타나는 효과)
-                const appearDelay = (index / totalWords) * 4; // 4초에 걸쳐 모든 별이 등장
+                const appearDelay = (index / totalWords) * 4;
 
                 gsap.to(particle, {
                     opacity: 0.6 + Math.random() * 0.4,
@@ -73,7 +68,6 @@ const Landing: React.FC = () => {
                     delay: appearDelay,
                     ease: "power2.out",
                     onComplete: () => {
-                        // 등장 후 반짝이는 애니메이션
                         startTwinkleAnimation(particle);
                     }
                 });
@@ -82,7 +76,6 @@ const Landing: React.FC = () => {
     };
 
     const startTwinkleAnimation = (particle: HTMLDivElement) => {
-        // 별처럼 반짝이는 애니메이션
         gsap.to(particle, {
             opacity: 0.2 + Math.random() * 0.6,
             scale: 0.6 + Math.random() * 0.6,
@@ -93,7 +86,6 @@ const Landing: React.FC = () => {
             delay: Math.random() * 2
         });
 
-        // 미세한 회전 효과
         gsap.to(particle, {
             rotation: `+=${(Math.random() - 0.5) * 30}`,
             duration: 6 + Math.random() * 4,
@@ -104,12 +96,10 @@ const Landing: React.FC = () => {
     };
 
     const startMainSequence = (tl: gsap.core.Timeline) => {
-        // 로고의 중심 좌표 계산
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
 
         tl
-            // 1단계: 로고 등장
             .to('.logo-center', {
                 opacity: 1,
                 scale: 1,
@@ -117,7 +107,6 @@ const Landing: React.FC = () => {
                 ease: "back.out(1.7)"
             })
 
-            // 2단계: 불용어들 색상 변화 (빨간색 = 나쁜 것)
             .add(() => {
                 particlesRef.current.forEach((particle, index) => {
                     if (particle) {
@@ -132,7 +121,6 @@ const Landing: React.FC = () => {
                 });
             }, 1)
 
-            // 3단계: 로고 회전 시작 (블랙홀 효과 준비)
             .to('.logo-center', {
                 rotation: 360,
                 scale: 1.2,
@@ -140,16 +128,14 @@ const Landing: React.FC = () => {
                 ease: "power2.inOut"
             }, 2)
 
-            // 4단계 전: 기존 애니메이션 모두 종료
             .add(() => {
                 particlesRef.current.forEach(particle => {
                     if (particle) {
-                        gsap.killTweensOf(particle); // 모든 떠다니는 애니메이션 종료
+                        gsap.killTweensOf(particle);
                     }
                 });
-            }, 3.4) // 흡수 애니메이션 시작 0.1초 전에 종료
+            }, 3.4)
 
-            // 4단계: 깔끔한 흡수 애니메이션
             .add(() => {
                 particlesRef.current.forEach((particle, index) => {
                     if (particle) {
@@ -174,10 +160,9 @@ const Landing: React.FC = () => {
 
             .add(() => {
                 if (setaTextRef.current && logoRef.current) {
-                    // 로고의 현재 위치를 기준으로 텍스트 위치 설정
                     const logoRect = logoRef.current.getBoundingClientRect();
                     const centerX = logoRect.left + logoRect.width / 2;
-                    const centerY = logoRect.top + logoRect.height / 2 - 80; // -80을 -120으로 수정 (더 위로)
+                    const centerY = logoRect.top + logoRect.height / 2 - 80;
 
                     gsap.set(setaTextRef.current, {
                         position: 'absolute',
@@ -191,7 +176,6 @@ const Landing: React.FC = () => {
                 }
             }, 5.0)
 
-            // 6단계: SETA 글자들 개별 등장 효과
             .to('.letter', {
                 opacity: 1,
                 y: 0,
@@ -199,10 +183,9 @@ const Landing: React.FC = () => {
                 scale: 1,
                 duration: 0.6,
                 ease: "back.out(2)",
-                stagger: 0.15 // stagger를 옵션으로 추가
+                stagger: 0.15
             }, 5.2)
 
-            // 7단계: Green AI 부제목 등장
             .to('.subtitle', {
                 opacity: 1,
                 y: 0,
@@ -210,7 +193,6 @@ const Landing: React.FC = () => {
                 ease: "power2.out"
             }, 6.2)
 
-            // 8단계: 완료 후 페이지 전환
             .add(() => {
                 setTimeout(() => {
                     gsap.to(containerRef.current, {
@@ -238,8 +220,6 @@ const Landing: React.FC = () => {
             style={{backgroundImage: `url(${ChatBackground})`}}
         >
             <div className="background-overlay"></div>
-
-            {/* 불용어 파티클들 */}
             <div className="particles-container">
                 {[...Array(3)].map((_, groupIndex) =>
                     stopwords.map((word, index) => (
@@ -248,7 +228,7 @@ const Landing: React.FC = () => {
                             ref={addParticleRef}
                             className="stopword"
                             style={{
-                                position: 'absolute', // 반드시 absolute 위치 지정
+                                position: 'absolute',
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
                                 fontSize: `${10 + Math.random() * 8}px`,
@@ -259,8 +239,6 @@ const Landing: React.FC = () => {
                     ))
                 )}
             </div>
-
-            {/* SETA 로고 */}
             <div className="logo-center">
                 <img
                     ref={logoRef}

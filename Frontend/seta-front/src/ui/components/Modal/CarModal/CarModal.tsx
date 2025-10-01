@@ -3,7 +3,7 @@ import {createPortal} from "react-dom";
 import {gsap} from "gsap";
 import "./CarModal.css";
 import type {CarModalProps} from "./types";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 export default function CarModal({
                                      open,
@@ -18,68 +18,45 @@ export default function CarModal({
     const fillRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
-    // 파생값 계산 - 수정됨
-    const {
-    currentKwh, efficiency, totalKm, equivKm, progress01, pct, remainingKm, isNewUser
-} = useMemo(() => {
-    const currentKwh = power?.current ?? 0;
-    const efficiency = vehicle?.efficiencyKmPerKwh ?? 5.2;
-    const total = trip?.totalKm ?? 0;
+    const {currentKwh, efficiency, totalKm, equivKm, progress01, pct, remainingKm, isNewUser} = useMemo(() => {
+        const currentKwh = power?.current ?? 0;
+        const efficiency = vehicle?.efficiencyKmPerKwh ?? 5.2;
+        const total = trip?.totalKm ?? 0;
 
-    // 신규 회원 체크 (절약한 전력이 실질적으로 0인 경우)
-    const isNewUser = currentKwh < 0.001;
+        const isNewUser = currentKwh < 0.001;
 
-    const eqKm = isNewUser ? 0 : Math.max(0, currentKwh * efficiency);
-    const p01 = total > 0 && !isNewUser ? Math.max(0, Math.min(1, eqKm / total)) : 0;
+        const eqKm = isNewUser ? 0 : Math.max(0, currentKwh * efficiency);
+        const p01 = total > 0 && !isNewUser ? Math.max(0, Math.min(1, eqKm / total)) : 0;
 
-    console.log('CarModal 파생값 계산:', {
-        currentKwh,
-        efficiency,
-        totalKm: total,
-        equivKm: eqKm,
-        isNewUser,
-        progress01: p01,
-        pct: Math.round(p01 * 100)
-    });
+        console.log('CarModal 파생값 계산:', {
+            currentKwh,
+            efficiency,
+            totalKm: total,
+            equivKm: eqKm,
+            isNewUser,
+            progress01: p01,
+            pct: Math.round(p01 * 100)
+        });
 
-    return {
-        currentKwh,
-        efficiency,
-        totalKm: total,
-        equivKm: isNewUser ? 0 : Math.max(0.1, Math.round(eqKm * 10) / 10),
-        progress01: p01,
-        pct: Math.round(p01 * 100),
-        remainingKm: Math.max(0, Math.round(total - eqKm)),
-        isNewUser
-    };
-}, [power?.current, vehicle?.efficiencyKmPerKwh, trip?.totalKm]);
+        return {
+            currentKwh,
+            efficiency,
+            totalKm: total,
+            equivKm: isNewUser ? 0 : Math.max(0.1, Math.round(eqKm * 10) / 10),
+            progress01: p01,
+            pct: Math.round(p01 * 100),
+            remainingKm: Math.max(0, Math.round(total - eqKm)),
+            isNewUser
+        };
+    }, [power?.current, vehicle?.efficiencyKmPerKwh, trip?.totalKm]);
 
-    // 포맷팅 함수 개선 - 작은 소수 처리
     const formatDistance = (km: number, isNewUser: boolean = false): string => {
-    if (isNewUser || km === 0) return "0";
-    if (km < 0.1) return "0.1";
-    if (km < 1) return km.toFixed(1);
-    return Math.round(km).toLocaleString();
-};
+        if (isNewUser || km === 0) return "0";
+        if (km < 0.1) return "0.1";
+        if (km < 1) return km.toFixed(1);
+        return Math.round(km).toLocaleString();
+    };
 
-    // const formatDistance = (km: number): string => {
-    //     if (km === 0) return "0";
-    //     if (km < 1) return km.toFixed(1);
-    //     return Math.round(km).toLocaleString();
-    // };
-
-    // KPI 자동 생성 - 포맷팅 개선
-    // const autoKpis =
-    //     kpis && kpis.length
-    //         ? kpis
-    //         : [
-    //             {icon: "🔋", label: "누적 전력 절약", value: `${formatKwh(currentKwh)} kWh`},
-    //             {icon: "🌿", label: "CO₂ 절감", value: `${Math.round(currentKwh * 0.2 * 1000)}g`}, // g 단위로 표시
-    //             {icon: "💰", label: "비용 절감", value: `${Math.round(currentKwh * 110)} 원`},
-    //             {icon: "⚙️", label: "전비", value: `${efficiency.toFixed(1)} km/kWh`},
-    //         ];
-
-    // 구간 상태(단계 기준) - 실제 데이터 기반으로 계산
     const getSegmentStatus = (i: number) => {
         const totalSegments = segments?.length ?? 3;
         const segmentProgress = progress01 * totalSegments;
@@ -89,15 +66,11 @@ export default function CarModal({
         return "upcoming";
     };
 
-    // 공유 기능 - 더 정확한 데이터로 업데이트
     const handleShare = async () => {
-        // 구체적인 성과 데이터 생성
         const costSaving = `${Math.round(currentKwh * 110).toLocaleString()}원`;
         const co2Reduction = `${Math.round(currentKwh * 0.2).toLocaleString()}kg`;
         const energySaving = `${currentKwh.toLocaleString()}kWh`;
-
         const shareText = `🚗 SETA 가상 드라이브\n\nAI 사용 최적화로 절약한 에너지로 가상 여행 중!\n\n📍 ${trip?.origin || "출발지"} → ${trip?.destination || "목적지"}\n🛣️ 총 거리: ${totalKm.toLocaleString()}km\n🏃‍♂️ 현재 진행: ${equivKm.toLocaleString()}km (${pct}%)\n\n⚡ 절약 현황:\n• ${energySaving} 전력 절약\n• ${costSaving} 비용 절감\n• ${co2Reduction} CO₂ 절감\n\n작은 실천이 환경을 바꿉니다! 🌍`;
-
         const shareData = {
             title: 'SETA 가상 드라이브 - 에너지 절약 여행',
             text: shareText,
@@ -166,7 +139,6 @@ export default function CarModal({
         document.body.removeChild(textArea);
     };
 
-    // ESC + 스크롤 락
     useEffect(() => {
         if (!open) return;
         const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -179,7 +151,6 @@ export default function CarModal({
         };
     }, [open, onClose]);
 
-    // 진행 애니메이션
     const prevRef = useRef(0);
     useEffect(() => {
         if (!open || !shellRef.current) return;
@@ -187,7 +158,7 @@ export default function CarModal({
         const prev = prevRef.current;
         const next = progress01;
 
-        console.log('진행 애니메이션:', { prev, next, progress01 });
+        console.log('진행 애니메이션:', {prev, next, progress01});
 
         gsap.to(root, {
             duration: 0.8,
@@ -206,7 +177,6 @@ export default function CarModal({
         prevRef.current = next;
     }, [open, progress01]);
 
-    // 오픈 초기화
     useEffect(() => {
         if (!open || !shellRef.current || !fillRef.current) return;
         prevRef.current = 0;
@@ -224,7 +194,6 @@ export default function CarModal({
         >
             <div ref={shellRef} className="carmodal-shell" role="dialog" aria-modal="true">
                 <main className="cm-container">
-                    {/* 닫기 */}
                     <button className="cm-close" aria-label="닫기" onClick={onClose}>
                         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                             <path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" strokeWidth="2"
@@ -232,7 +201,6 @@ export default function CarModal({
                         </svg>
                     </button>
 
-                    {/* HERO */}
                     <section className="cm-card cm-hero">
                         <div className="cm-header">
                             <div className="cm-badge" aria-hidden="true">
@@ -245,7 +213,8 @@ export default function CarModal({
                             <div className="cm-header-text">
                                 <h1 className="cm-title">절약 전력으로 가는 가상 주행</h1>
                                 <p className="cm-subtitle">
-                                    {(trip?.origin ?? "출발지")} → {(trip?.destination ?? "도착지")} 이 {totalKm.toLocaleString()}km 여정.
+                                    {(trip?.origin ?? "출발지")} → {(trip?.destination ?? "도착지")} 이 {totalKm.toLocaleString()}km
+                                    여정.
                                     <br/>
                                     {isNewUser ? (
                                         <>
@@ -264,23 +233,6 @@ export default function CarModal({
                             </div>
                         </div>
                     </section>
-
-                    {/* KPI
-                    {autoKpis.length > 0 && (
-                        <section className="cm-kpi-wrap" aria-label="핵심 지표">
-                            <div className="cm-kpis-grid4">
-                                {autoKpis.map((k, i) => (
-                                    <div key={i} className="cm-kpi" role="group" aria-label={k.label}>
-                                        <div className="cm-kpi__icon-wrap">{k.icon}</div>
-                                        <div className="cm-kpi__value">{k.value}</div>
-                                        <div className="cm-kpi__label">{k.label}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )} */}
-
-                    {/* 진행도 */}
                     <section className="cm-card">
                         <div className="cm-section-head">
                             <div className="cm-icon-wrap" aria-hidden="true">
@@ -309,13 +261,14 @@ export default function CarModal({
 
                             <div className="cm-meta">
                                 <div className="cm-chip">등가 주행: {formatDistance(equivKm, isNewUser)}km</div>
-                                <div className="cm-chip">목표: {totalKm.toLocaleString()}km ({remainingKm.toLocaleString()}km 남음)</div>
+                                <div className="cm-chip">목표: {totalKm.toLocaleString()}km
+                                    ({remainingKm.toLocaleString()}km 남음)
+                                </div>
                                 {!isNewUser && <div className="cm-chip">전비: {efficiency.toFixed(1)} km/kWh</div>}
                             </div>
                         </div>
                     </section>
 
-                    {/* 타임라인 */}
                     <section className="cm-card">
                         <div className="cm-section-head">
                             <div className="cm-icon-wrap" aria-hidden="true">
@@ -370,7 +323,6 @@ export default function CarModal({
                         </div>
                     </section>
 
-                    {/* CTA */}
                     {cta?.share && (
                         <section className="cm-card cm-cta" aria-labelledby="cm-cta-title">
                             <div className="cm-cta-grid">

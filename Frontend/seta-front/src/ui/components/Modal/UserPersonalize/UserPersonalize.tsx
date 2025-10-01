@@ -18,7 +18,7 @@ type Props = {
     onSave: (values: PersonalizeValues) => void;
 };
 
-type ToneValue = "기본" | "친근한" | "정중한" | "유쾌한" | "차분한"| "냉소적인";
+type ToneValue = "기본" | "친근한" | "정중한" | "유쾌한" | "차분한" | "냉소적인";
 type ToneProps = React.PropsWithChildren<{ value: ToneValue }>;
 
 function hasValueProp(

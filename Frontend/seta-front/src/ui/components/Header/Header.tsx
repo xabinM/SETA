@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import {Link} from "react-router-dom";
 import logoSrc from "@/assets/seta.png";
 
 export default function Header() {
@@ -26,7 +26,6 @@ export default function Header() {
                 boxShadow: "0px 25px 50px -12px rgba(0, 0, 0, 0.25)",
             }}
         >
-            {/* 로고 영역: 클릭/포커스 불가(탭 이동도 없음) */}
             <div
                 className="flex items-center gap-3 select-none cursor-default"
                 aria-label="SETA"
@@ -48,7 +47,7 @@ export default function Header() {
               alt=""
               className="select-none"
               draggable={false}
-              style={{ width: "22px", height: "23px", objectFit: "contain" }}
+              style={{width: "22px", height: "23px", objectFit: "contain"}}
           />
         </span>
                 <span
@@ -66,7 +65,6 @@ export default function Header() {
         </span>
             </div>
 
-            {/* 네비게이션: 이 링크들만 이동 */}
             <div className="h-full flex items-center whitespace-nowrap space-x-6">
                 <Link
                     to="/chat"
@@ -74,7 +72,7 @@ export default function Header() {
                     style={{
                         fontFamily: "'Inter', sans-serif",
                         fontWeight: 700,
-                        fontSize: "1.25rem",  // 20px
+                        fontSize: "1.25rem",
                         lineHeight: "1.75rem",
                         color: "#e5e7eb",
                         marginRight: "70px",

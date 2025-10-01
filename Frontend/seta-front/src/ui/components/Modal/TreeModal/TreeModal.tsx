@@ -16,19 +16,15 @@ export default function TreeModal({
     const shellRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
-    // 공유 기능
     const handleShare = async () => {
-        // KPI 데이터에서 구체적인 수치 추출
         const costSaving = kpis.find(k => k.label.includes('비용'))?.value || '₩0';
         const co2Reduction = kpis.find(k => k.label.includes('CO₂'))?.value || '0kg';
         const energySaving = kpis.find(k => k.label.includes('에너지'))?.value || '0kWh';
         const consecutiveDays = kpis.find(k => k.label.includes('연속'))?.value || '0일';
 
-        // 달성한 나무 개수 계산
         const achievedTrees = TREE_LEVELS.filter(level => tokens.current >= level).length;
         const treeEmojis = ['🌱', '🌿', '🌳', '🌲', '🌴'];
         const achievedTreeEmojis = treeEmojis.slice(0, achievedTrees).join('');
-
         const shareText = `SETA Tree ${achievedTreeEmojis || '🌱'}\n\nAI 사용 최적화로 환경 보호에 기여하고 있어요!\n\n📊 내 절약 현황:\n• ${tokens.current.toLocaleString()}토큰 절약 완료\n• ${costSaving} 비용 절약\n• ${co2Reduction} CO₂ 절감\n• ${energySaving} 에너지 절약\n• ${consecutiveDays} 연속 절약\n\n작은 실천이 큰 변화를 만들어요 🌍`;
 
         const shareData = {
@@ -38,15 +34,12 @@ export default function TreeModal({
         };
 
         try {
-            // Web Share API 지원 확인
             if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
                 await navigator.share(shareData);
             } else {
-                // 폴백: 클립보드에 복사
                 await handleCopyLink(shareText);
             }
         } catch (error) {
-            // 사용자가 공유를 취소했거나 에러 발생 시 클립보드 복사로 폴백
             if (error instanceof Error && error.name !== 'AbortError') {
                 await handleCopyLink(shareText);
             }
@@ -58,7 +51,6 @@ export default function TreeModal({
 
         try {
             await navigator.clipboard.writeText(shareText);
-            // 복사 완료 피드백 (간단한 알림)
             const button = document.querySelector('.lgm-btn-primary') as HTMLButtonElement;
             if (button) {
                 const originalText = button.textContent;
@@ -70,7 +62,6 @@ export default function TreeModal({
                 }, 2000);
             }
         } catch {
-            // 클립보드 API 지원하지 않는 경우 텍스트 선택
             fallbackCopyToClipboard(shareText);
         }
     };
@@ -87,7 +78,6 @@ export default function TreeModal({
 
         try {
             document.execCommand('copy');
-            // 복사 완료 피드백
             const button = document.querySelector('.lgm-btn-primary') as HTMLButtonElement;
             if (button) {
                 const originalText = button.textContent;
@@ -117,15 +107,10 @@ export default function TreeModal({
         };
     }, [open, onClose]);
 
-    // 타임라인 진행도 계산 수정
     useEffect(() => {
         if (!open || !shellRef.current) return;
-
-        // 완료된 나무 개수 계산
         const completedTrees = TREE_LEVELS.filter(level => tokens.current >= level).length;
         const totalTrees = TREE_LEVELS.length;
-
-        // 현재 진행 중인 나무의 진행도 계산
         let currentProgress = 0;
         if (completedTrees < totalTrees) {
             const currentTargetLevel = TREE_LEVELS[completedTrees];
@@ -133,7 +118,7 @@ export default function TreeModal({
             const progressInCurrentLevel = (tokens.current - prevLevel) / (currentTargetLevel - prevLevel);
             currentProgress = (completedTrees + progressInCurrentLevel) / totalTrees;
         } else {
-            currentProgress = 1; // 모든 나무 완료
+            currentProgress = 1;
         }
 
         shellRef.current.style.setProperty("--timeline-progress", String(Math.min(0.999, currentProgress)));
@@ -145,13 +130,11 @@ export default function TreeModal({
     const remaining = Math.max(0, tokens.goal - tokens.current);
     const fmt = (n: number) => n.toLocaleString();
 
-    // 나무 상태 계산 함수 수정
     const getTreeStatus = (treeIndex: number) => {
         const requiredTokens = TREE_LEVELS[treeIndex];
         return tokens.current >= requiredTokens;
     };
 
-    // 타임라인 상태 계산 함수 수정
     const getTimelineStatus = (_timelineItem: TimelineItem, index: number) => {
         const requiredTokens = TREE_LEVELS[index];
 
@@ -177,7 +160,6 @@ export default function TreeModal({
                 aria-labelledby="lgm-hero-title"
             >
                 <main className="lgm-container">
-                    {/* X 버튼 */}
                     <button type="button" className="lgm-close" aria-label="닫기" onClick={onClose}>
                         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                             <path
@@ -189,7 +171,6 @@ export default function TreeModal({
                         </svg>
                     </button>
 
-                    {/* Hero */}
                     <section className="lgm-card" aria-labelledby="lgm-hero-title">
                         <div className="lgm-header">
                             <div className="lgm-badge" aria-hidden="true">
@@ -210,15 +191,12 @@ export default function TreeModal({
                         </p>
                     </section>
 
-                    {/* Trees */}
                     <section className="lgm-card">
                         <div className="lgm-tree-garden">
                             {trees.map((t, i) => {
                                 const isAchieved = getTreeStatus(i);
-                                // 투명도 계산 개선
                                 let opacity = 1;
                                 if (!isAchieved) {
-                                    // 다음 나무 (현재 진행 중)는 0.5, 나머지는 0.3
                                     const completedCount = TREE_LEVELS.filter(level => tokens.current >= level).length;
                                     opacity = i === completedCount ? 0.5 : 0.3;
                                 }
@@ -236,7 +214,6 @@ export default function TreeModal({
                         </div>
                     </section>
 
-                    {/* Progress */}
                     <section className="lgm-card" aria-labelledby="lgm-progress-title">
                         <h2 id="lgm-progress-title" className="lgm-section-title">
                             <img
@@ -265,26 +242,6 @@ export default function TreeModal({
                         </div>
                     </section>
 
-                    {/* KPIs */}
-                    {/* <section className="lgm-kpis" aria-labelledby="lgm-kpi-title">
-                        <h2 id="lgm-kpi-title" className="lgm-section-title">
-                            절약 지표
-                        </h2>
-                        <div className="lgm-kpis-grid">
-                            {kpis.map((k, i) => (
-                                <div key={i} className="lgm-kpi" role="group" aria-label={k.ariaLabel || k.label}>
-                                    <div className="lgm-kpi__icon" aria-hidden="true">
-                                        {k.icon}
-                                    </div>
-                                    <div className="lgm-kpi__value">{k.value}</div>
-                                    <div className="lgm-kpi__label">{k.label}</div>
-                                    {k.hint && <div className="lgm-kpi__hint">{k.hint}</div>}
-                                </div>
-                            ))}
-                        </div>
-                    </section> */}
-
-                    {/* Timeline */}
                     <section className="lgm-card" aria-labelledby="lgm-timeline-title">
                         <h2 id="lgm-timeline-title" className="lgm-section-title" style={{marginBottom: 8}}>🌳 나무 심기 여정</h2>
                         <div className="lgm-timeline">
@@ -292,7 +249,6 @@ export default function TreeModal({
                                 const status = getTimelineStatus(t, i);
                                 const statusText = status === "done" ? "완료" : status === "progress" ? "진행중" : "예정";
 
-                                // 날짜 동적 계산
                                 let dateText = "";
                                 if (status === "done") {
                                     dateText = "완료";
@@ -322,7 +278,6 @@ export default function TreeModal({
                         </div>
                     </section>
 
-                    {/* CTA */}
                     <section className="lgm-card lgm-cta" aria-labelledby="lgm-closing-title">
                         <h2 id="lgm-closing-title" className="lgm-section-title">🌍 지구를 위한 작은 실천</h2>
                         <p className="m-0 text-center" style={{color: "var(--text-dim)"}}>

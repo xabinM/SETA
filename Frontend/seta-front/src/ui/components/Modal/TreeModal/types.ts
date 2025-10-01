@@ -9,7 +9,7 @@ export type Tree = {
 };
 
 export type KPI = {
-    icon: ReactNode;       // ← string → ReactNode 로 변경
+    icon: ReactNode;
     value: string;
     label: string;
     hint?: string;
@@ -17,7 +17,7 @@ export type KPI = {
 };
 
 export type TimelineItem = {
-    icon: ReactNode;       // ← string → ReactNode 로 변경 (이모지/이미지 모두 허용)
+    icon: ReactNode;
     title: string;
     status: "done" | "progress" | "upcoming";
     date: string;

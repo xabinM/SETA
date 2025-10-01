@@ -375,8 +375,8 @@ body.mobile-scroll-enabled {
 }
 
 .feature-title {
-    display: flex;          /* 아이콘 + 텍스트 가로 배치 */
-    align-items: center;    /* 세로 기준 맞춤 (baseline 들뜸 방지) */
+    display: flex;
+    align-items: center;
     gap: 8px;
     font-family: 'Noto Sans KR';
     font-weight: 700;
@@ -389,8 +389,8 @@ body.mobile-scroll-enabled {
 .feature-title img {
     width: 25px;
     height: 25px;
-    flex: 0 0 25px;         /* 크기 고정으로 흔들림 방지 */
-    display: block;         /* 인라인 이미지 라인박스 간섭 제거 */
+    flex: 0 0 25px;
+    display: block;
 }
 
 .feature-description {
@@ -400,13 +400,10 @@ body.mobile-scroll-enabled {
     line-height: 1.3;
     color: #A0A0B0;
     text-align: left;
-    /* 한국어 자연 줄바꿈 → 단어 중간 어색한 줄바꿈 감소 */
     word-break: keep-all;
-    overflow-wrap: anywhere;  /* 긴 영어/URL 안전 */
-    text-wrap: pretty;        /* 지원 브라우저에서 보기 좋게 */
-
-    line-height: 1.4;         /* 살짝 조정해 가독성↑ */
-    /* min-height 같은 강제 높이 없음 → 답답한 2줄 고정 제거 */
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+    line-height: 1.4;
 }
 
 

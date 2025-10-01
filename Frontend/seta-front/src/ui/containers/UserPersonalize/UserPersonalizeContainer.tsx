@@ -1,4 +1,3 @@
-// UserPersonalizeContainer.tsx
 import {useEffect, useState} from "react";
 import {createPortal} from "react-dom";
 import UserPersonalize, {type PersonalizeValues} from "@/ui/components/Modal/UserPersonalize/UserPersonalize";
@@ -12,7 +11,6 @@ import {
 import {parseTraits, joinTraits} from "@/features/user-setting/normalize";
 import CustomToast from "@/ui/components/Toast/CustomToast";
 
-/* ==== 톤 매핑 (UI 한글 ↔ API 영문) ==== */
 const UI2CODE = {
     "기본": "neutral",
     "친근한": "friendly",
@@ -35,9 +33,7 @@ const CODE2UI: Record<string, ToneUI> = {
 
 function toUI(v?: string | null): ToneUI {
     if (!v) return "기본";
-    // 이미 한글 톤으로 들어오면 그대로 사용
     if ((UI2CODE as Record<string, string>)[v]) return v as ToneUI;
-    // 영문 코드 → 한글
     const key = v.toLowerCase?.() ?? v;
     return CODE2UI[key] ?? "기본";
 }
@@ -46,7 +42,6 @@ function toCode(v: ToneUI): string {
     return UI2CODE[v] ?? "neutral";
 }
 
-/* ==== 서버 ↔ UI 매핑 ==== */
 function mapServerToValues(data: UserSettingServer | null): Partial<PersonalizeValues> | undefined {
     if (!data) return undefined;
     return {
@@ -62,8 +57,8 @@ function mapValuesToCreatePayload(v: PersonalizeValues): UserSettingCreatePayloa
     return {
         callMe: v.callMe.trim(),
         roleDescription: v.roleDescription.trim(),
-        preferredTone: toCode(v.preferredTone as ToneUI), // 한글 → 영문 코드
-        traits: joinTraits(v.traits),                      // 배열 → "간결함, 침착함"
+        preferredTone: toCode(v.preferredTone as ToneUI),
+        traits: joinTraits(v.traits),
         additionalContext: v.additionalContext.trim(),
     };
 }
@@ -73,13 +68,11 @@ function buildDiffPayload(
     prev: Partial<PersonalizeValues> | undefined
 ): Partial<UserSettingCreatePayload> {
     const diff: Partial<UserSettingCreatePayload> = {};
-
     const prevCallMe = (prev?.callMe ?? "").trim();
     const prevRole = (prev?.roleDescription ?? "").trim();
     const prevToneUI = (prev?.preferredTone ?? "기본") as ToneUI;
     const prevTraitsStr = joinTraits(prev?.traits ?? []);
     const prevCtx = (prev?.additionalContext ?? "").trim();
-
     const nextCallMe = next.callMe.trim();
     const nextRole = next.roleDescription.trim();
     const nextToneUI = next.preferredTone as ToneUI;
@@ -95,7 +88,6 @@ function buildDiffPayload(
     return diff;
 }
 
-/* ==== 컨테이너 ==== */
 export default function UserPersonalizeContainer({
                                                      open,
                                                      onClose,
@@ -144,10 +136,7 @@ export default function UserPersonalizeContainer({
             }
 
             setInitialValues(values);
-
-            // 성공 토스트 먼저 띄우고,
             setToast({message: "저장 완료", description: "개인 맞춤 설정이 적용되었습니다."});
-            // 다음 프레임에 모달 닫기(토스트가 즉시 보이도록)
             requestAnimationFrame(() => onClose());
         } catch (e) {
             console.error("설정 저장 실패:", e);
@@ -157,7 +146,6 @@ export default function UserPersonalizeContainer({
 
     return (
         <>
-            {/* 모달만 조건부 렌더 — 토스트는 항상 렌더 */}
             {open && ready && (
                 <UserPersonalize
                     open={true}

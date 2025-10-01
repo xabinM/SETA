@@ -10,8 +10,8 @@ import {getChatRooms, createChatRoom, deleteChatRoom, type ChatRoom} from "@/fea
 import {loadCachedRooms, saveCachedRooms} from "@/features/chat/cache";
 import {getMe} from "@/features/auth/api";
 import type {Me} from "@/features/auth/api";
-import ConfirmModal from "@/ui/components/Modal/Confirm/ConfirmModal"; // ✅ 커스텀 확인 모달
-import CustomToast from "@/ui/components/Toast/CustomToast";           // ✅ 로그인과 동일 토스트
+import ConfirmModal from "@/ui/components/Modal/Confirm/ConfirmModal";
+import CustomToast from "@/ui/components/Toast/CustomToast";
 
 function AddIcon(props: SVGProps<SVGSVGElement>) {
     return (
@@ -26,8 +26,7 @@ function AddIcon(props: SVGProps<SVGSVGElement>) {
                 <filter id="filter0_d_add_373_2459" x="-4" y="0" width="32.0047" height="32.0049"
                         filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
                     <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                                   result="hardAlpha"/>
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
                     <feOffset dy="4"/>
                     <feGaussianBlur stdDeviation="2"/>
                     <feComposite in2="hardAlpha" operator="out"/>
@@ -71,9 +70,7 @@ export default function Chat() {
         delete titleCheckInFlightRef.current[roomId];
     }, []);
 
-    // ✅ 모달 오픈용
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-    // ✅ 토스트 상태 (Login과 동일한 형태)
     const [toast, setToast] = useState<{ msg: string; desc?: string } | null>(null);
 
     const applyRoomsIfChanged = useCallback(
@@ -292,13 +289,10 @@ export default function Chat() {
                     saveCachedRooms(next);
                     return next;
                 });
-                // ✅ 삭제 성공 토스트
                 setToast({ msg: "채팅방 삭제 완료", desc: "대화가 목록에서 제거되었어요." });
                 if (activeId === roomId) navigate("/chat", {replace: true});
             } catch (e) {
                 console.error(e);
-                // 실패도 토스트로 노출해주고 싶다면 아래 주석 해제
-                // setToast({ msg: "삭제 실패", desc: e instanceof Error ? e.message : "알 수 없는 오류" });
                 alert("채팅방 삭제에 실패했습니다.");
             } finally {
                 setDeletingId(null);
@@ -324,10 +318,7 @@ export default function Chat() {
                 <div className="chat-canvas">
                     <div className="container">
                         {isMobile && (
-                            <div className={`sidebar-backdrop ${sidebarOpen ? "sidebar-open" : ""}`}
-                                 onClick={() => setSidebarOpen(false)}/>
-                        )}
-
+                            <div className={`sidebar-backdrop ${sidebarOpen ? "sidebar-open" : ""}`} onClick={() => setSidebarOpen(false)}/>)}
                         <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
                             <div className="sidebar-header">
                                 <div className="sidebar-user">
@@ -404,8 +395,7 @@ export default function Chat() {
                                                     title="삭제"
                                                     disabled={deletingId === r.chatRoomId}
                                                     onClick={(e) => {
-                                                        e.stopPropagation(); // 항목 클릭(열기) 방지
-                                                        // ✅ 기본 confirm 대신 커스텀 모달 오픈
+                                                        e.stopPropagation();
                                                         setConfirmDeleteId(r.chatRoomId);
                                                     }}
                                                 >
@@ -507,8 +497,7 @@ export default function Chat() {
                                             <div className="welcome-title">안녕하세요!</div>
                                             <div className="welcome-subtitle">SETA Assistant입니다. 무엇을 도와드릴까요?</div>
                                             <div className="feature-cards">
-                                                <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("오늘 뭘 해볼지 아이디어 좀 추천해줘")}>
+                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("오늘 뭘 해볼지 아이디어 좀 추천해줘")}>
                                                     <div className="feature-title">
                                                         <img
                                                             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png"
@@ -524,8 +513,7 @@ export default function Chat() {
                                                     </div>
                                                 </div>
 
-                                                <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("요즘 집중이 안 돼서 고민이에요")}>
+                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("요즘 집중이 안 돼서 고민이에요")}>
                                                     <div className="feature-title">
                                                         <img
                                                             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Sun%20Behind%20Small%20Cloud.png"
@@ -541,8 +529,7 @@ export default function Chat() {
                                                     </div>
                                                 </div>
 
-                                                <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("시간 관리 습관을 어떻게 만들 수 있을까?")}>
+                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("시간 관리 습관을 어떻게 만들 수 있을까?")}>
                                                     <div className="feature-title">
                                                         <img
                                                             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fire.png"
@@ -558,8 +545,7 @@ export default function Chat() {
                                                     </div>
                                                 </div>
 
-                                                <div className="feature-card"
-                                                     onClick={() => onCreateRoomAndSeed("오늘 기분 좋은 농담 하나 해줘")}>
+                                                <div className="feature-card" onClick={() => onCreateRoomAndSeed("오늘 기분 좋은 농담 하나 해줘")}>
                                                     <div className="feature-title">
                                                         <img
                                                             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Wind%20Face.png"
@@ -609,7 +595,6 @@ export default function Chat() {
                 </div>
             </div>
 
-            {/* 확인 모달 */}
             <ConfirmModal
                 open={!!confirmDeleteId}
                 title="채팅방 삭제"
@@ -620,13 +605,12 @@ export default function Chat() {
                 onConfirm={() => {
                     const id = confirmDeleteId;
                     if (!id) return;
-                    setConfirmDeleteId(null);          // ✅ 모달 닫기
-                    void deleteRoomById(id);           // ✅ 삭제 실행 + 토스트 출력
+                    setConfirmDeleteId(null);
+                    void deleteRoomById(id);
                 }}
                 onClose={() => setConfirmDeleteId(null)}
             />
 
-            {/* ✅ 로그인과 같은 스타일의 토스트 */}
             {toast && (
                 <CustomToast
                     message={toast.msg}

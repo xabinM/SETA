@@ -13,7 +13,7 @@ export default function AppBootstrap() {
     useEffect(() => {
         setUnauthorizedHandler(() => {
             tokenStore.clear();
-            const path = window.location.pathname; // 그 순간의 실제 경로
+            const path = window.location.pathname;
             const search = window.location.search;
             const next = encodeURIComponent(path + search);
 

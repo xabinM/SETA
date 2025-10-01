@@ -1,13 +1,12 @@
-/* ===== Backdrop & Shell ===== */
 .pmodal-backdrop {
     overscroll-behavior: none;
     position: fixed;
     inset: 0;
     z-index: 4000;
     display: grid;
-    place-items: center; /* 화면 정중앙 */
+    place-items: center;
     background: rgba(0, 0, 0, .45);
-    backdrop-filter: blur(4px); /* 블러는 백드롭에만 */
+    backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     padding: 12px;
     box-sizing: border-box;
@@ -20,17 +19,13 @@
     border: 1px solid var(--glass-border, rgba(255, 255, 255, .12));
     background: radial-gradient(120% 90% at 12% 18%, rgba(188, 172, 242, .18) 0%, rgba(188, 172, 242, 0) 45%),
     radial-gradient(120% 90% at 80% 82%, rgba(121, 224, 211, .18) 0%, rgba(121, 224, 211, 0) 45%),
-    rgba(255, 255, 255, .07); /* 유리 톤 유지 */
-    /* ✅ blur 제거 → 깜빡임 방지 */
+    rgba(255, 255, 255, .07);
     backdrop-filter: saturate(120%);
     -webkit-backdrop-filter: saturate(120%);
-
     box-shadow: 0 1px 0 rgba(255, 255, 255, .08), 0 10px 32px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06);
     color: #e5e7eb;
     overflow: hidden;
     animation: pmodalIn .14s ease;
-
-    /* 바디만 스크롤되도록 */
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -47,7 +42,6 @@
     }
 }
 
-/* Header/Footer/Divider */
 .pmodal-header, .pmodal-footer {
     display: flex;
     align-items: center;
@@ -112,12 +106,11 @@
     background: linear-gradient(90deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0));
 }
 
-/* Body (바디만 스크롤) */
 .pmodal-body {
     padding: 14px 16px 8px;
     flex: 1 1 auto;
     min-height: 0;
-    overflow: auto; /* 스크롤 가능 (바 숨김) */
+    overflow: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     scrollbar-width: none;
@@ -155,7 +148,6 @@
     opacity: .7;
 }
 
-/* Inputs */
 .pinput {
     width: 100%;
     padding: 12px 12px;
@@ -178,12 +170,11 @@
     min-height: 96px;
 }
 
-/* Tone segmented control */
 .tone-seg {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    overflow: visible; /* ✅ 스케일 확대 시 잘리지 않도록 */
+    overflow: visible;
 }
 
 .tone-pill {
@@ -203,25 +194,21 @@
     transform: translateZ(0);
 }
 
-/* ✅ 이중선 제거: 채움 + 살짝 확대 */
 .tone-pill.active {
     background: linear-gradient(180deg, rgba(199, 210, 254, .18), rgba(199, 210, 254, .10));
     border-color: rgba(199, 210, 254, .55);
     transform: translateZ(0) scale(1.02);
 }
 
-/* 포커스 접근성 링 (키보드 탐색 시에만) */
 .tone-pill:focus-visible {
     outline: 2px solid rgba(199, 210, 254, .8);
     outline-offset: 2px;
 }
 
-/* 혹시 남아있을 ::after/outline 스타일 제거 보정 */
 .tone-pill.active::after {
     content: none !important;
 }
 
-/* Tone 내 텍스트/이모지 */
 .tone-emoji {
     font-size: 16px;
 }
@@ -230,7 +217,6 @@
     font-weight: 600;
 }
 
-/* Traits */
 .traits-row {
     display: flex;
     align-items: center;
@@ -314,7 +300,6 @@
     border-color: rgba(255, 255, 255, .28);
 }
 
-/* Footer */
 .pmodal-footer {
     gap: 12px;
     flex-wrap: wrap;
