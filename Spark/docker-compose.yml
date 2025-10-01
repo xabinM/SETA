@@ -1,32 +1,4 @@
 services:
-  # Spark Streaming (메시지 필터링)
-  spark:
-    build: 
-      context: .
-      dockerfile: Dockerfile.jupyter
-    image: pyspark-tiktoken-app
-    container_name: spark-streaming-dev
-    ports:
-      - "8888:8888"
-      - "4040:4040"
-    volumes:
-      - .:/home/jovyan/work
-    environment:
-      - SPARK_OPTS=--driver-java-options=-Xms1g --driver-java-options=-Xmx4g --driver-java-options=-Dlog4j.logLevel=info
-      # Kafka 연결
-      - KAFKA_BOOTSTRAP_SERVERS=3.35.206.91:29092
-      - INPUT_TOPIC=chat.raw.request.v1
-      - OUTPUT_TO_KAFKA=true
-      - OUTPUT_TOPIC=chat.raw.filtered.v1
-      - FILTER_JSON_PATH=filter_word.json
-      # PostgreSQL 연결
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    networks:
-      - app-network
 
   # Spark Master 
   spark-master:
