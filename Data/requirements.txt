@@ -1,0 +1,42 @@
+# Web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+numpy<2
+
+# Config & Env
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.0.3
+
+# Data stores
+elasticsearch==8.11.1
+redis==5.0.8
+requests==2.32.3
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+
+# Kafka
+confluent-kafka==2.4.0
+
+# Embedding / NLP
+sentence-transformers==2.6.1
+transformers==4.35.2
+huggingface-hub==0.17.3
+
+# PyTorch (CPU 전용, 빌드 속도 최적화)
+torch==2.0.1+cpu
+torchvision==0.15.2+cpu
+torchaudio==2.0.2+cpu
+-f https://download.pytorch.org/whl/cpu/torch_stable.html
+
+# Tokenization & LLM Client
+tiktoken==0.5.2
+openai==1.3.7
+httpx==0.24.1
+
+# Optional Utils
+orjson==3.9.10
+tenacity==8.2.3
+
+pgvector==0.2.5
+python-dateutil
