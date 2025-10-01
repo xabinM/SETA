@@ -13,13 +13,13 @@ services:
       - .:/home/jovyan/work
     environment:
       - SPARK_OPTS=--driver-java-options=-Xms1g --driver-java-options=-Xmx4g --driver-java-options=-Dlog4j.logLevel=info
-      # 서버1 Kafka 연결
+      # Kafka 연결
       - KAFKA_BOOTSTRAP_SERVERS=3.35.206.91:29092
       - INPUT_TOPIC=chat.raw.request.v1
       - OUTPUT_TO_KAFKA=true
       - OUTPUT_TOPIC=chat.raw.filtered.v1
       - FILTER_JSON_PATH=filter_word.json
-      # 서버1 메인 PostgreSQL 연결
+      # PostgreSQL 연결
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -43,7 +43,6 @@ services:
 
   # Spark Worker
   spark-worker:
-    # image: bitnami/spark:3.5
     build:
       context: .
       dockerfile: Dockerfile.spark
@@ -59,9 +58,8 @@ services:
     depends_on:
       - spark-master
 
-  # Spark Streaming Application (새로운 필터링 로직)
+  # Spark Streaming Application
   spark-streaming-app:
-    # image: bitnami/spark:3.5
     build:
       context: .
       dockerfile: Dockerfile.spark
@@ -76,7 +74,7 @@ services:
       - ./filter_word.json:/opt/bitnami/spark/app/filter_word.json
     command: /bin/bash -c "sleep 5 && /opt/bitnami/spark/bin/spark-submit --master spark://spark-master:7077 --driver-memory 2g --executor-memory 2g --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0 --conf \"spark.driver.extraJavaOptions=-Dfile.encoding=UTF-8\" --conf \"spark.executor.extraJavaOptions=-Dfile.encoding=UTF-8\" --conf spark.driver.port=4040 --conf spark.ui.port=4041 /opt/bitnami/spark/app/stream_filter_router.py"
     environment:
-      # 서버1 Kafka 연결
+      # Kafka 연결
       - KAFKA_BOOTSTRAP_SERVERS=3.35.206.91:29092
       - INPUT_TOPIC=chat.raw.request.v1
       - OUTPUT_TO_KAFKA=true
@@ -92,9 +90,8 @@ services:
     depends_on:
       - spark-worker
 
-  # 배치 처리용 Spark (토큰 사용량 집계) 
+  # Spark Batch Application
   spark-batch:
-    # image: bitnami/spark:3.5
     build:
       context: .
       dockerfile: Dockerfile.spark
@@ -102,21 +99,13 @@ services:
     volumes:
       - ./spark_batch_aggregation.py:/opt/bitnami/spark/app/spark_batch_aggregation.py
     environment:
-      # 서버1 메인 PostgreSQL 연결
+      # PostgreSQL 연결
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     command: tail -f /dev/null
-    # command: /bin/bash -c "
-    #   echo 'Waiting for dependencies...' &&
-    #   sleep 10 &&
-    #   echo 'Starting token usage aggregation...' &&
-    #   /opt/bitnami/spark/bin/spark-submit 
-    #   --master local[*] 
-    #   --packages org.postgresql:postgresql:42.7.3 
-    #   /opt/bitnami/spark/app/spark_batch_aggregation.py"
     networks:
       - app-network
 

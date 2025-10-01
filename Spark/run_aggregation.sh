@@ -2,14 +2,11 @@
 
 source ~/.bashrc
 
-# 1. 스파크 작업이 있는 폴더로 이동
 SCRIPT_DIR="$(dirname "$0")"
 cd "$SCRIPT_DIR" || exit
 
-# 2. "cron.log"라는 업무 일지에 "지금부터 작업 시작!"이라고 시간과 함께 기록
 echo "--- Running Spark batch aggregation at $(date) ---" >> cron.log
 
-# 3. 스파크 집계 작업을 실행하고, 그 과정과 결과를 모두 업무 일지에 자세히 기록
 /usr/bin/docker-compose --file "$SCRIPT_DIR/docker-compose.yml" run --rm spark-batch \
   /opt/bitnami/spark/bin/spark-submit \
   --master local[*] \
