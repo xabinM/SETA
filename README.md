@@ -238,7 +238,7 @@ AI는 업무 효율화와 가치 창출에 크게 기여하지만 막대한 전�
 - 초당 수천 건 요청 로그 집계, ESG 지표 실시간 계산  
 
 ### 4. 실시간 대시보드
-- **SSE(Server-Sent Events)**로 실시간 절감 데이터 전송  
+- **SSE(Server-Sent Events)** 로 실시간 절감 데이터 전송  
 - Elasticsearch 집계 쿼리로 빠른 지표 산출  
 
 ### 5. RAG 기반 대화 메모리
