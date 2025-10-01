@@ -56,7 +56,7 @@ AI는 업무 효율화와 가치 창출에 크게 기여하지만 막대한 전�
 
 | 대시보드 (개인) | 대시보드 (전체) | 시각화 (나무) | 시각화 (차량) | 필터링 로그|
 |:--:|:--:|:--:|:--:|:--:|
-| ![Dashboard_Personal](./docs/dashboard_personal.png) |![Dashboard_All](./docs/dashboard_all.png) |  ![Tree](./docs/TreeModal.png) | ![Car](./docs/CarModal.png) | ![Filter Log](./docs/filter_log.png) |
+| ![Dashboard_Personal](./docs/dashboard_personal.png) |![Dashboard_All](./docs/dashboard_all.png) |  ![Tree](./docs/TreeModal.png) | ![Car](./docs/CarModal.png) | ![Filter Log](./docs/filter_log.png) | ![Llm Log](./docs/filter_log2.png) |
 
 > 💡 실시간 절감량과 ESG 데이터를 시각화하여, 운영 효율성을 한눈에 제공합니다.
 
@@ -197,9 +197,23 @@ AI는 업무 효율화와 가치 창출에 크게 기여하지만 막대한 전�
 | ![JMeter Plan](./docs/jmeter_plan.png) | ![JMeter TPS](./docs/jmeter_tps.png) | ![JMeter Response](./docs/jmeter_response.png) |
 
 > **JMeter 부하 테스트**를 통해 필터링 파이프라인 안정성 및 처리 성능 검증  
-> - 평균 처리 속도: **xx ms**  
-> - 최대 TPS: **xx/s**  
+> - 평균 처리 속도: **71 ms** (HTTP) / **5010 ms** (SSE 연결 유지 시간)
+> - 최대 TPS: **47.6 / sec**  
 > - 오류율: **0%**
+
+### 📊 상세 해석
+
+- **HTTP 요청**
+  - 평균 응답속도: **74ms → 71ms** 
+  - 최대 응답시간: **1163ms → 205ms**로 대폭 감소하여 **안정성 향상**  
+
+- **JSR223 (SSE)**
+  - 평균 5초 응답은 **SSE 연결 유지 특성**으로 정상 동작  
+  - Throughput: **9.5/sec (기존과 동일)**  
+
+- **총 처리량**
+  - 약 **50 TPS 안정 유지**  
+  - **CPU/MEM 여유** 
 
 ---
 
