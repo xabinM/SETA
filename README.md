@@ -1,30 +1,39 @@
 # 🌍 SETA (Save the Earth Through AI)  
-비용과 지구를 동시에 지키는 GREEN AI 솔루션
+비용과 지구를 동시에 지키는 **Green AI 솔루션**  
+
+> 💡 **“Save Tokens, Save Earth.”**  
+> 불필요한 AI 호출을 줄여 자원·비용을 절감하고 환경을 보호합니다 🌿  
+
+<p align="center">
+  <img src="./docs/seta_logo.png" width="160" alt="SETA Logo" />
+</p>
 
 ---
 
 ## 📑 목차
 1. [프로젝트 개요](#-프로젝트-개요)  
 2. [문제 인식](#-문제-인식)  
-3. [프로젝트 미리보기](#-프로젝트-미리보기🧚)  
+3. [프로젝트 미리보기](#-프로젝트-미리보기)  
 4. [서비스 소개](#-서비스-소개)  
 5. [기술 스택](#-기술-스택)  
-6. [아키텍처](#-아키텍처)  
-7. [기대 효과](#-기대-효과)  
-8. [기술 설명](#-기술-설명)  
-9. [산출물](#-산출물)  
-10. [설치 및 실행 방법](#-설치-및-실행-방법)  
-11. [트러블 슈팅](#-트러블-슈팅)  
-12. [팀 소개](#-코사인-팀-소개)  
-13. [프로젝트 후기](#-프로젝트-후기)  
+6. [시스템 아키텍처](#-시스템-아키텍처)  
+7. [주요 화면](#-주요-화면)  
+8. [성능 테스트](#-성능-테스트)  
+9. [ESG 절감 효과](#-esg-절감-효과)  
+10. [기대 효과](#-기대-효과)  
+11. [기술 설명](#-기술-설명)  
+12. [산출물](#-산출물)  
+13. [팀 소개](#-코사인-팀-소개)  
+14. [프로젝트 후기](#-프로젝트-후기)
 
 ---
 
 ## 📌 프로젝트 개요
 **📆 프로젝트 기간 : 2025.09.01 ~ 2025.09.29**  
 
-AI는 업무 효율화와 가치 창출에 크게 기여하지만 막대한 전력 소모와 CO₂ 배출을 야기하고 있으며,
-여러 연구 결과에 따르면 실제 운영 환경에서도 **‘안녕’, ‘고마워’ 같은 불필요한 요청**이 수천만 달러 규모의 비용을 발생시키는 문제로 이어지고 있는 상황입니다.
+AI는 업무 효율화와 가치 창출에 크게 기여하지만 막대한 전력 소모와 CO₂ 배출을 야기하고 있으며,  
+여러 연구 결과에 따르면 실제 운영 환경에서도 **‘안녕’, ‘고마워’ 같은 불필요한 요청**이  
+수천만 달러 규모의 비용을 발생시키는 문제로 이어지고 있는 상황입니다.
 
 **SETA**는 이러한 불필요한 AI 호출을 줄여  
 👉 **자원·비용 절감 + 환경 보호**라는 두 가지 목표를 동시에 실현하는 **Green AI 솔루션**입니다.  
@@ -39,6 +48,16 @@ AI는 업무 효율화와 가치 창출에 크게 기여하지만 막대한 전�
   - 🌫 **36톤 CO₂**
   - 🚗 **7,500대 자동차 배출량**
   - 🏠 **3만 가구 전력 사용량**
+
+---
+
+## 🧚 프로젝트 미리보기
+
+| 대시보드 (개인) | 대시보드 (전체) | 시각화 (나무) | 시각화 (차량) | 필터링 로그|
+|:--:|:--:|:--:|:--:|:--:|
+| ![Dashboard_Personal](./docs/dashboard_personal.png) |![Dashboard_All](./docs/dashboard_all.png) |  ![Tree](./docs/TreeModal.png) | ![Car](./docs/CarModal.png) | ![Filter Log](./docs/filter_log.png) |
+
+> 💡 실시간 절감량과 ESG 데이터를 시각화하여, 운영 효율성을 한눈에 제공합니다.
 
 ---
 
@@ -60,108 +79,181 @@ AI는 업무 효율화와 가치 창출에 크게 기여하지만 막대한 전�
 
 ---
 
-## 📌 기술 스택💻
+## 📌 기술 스택 💻
 
-#### 📌 프로그래밍 언어 및 프레임워크
-![Java](https://img.shields.io/badge/Java-17-007396?logo=java&logoColor=white&style=flat)  
-![Spring Boot](https://img.shields.io/badge/SpringBoot-3.2-green?logo=springboot&logoColor=white&style=flat)  
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white&style=flat)
+<!-- 🧠 Language & Framework -->
+<h3>🧠 Language & Framework</h3>
+<div>
+  <img src="https://go-skill-icons.vercel.app/api/icons?i=java,spring,react,typescript,fastapi&theme=dark" alt="Java, Spring, React, TypeScript, FastAPI" />
+</div>
 
-#### Big Data / AI
-![Kafka](https://img.shields.io/badge/Kafka-3.7-231F20?logo=apachekafka&logoColor=white&style=for-the-badge)  
-![Spark](https://img.shields.io/badge/Apache_Spark-Streaming-orange?logo=apachespark&logoColor=white&style=for-the-badge) 
-![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688?logo=fastapi&logoColor=white&style=for-the-badge)
+<!-- 📊 Big Data / AI -->
+<h3>📊 Big Data / AI</h3>
+<div>
+  <img src="https://go-skill-icons.vercel.app/api/icons?i=kafka,spark,elasticsearch,pytorch&theme=dark" alt="Kafka, Spark, Elasticsearch, PyTorch" />
+</div>
 
-#### 🎨 UI 스타일링
-![TypeScript](https://img.shields.io/badge/TypeScript-5.2-3178C6?logo=typescript&logoColor=white&style=flat)  
+<!-- 💾 Database / Cache -->
+<h3>💾 Database / Cache</h3>
+<div>
+  <img src="https://go-skill-icons.vercel.app/api/icons?i=postgresql,redis&theme=dark" alt="PostgreSQL, Redis" />
+</div>
 
-#### 🗃️ 데이터/상태 관리
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white&style=flat)  
-![Redis](https://img.shields.io/badge/Redis-7-red?logo=redis&logoColor=white&style=flat)  
+<!-- 🌐 Frontend -->
+<h3>🌐 Frontend</h3>
+<div>
+  <img src="https://go-skill-icons.vercel.app/api/icons?i=react,typescript,tailwind,vite,chartjs,gsap&theme=dark" alt="React, TypeScript, Tailwind, Vite, Chart.js, GSAP" />
+</div>
 
-#### 🌐 배포/인프라
-![AWS](https://img.shields.io/badge/AWS-Cloud-orange?logo=amazonaws&logoColor=white&style=flat)  
-![Docker](https://img.shields.io/badge/Docker-25-2496ED?logo=docker&logoColor=white&style=flat)  
-![Nginx](https://img.shields.io/badge/Nginx-1.18-009639?logo=nginx&logoColor=white&style=flat)   
+<!-- 🧹 Code Quality -->
+<h3>🧹 Code Quality</h3>
+<div>
+  <img src="https://go-skill-icons.vercel.app/api/icons?i=eslint,prettier&theme=dark" alt="ESLint, Prettier" />
+</div>
 
+<!-- 🚀 CI/CD & DevOps -->
+<h3>🚀 CI/CD & DevOps</h3>
+<div>
+  <img src="https://go-skill-icons.vercel.app/api/icons?i=gitlab,jenkins,docker,nginx,aws&theme=dark" alt="GitLab, Jenkins, Docker, Nginx, AWS" />
+</div>
+
+<!-- 🧰 Tools -->
+<h3>🧰 Tools</h3>
+<div>
+  <img src="https://go-skill-icons.vercel.app/api/icons?i=pnpm,postman,gitlab&theme=dark" alt="pnpm, Postman, GitLab" />
+</div>
 
 ---
 
-## 📌 아키텍처
-- **다단계 필터링 파이프라인**: Kafka → Spark → ML → Spring Boot Gateway  
-- **실시간 스트리밍**: SSE(Server-Sent Events) 기반 응답 처리  
-- **데이터베이스**: 절감 로그 및 ESG 지표 저장  
+<!-- 🧩 Summary Table -->
+<h3>🧩 구성 요약</h3>
 
-<img src="./docs/architecture.png" width="700px">
+<table>
+  <tr>
+    <th>구분</th>
+    <th>주요 기술</th>
+  </tr>
+  <tr>
+    <td><b>Frontend</b></td>
+    <td>React 19 · TypeScript 5 · Vite 7 · Tailwind CSS 4 · Chart.js · GSAP</td>
+  </tr>
+  <tr>
+    <td><b>Backend</b></td>
+    <td>Spring Boot 3.5.5 · FastAPI</td>
+  </tr>
+  <tr>
+    <td><b>Big Data / AI</b></td>
+    <td>Apache Kafka · Apache Spark Streaming · Elasticsearch · PyTorch</td>
+  </tr>
+  <tr>
+    <td><b>Database / Cache</b></td>
+    <td>PostgreSQL · Redis</td>
+  </tr>
+  <tr>
+    <td><b>Infra / Deploy</b></td>
+    <td>Docker · Docker Compose · Nginx · AWS EC2</td>
+  </tr>
+  <tr>
+    <td><b>CI/CD</b></td>
+    <td>GitLab CI/CD · Jenkins Pipeline</td>
+  </tr>
+  <tr>
+    <td><b>Code Quality</b></td>
+    <td>ESLint + Prettier · TypeScript 정적 분석</td>
+  </tr>
+  <tr>
+    <td><b>Tools</b></td>
+    <td>pnpm · GitLab · Postman</td>
+  </tr>
+</table>
 
 ---
 
-## 📌 기대 효과
+## 🏗️ 시스템 아키텍처
+<p align="center">
+  <img src="./docs/Architecture.png" width="720" alt="System Architecture" />
+</p>
+
+> Kafka → Spark → ML → Spring Boot → PostgreSQL/Redis  
+> SSE 기반 실시간 스트리밍 + Elasticsearch로 집계 및 대시보드 제공
+
+---
+
+## 🖼️ 주요 화면
+
+| 홈 화면 | 채팅 | 대시보드 |
+|:--:|:--:|:--:|
+| ![Home](./docs/home.png) | ![Chat](./docs/chat.png) | ![Dashboard](./docs/dashboard_all.png) |
+
+> 사용자 중심의 Glassmorphism UI와 실시간 ESG 대시보드 제공
+
+---
+
+## 📈 성능 테스트
+
+| JMeter 시나리오 | TPS 그래프 | 응답 시간 |
+|:--:|:--:|:--:|
+| ![JMeter Plan](./docs/jmeter_plan.png) | ![JMeter TPS](./docs/jmeter_tps.png) | ![JMeter Response](./docs/jmeter_response.png) |
+
+> **JMeter 부하 테스트**를 통해 필터링 파이프라인 안정성 및 처리 성능 검증  
+> - 평균 처리 속도: **xx ms**  
+> - 최대 TPS: **xx/s**  
+> - 오류율: **0%**
+
+---
+
+## 🌿 ESG 절감 효과
+
+| 항목 | 절감량 |
+|:--|:--|
+| ⚡ 전력 | 288 MWh / 일 |
+| 🌫 CO₂ | 36톤 / 일 |
+| 🚗 차량 배출 | 7,500대 상당 |
+| 🏠 가정 전력 | 30,000가구 규모 |
+
+---
+
+## 📊 기대 효과
 - 불필요 요청 차단으로 **운영비 절감**  
 - **전력·CO₂ 절약**을 통한 ESG 가치 창출  
-- 투명한 모니터링을 통한 **운영 인사이트 제공**  
+- 투명한 모니터링을 통한 **운영 인사이트 제공**
 
 ---
 
 ## 📌 기술 설명
 
 ### 1. 다단계 필터링 (ML 기반 + 규칙 기반)
-- **규칙 기반 필터링**  
-  - “안녕”, “고마워” 같은 불필요 요청을 정규식·룰 엔진으로 즉시 차단  
-  - GPU 호출을 줄여 비용 절감 효과
-- **ML 기반 필터링**  
-  - BERT 계열 모델과 유사도 측정을 통한 의미 분석  
-  - 문맥 파악이 필요한 요청을 분류해 핵심 요청만 LLM으로 전달  
-  - 👉 불필요 토큰 사용량을 획기적으로 절감  
+- **규칙 기반 필터링**: “안녕”, “고마워” 등 불필요 요청 정규식 차단  
+- **ML 기반 필터링**: BERT 기반 의미 분석으로 핵심 요청만 전달  
+- 👉 GPU 호출 최소화 + 토큰 절감 효과 극대화  
 
 ### 2. Kafka 기반 스트리밍 파이프라인
-- **Apache Kafka**  
-  - 모든 사용자 요청/응답을 토픽 단위로 비동기 처리  
-  - 주요 토픽: `chat.raw.request.v1`, `chat.filter.result.v1`, `chat.raw.filtered.v1`, `chat.llm.answer.v1` 
-  - 장애 발생 시 **exactly-once consumer** 설정으로 데이터 유실 최소화  
-- 결과: **확장성 + 안정성**을 동시에 확보  
+- 사용자 요청/응답을 토픽 단위로 비동기 처리  
+- 주요 토픽: `chat.raw.request.v1`, `chat.filter.result.v1` 등  
+- **exactly-once consumer** 설정으로 안정성 확보  
 
 ### 3. Spark 기반 대규모 데이터 처리
-- **Apache Spark Streaming**  
-  - Kafka → Spark → PostgreSQL 파이프라인 구성  
-  - 초당 수천 건의 요청 로그를 집계하여 **토큰 절감량, CO₂ 절약량** 실시간 계산  
-  - Window 연산 기반 집계 (분 단위, 일 단위)로 대시보드에 시각화 
+- Kafka → Spark → PostgreSQL 파이프라인  
+- 초당 수천 건 요청 로그 집계, ESG 지표 실시간 계산  
 
-### 4. 실시간 절감량 대시보드
-- **SSE(Server-Sent Events)** 기반으로 절감 데이터 실시간 전송  
-- **Elasticsearch 집계 쿼리**를 통해 대량 로그 데이터에서 빠르게 지표 산출  
-- ESG 지표와 비용 절감 효과를 **한눈에 시각화**  
-- 운영자/사용자 모두 투명하게 확인 가능  
+### 4. 실시간 대시보드
+- **SSE(Server-Sent Events)**로 실시간 절감 데이터 전송  
+- Elasticsearch 집계 쿼리로 빠른 지표 산출  
 
 ### 5. RAG 기반 대화 메모리
-- **Retrieval-Augmented Generation (RAG)** 구조 적용  
-  - 사용자의 과거 채팅 데이터를 **벡터 임베딩 후 Elasticsearch** 에 저장  
-  - 새로운 대화 시, **관련 맥락을 검색하여 프롬프트에 삽입**  
-- 결과:  
-  - LLM이 이전 대화를 기억하는 듯한 자연스러운 연속 대화 제공  
-  - 불필요한 재질문 감소 → **토큰 절감 + UX 개선**  
+- 사용자 채팅 데이터를 벡터화하여 Elasticsearch 저장  
+- 유사 맥락 검색을 통해 연속 대화 지원  
 
 ### 6. Liquid Glass Design (UI/UX)
-- 프론트엔드 대시보드 디자인에 **Liquid Glass Design** 적용  
-  - 반투명 유리 느낌(Glassmorphism)  
-  - ESG 친화적 색감(녹색/청색 계열)으로 환경 메시지 강화  
-- 결과: **데이터 신뢰성과 친환경 이미지**를 동시에 강조  
+- 반투명 Glassmorphism + ESG 컬러로 친환경 메시지 강화
 
 ---
 
-## 📌 산출물
-- 📄 와이어프레임  
-- 📑 API 명세서  
-- 🗂 ERD & 기술 아키텍처  
-- 📊 번다운 차트 / 발표 자료  
-
----
-
-## 📌 코사인 팀 소개
-SSAFY 13기 · 코사인 팀
-- 👩‍💻 김시연 (팀장, FrontEnd)
-- 👩‍💻 유지은 (Infra, FrontEnd)
-- 👩‍💻 민사빈 (Infra, BackEnd)
-- 👩‍💻 김유미 (BackEnd)
-- 👨‍💻 한경훈 (Data)
+## 👥 코사인 팀 소개
+SSAFY 13기 · 코사인 팀  
+- 👩‍💻 김시연 (팀장, FrontEnd)  
+- 👩‍💻 유지은 (Infra, FrontEnd)  
+- 👩‍💻 민사빈 (Infra, BackEnd)  
+- 👩‍💻 김유미 (BackEnd)  
+- 👨‍💻 한경훈 (Data)  
 - 👨‍💻 이병헌 (AI)
