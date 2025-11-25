@@ -1,25 +1,37 @@
 spring:
   application:
-    name: backend # Jaeger에서 사용
+    name: backend
 
   profiles:
     active: msk
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL}        # PostgreSQL JDBC URL
+    url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 20  # 기존 10에서 증가
+      maximum-pool-size: 20
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-      leak-detection-threshold: 0  # 연결 누수 탐지
+      leak-detection-threshold: 0
+
+  replica-datasource:
+    url: ${SPRING_REPLICA_DATASOURCE_URL}
+    username: ${SPRING_REPLICA_DATASOURCE_USERNAME}
+    password: ${SPRING_REPLICA_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 0
 
   jpa:
     hibernate:
-      ddl-auto: validate                 # 운영 환경에서는 validate 또는 none
+      ddl-auto: validate
     defer-datasource-initialization: false
     show-sql: true
     properties:
@@ -34,8 +46,8 @@ spring:
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST}          # Redis 호스트
-      port: ${SPRING_DATA_REDIS_PORT}          # Redis 포트
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
     elasticsearch:
       repositories:
         enabled: true
@@ -43,7 +55,7 @@ spring:
     uris: http://172.26.8.129:9200
 
 jwt:
-  secret: ${JWT_SECRET}                  # JWT 시크릿
+  secret: ${JWT_SECRET}
   accessTokenExpirationMs: ${JWT_ACCESSTOKENEXPIRATIONMS}
   refreshTokenExpirationMs: ${JWT_REFRESHTOKENEXPIRATIONMS}
 
