@@ -14,6 +14,7 @@ import com.AIce.Backend.domain.user.entity.User;
 import com.AIce.Backend.domain.user.repository.UserRepository;
 import com.AIce.Backend.domain.usersetting.entity.UserSetting;
 import com.AIce.Backend.domain.usersetting.repository.UserSettingRepository;
+import com.AIce.Backend.global.annotation.ReadOnlyTransactional;
 import com.AIce.Backend.global.enums.PreferredTone;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -74,6 +75,8 @@ public class AuthService {
         return new LoginDto(user.getUserId(), user.getName(), tokens);
     }
 
+
+
     public void logout(String refreshToken) {
         jwtTokenProvider.validateToken(refreshToken);
 
@@ -98,6 +101,7 @@ public class AuthService {
         return jwtTokenProvider.generateTokens(userId);
     }
 
+    @ReadOnlyTransactional
     public UserResponseDto getUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

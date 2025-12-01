@@ -4,13 +4,12 @@ import com.AIce.Backend.domain.user.entity.User;
 import com.AIce.Backend.domain.usersetting.entity.UserSetting;
 import com.AIce.Backend.domain.user.repository.UserRepository;
 import com.AIce.Backend.domain.usersetting.repository.UserSettingRepository;
+import com.AIce.Backend.global.annotation.ReadOnlyTransactional;
 import com.AIce.Backend.usersetting.dto.*;
 import com.AIce.Backend.usersetting.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -19,7 +18,7 @@ public class UserSettingService {
     private final UserSettingRepository userSettingRepository;
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
+    @ReadOnlyTransactional
     public UserSettingResponse getMySetting(Long userId) {
         UserSetting us = userSettingRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new NotFoundUserSettingException("User setting not found"));

@@ -11,6 +11,7 @@ import com.AIce.Backend.domain.chat.repository.ChatRoomRepository;
 import com.AIce.Backend.domain.chat.repository.RoomSummaryStateRepository;
 import com.AIce.Backend.domain.user.entity.User;
 import com.AIce.Backend.domain.user.repository.UserRepository;
+import com.AIce.Backend.global.annotation.ReadOnlyTransactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -46,14 +47,14 @@ public class ChatRoomService {
         return new ChatRoomResponse(room);
     }
 
-    @Transactional(readOnly = true)
+    @ReadOnlyTransactional
     public ChatRoomResponse getRoom(UUID roomId, Long userId) {
         ChatRoom room = chatRoomRepository.findByChatRoomIdAndUser(roomId, userRepository.findByUserId(userId))
                 .orElseThrow(() -> new NotFoundChatRoomException("ChatRoom not found"));
         return new ChatRoomResponse(room);
     }
 
-    @Transactional(readOnly = true)
+    @ReadOnlyTransactional
     public List<ChatRoomResponse> listMyRooms(Long userId) {
         List<ChatRoom> rooms = chatRoomRepository.findByUserOrderByUpdatedAtDesc(userRepository.findByUserId(userId))
                 .orElse(Collections.emptyList());
@@ -79,7 +80,7 @@ public class ChatRoomService {
         chatRoomRepository.delete(room);
     }
 
-    @Transactional(readOnly = true)
+    @ReadOnlyTransactional
     public List<ChatMessageResponse> listMyMessages(Long userId, UUID roomId) {
         List<ChatMessage> messages = chatMessageRepository.findByChatRoom_ChatRoomIdAndUser_UserIdOrderByCreatedAtDesc(roomId, userId)
                 .orElse(Collections.emptyList());
@@ -89,7 +90,7 @@ public class ChatRoomService {
     }
 
     // 사용자가 해당 채팅방에 접근할 수 있는지 확인
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+    @ReadOnlyTransactional
     public boolean hasAccessToRoom(Long userId, String roomId) {
         return chatRoomRepository.existsByChatRoomIdAndUser_UserId(UUID.fromString(roomId), userId);
     }
