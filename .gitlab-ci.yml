@@ -36,6 +36,13 @@ backend-build-docker:
     # 2. Docker 이미지 빌드 & 푸시
     - docker build -t $BACKEND_IMAGE .
     - docker push $BACKEND_IMAGE
+  cache:
+    key:
+      files:
+        - build.gradle
+    paths:
+      - ~/.gradle/caches/
+      - ~/.gradle/wrapper/
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
       when: always
@@ -60,6 +67,12 @@ frontend-build-docker:
   script:
     - docker build --build-arg VITE_API_BASE_URL="$VITE_API_BASE_URL" -t $FRONTEND_IMAGE ./Frontend/seta-front
     - docker push $FRONTEND_IMAGE
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - frontend/node_modules/
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^(master|Devops_main)$/'
       when: always
