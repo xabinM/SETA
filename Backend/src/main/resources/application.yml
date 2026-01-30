@@ -5,6 +5,10 @@ spring:
   profiles:
     active: msk
 
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
